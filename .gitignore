@@ -24,3 +24,8 @@ _gen.js
 _gen.py
 _test.txt
 _test2.txt
+
+# codex temp files
+.ssh-proxy.ps1
+
+.vercel

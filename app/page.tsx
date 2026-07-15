@@ -4,6 +4,8 @@ import { CursorFollower } from "@/components/CursorFollower";
 import { Hero } from "@/components/Hero";
 import { About } from "@/components/About";
 import { Work } from "@/components/Work";
+import { PortfolioGallery } from "@/components/PortfolioGallery";
+import { RecentlyPlayed } from "@/components/RecentlyPlayed";
 import { Contact } from "@/components/Contact";
 
 export default function Page() {
@@ -18,6 +20,10 @@ export default function Page() {
         <About />
         <div className="section-divider" />
         <Work />
+        <div className="section-divider" />
+        <PortfolioGallery />
+        <div className="section-divider" />
+        <RecentlyPlayed />
         <div className="section-divider" />
         <Contact />
       </main>
