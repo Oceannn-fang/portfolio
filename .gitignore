@@ -1,0 +1,26 @@
+﻿# dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# next.js
+.next/
+out/
+
+# production
+build/
+
+# misc
+.env
+.env*.local
+*.log
+.DS_Store
+
+# project specifics
+startdev.bat
+devserver-err.log
+devserver.log
+_gen.js
+_gen.py
+_test.txt
+_test2.txt

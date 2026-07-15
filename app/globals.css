@@ -1,0 +1,95 @@
+﻿@import "tailwindcss";
+
+@theme {
+  --color-ink: #080e1a;
+  --color-navy-950: #080e1a;
+  --color-navy-900: #0a1429;
+  --color-navy-800: #0d2137;
+  --color-navy-700: #112d4a;
+  --color-navy-600: #1a3f5c;
+  --color-blue-ice: #6b9eff;
+  --color-blue-muted: #4a7bc7;
+  --color-bone: #ede8d5;
+  --color-ash: #a8b0bc;
+  --color-ash-dim: #687080;
+  --color-warm: #c4a882;
+
+  --font-serif-cn: var(--font-fzxiaobiaosong), serif;
+  --font-serif-en: var(--font-bona-nova), serif;
+  --font-sans: var(--font-satoshi), system-ui, sans-serif;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html.lenis,
+html.lenis body { height: auto; }
+.lenis.lenis-smooth { scroll-behavior: auto !important; }
+
+::selection {
+  background-color: rgba(107, 158, 255, 0.3);
+  color: var(--color-bone);
+}
+
+body {
+  background-color: var(--color-ink);
+  color: var(--color-bone);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  cursor: none;
+}
+
+@media (hover: none) and (pointer: coarse) {
+  body { cursor: auto; }
+}
+
+/* ====== Film Grain Overlay ====== */
+.grain-overlay {
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.5'/%3E%3C/svg%3E");
+  background-size: 256px 256px;
+  opacity: 0.03;
+  pointer-events: none;
+  z-index: 9999;
+  animation: grain 0.3s steps(4) infinite;
+}
+
+.grain-overlay::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(ellipse at center, transparent 45%, rgba(0,0,0,0.5) 100%);
+  pointer-events: none;
+  z-index: 9998;
+}
+
+@keyframes grain {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  25% { transform: translate(-2px, 2px) rotate(0.5deg); }
+  50% { transform: translate(2px, -1px) rotate(-0.3deg); }
+  75% { transform: translate(-1px, -2px) rotate(0.2deg); }
+}
+
+/* ====== Scrollbar ====== */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--color-navy-700); border-radius: 2px; }
+
+/* ====== Section Reveal ====== */
+.reveal {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.8s cubic-bezier(0.22, 1, 0.36, 1),
+              transform 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.reveal.visible { opacity: 1; transform: translateY(0); }
+
+/* ====== Section Divider ====== */
+.section-divider {
+  width: 1px;
+  height: 80px;
+  background: linear-gradient(to bottom, var(--color-bone), transparent);
+  margin: 0 auto;
+  opacity: 0.15;
+}
