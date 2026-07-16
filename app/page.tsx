@@ -1,6 +1,5 @@
 ﻿import { Navbar } from "@/components/Navbar";
 import { GrainOverlay } from "@/components/GrainOverlay";
-import { CursorFollower } from "@/components/CursorFollower";
 import { Hero } from "@/components/Hero";
 import { About } from "@/components/About";
 import { Work } from "@/components/Work";
@@ -12,7 +11,6 @@ export default function Page() {
   return (
     <>
       <GrainOverlay />
-      <CursorFollower />
       <Navbar />
       <main>
         <Hero />
