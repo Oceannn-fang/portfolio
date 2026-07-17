@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { motion, useScroll, useSpring } from "motion/react";
 import { useState, useEffect } from "react";
@@ -37,7 +37,7 @@ export function Navbar() {
           transition: "padding 0.4s cubic-bezier(0.22, 1, 0.36, 1)",
           backdropFilter: scrolled ? "blur(12px) saturate(1.2)" : "none",
           WebkitBackdropFilter: scrolled ? "blur(12px) saturate(1.2)" : "none",
-          backgroundColor: scrolled ? "rgba(8, 14, 26, 0.7)" : "transparent",
+          backgroundColor: scrolled ? "rgba(245, 242, 237, 0.85)" : "transparent",
         }}
       >
         <a
@@ -66,7 +66,6 @@ export function Navbar() {
             <a
               key={link.label}
               href={link.href}
-              data-cursor="link"
               style={{
                 color: "var(--color-ash)",
                 textDecoration: "none",
@@ -99,3 +98,4 @@ export function Navbar() {
     </>
   );
 }
+

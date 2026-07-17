@@ -39,8 +39,7 @@ export function Work() {
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-50px" }}
-            transition={{ duration: 0.6, delay: i * 0.1 }}
-            data-cursor="link"
+            transition={{ duration: 0.6, delay: i * 0.05 }}
             style={{
               display: "flex",
               justifyContent: "space-between",
@@ -158,3 +157,4 @@ export function Work() {
     </section>
   );
 }
+

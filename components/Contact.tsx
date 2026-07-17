@@ -57,7 +57,6 @@ export function Contact() {
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, margin: "-100px" }}
         transition={{ duration: 0.8, delay: 0.2 }}
-        data-cursor="link"
         style={{
           fontFamily: "var(--font-serif-en)",
           fontSize: "clamp(1.5rem, 5vw, 3.5rem)",
@@ -91,7 +90,6 @@ export function Contact() {
             href={social.url}
             target="_blank"
             rel="noopener noreferrer"
-            data-cursor="link"
             style={{
               fontFamily: "var(--font-sans)",
               fontSize: "0.75rem",
@@ -133,3 +131,4 @@ export function Contact() {
     </section>
   );
 }
+

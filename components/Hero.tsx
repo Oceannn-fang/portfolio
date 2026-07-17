@@ -1,7 +1,7 @@
 ﻿"use client";
 
-import { motion, useScroll, useTransform, useMotionValue } from "motion/react";
-import { useRef, useEffect, useState } from "react";
+import { motion, useScroll, useTransform } from "motion/react";
+import { useRef } from "react";
 import { profile } from "@/lib/data";
 
 export function Hero() {
@@ -11,22 +11,6 @@ export function Hero() {
     offset: ["start start", "end start"],
   });
   const opacity = useTransform(scrollYProgress, [0, 0.8], [1, 0]);
-  const y = useTransform(scrollYProgress, [0, 1], [0, 150]);
-
-  const mouseX = useMotionValue(0.5);
-  const mouseY = useMotionValue(0.5);
-
-  useEffect(() => {
-    const onMouse = (e: MouseEvent) => {
-      mouseX.set(e.clientX / window.innerWidth);
-      mouseY.set(e.clientY / window.innerHeight);
-    };
-    window.addEventListener("mousemove", onMouse, { passive: true });
-    return () => window.removeEventListener("mousemove", onMouse);
-  }, [mouseX, mouseY]);
-
-  const glareX = useTransform(mouseX, [0, 1], [0, 40]);
-  const glareY = useTransform(mouseY, [0, 1], [0, 40]);
 
   return (
     <section
@@ -42,23 +26,7 @@ export function Hero() {
         overflow: "hidden",
       }}
     >
-      {/* Ambient light effect */}
-      <motion.div
-        style={{
-          position: "absolute",
-          width: "60vw",
-          height: "60vw",
-          borderRadius: "50%",
-          background:
-            "radial-gradient(circle, rgba(107,158,255,0.04) 0%, transparent 70%)",
-          translateX: glareX,
-          translateY: glareY,
-          top: "20%",
-          pointerEvents: "none",
-        }}
-      />
-
-      <motion.div style={{ opacity, y }}>
+      <motion.div style={{ opacity }}>
         <motion.p
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}

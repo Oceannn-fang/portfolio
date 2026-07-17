@@ -29,3 +29,7 @@ _test2.txt
 .ssh-proxy.ps1
 
 .vercel
+
+fix_*.js
+test_output.ps1
+*.log
