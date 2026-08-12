@@ -1,53 +1,41 @@
-﻿import type { Metadata } from "next";
-import localFont from "next/font/local";
-import { SmoothScroll } from "@/components/SmoothScroll";
+import type { Metadata, Viewport } from "next";
 import "./globals.css";
-
-const fzXiaoBiaoSong = localFont({
-  src: "../fonts/方正小标宋简体.ttf",
-  variable: "--font-fzxiaobiaosong",
-  display: "swap",
-});
-
-const bonaNova = localFont({
-  src: [
-    { path: "../fonts/BonaNova-Regular.ttf", weight: "400" },
-    { path: "../fonts/BonaNova-Bold.ttf", weight: "700" },
-  ],
-  variable: "--font-bona-nova",
-  display: "swap",
-});
-
-const satoshi = localFont({
-  src: [
-    { path: "../fonts/Satoshi-Light.otf", weight: "300" },
-    { path: "../fonts/Satoshi-Medium.otf", weight: "500" },
-    { path: "../fonts/Satoshi-Bold.otf", weight: "700" },
-  ],
-  variable: "--font-satoshi",
-  display: "swap",
-});
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3100";
+const pageTitle = "George Kedenburg III";
 
 export const metadata: Metadata = {
-  title: "Portfolio",
-  description: "Personal website",
+  metadataBase: new URL(siteUrl),
+  title: pageTitle,
+  description: "Product Designer",
   openGraph: {
-    title: "Portfolio",
-    description: "Personal website",
+    title: pageTitle,
+    description: "Product Designer",
+    type: "website",
+    url: siteUrl,
+    videos: [{ url: `${siteUrl}/social.mp4`, type: "video/mp4" }],
+    images: [{ url: `${siteUrl}/social.jpg` }],
   },
+  twitter: {
+    card: "summary_large_image",
+    title: pageTitle,
+    description: "Product Designer",
+    images: [`${siteUrl}/social.jpg`],
+  },
+};
+
+export const viewport: Viewport = {
+  themeColor: "rgb(19, 69, 250)",
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
 };
 
 export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html
-      lang="zh-CN"
-      className={`${fzXiaoBiaoSong.variable} ${bonaNova.variable} ${satoshi.variable}`}
-    >
-      <body>
-        <SmoothScroll>{children}</SmoothScroll>
-      </body>
+    <html lang="en-US">
+      <body className="gk3-page">{children}</body>
     </html>
   );
 }

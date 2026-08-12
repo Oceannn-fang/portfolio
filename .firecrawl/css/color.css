@@ -1,0 +1,20 @@
+:root {
+    --base-saturated: rgb(19, 69, 250);
+    --base-pastel: #D3FED7;
+    --fg-color: var(--base-saturated);
+    --fg-rgb: 19, 69, 250;
+    --bg-color: var(--base-pastel);
+    --bg-rgb: 211, 254, 215;
+    --scrim: rgba(0,0,0,.4);
+    --panel-color: var(--fg-color);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --fg-color: var(--base-pastel);
+      --fg-rgb: 211, 254, 215;
+      --bg-color: rgb(5, 18, 66);
+      --bg-rgb: 5, 18, 66;
+      --scrim: rgba(211,254,215,.08);
+      --panel-color: var(--bg-color);
+    }
+  }

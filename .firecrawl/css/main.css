@@ -1,0 +1,1061 @@
+/*
+  __________             ______________
+ |:""""""""|:           | ............ :
+ |:        |:           | :          | :
+ |: >gk3   |:           | :          | :
+ |:________|:           | :>.website | :
+ |   .....  :---_____---| :__________| :
+ |  '-----" :           |..............:
+ | @        :"-__-_     |"""""""""""""":
+ |..........:    _-"    |..............:
+ /.::::::::.\   /\      /.::::::::.:::.\
+/____________\ (__)    /________________\
+*/
+
+
+:root {
+  --header-div-height: calc(100vh - 224px);
+  --header-div-height-mobile: calc(100vh - 278px);
+  --header-height: 100%;
+  --ease-bounce: cubic-bezier(0.34, 1.17, 0.35, 1);
+}
+
+@keyframes cursor {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+/*! HTML5 Boilerplate v8.0.0 | MIT License | https://html5boilerplate.com/ */
+
+/* main.css 2.1.0 | MIT License | https://github.com/h5bp/main.css#readme */
+/*
+ * What follows is the result of much research on cross-browser styling.
+ * Credit left inline and big thanks to Nicolas Gallagher, Jonathan Neal,
+ * Kroc Camen, and the H5BP dev community and team.
+ */
+
+/* ==========================================================================
+   Base styles: opinionated defaults
+   ========================================================================== */
+
+html {
+  color: #222;
+  font-size: 1em;
+  line-height: 1.4;
+  height: 100%;
+  background: var(--panel-color);
+  /* background: linear-gradient(
+    90deg,
+    var(--panel-color) 0%,
+    var(--panel-color) 34%,
+    var(--bg-color) 34%,
+    var(--bg-color) 100%
+  ); */
+}
+
+/*
+ * Remove text-shadow in selection highlight:
+ * https://twitter.com/miketaylr/status/12228805301
+ *
+ * Vendor-prefixed and regular ::selection selectors cannot be combined:
+ * https://stackoverflow.com/a/16982510/7133471
+ *
+ * Customize the background color to match your design.
+ */
+
+::-moz-selection {
+  background: #b3d4fc;
+  text-shadow: none;
+}
+
+::selection {
+  background: #b3d4fc;
+  text-shadow: none;
+}
+
+/*
+ * A better looking default horizontal rule
+ */
+
+hr {
+  display: block;
+  height: 1px;
+  border: 0;
+  border-top: 1px solid #ccc;
+  margin: 1em 0;
+  padding: 0;
+}
+
+/*
+ * Remove the gap between audio, canvas, iframes,
+ * images, videos and the bottom of their containers:
+ * https://github.com/h5bp/html5-boilerplate/issues/440
+ */
+
+audio,
+canvas,
+iframe,
+img,
+svg,
+video {
+  vertical-align: middle;
+}
+
+/*
+ * Remove default fieldset styles.
+ */
+
+fieldset {
+  border: 0;
+  margin: 0;
+  padding: 0;
+}
+
+/*
+ * Allow only vertical resizing of textareas.
+ */
+
+textarea {
+  resize: vertical;
+}
+
+/* ==========================================================================
+   Author's custom styles
+   ========================================================================== */
+
+@font-face {
+  font-family: "Quincy Light";
+  src: url("fonts/quincycf-light-webfont.woff2") format("woff2"),
+    url("fonts/quincycf-light-webfont.woff") format("woff");
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Ellograph Light";
+  src: url("fonts/ellographcf-light-webfont.woff2") format("woff2"),
+    url("fonts/ellographcf-light-webfont.woff") format("woff");
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Quincy Text Italic";
+  src: url("fonts/quincycf-textitalic-webfont.woff2") format("woff2"),
+    url("fonts/quincycf-textitalic-webfont.woff") format("woff");
+  font-weight: normal;
+  font-style: normal;
+}
+
+
+@font-face {
+  font-family: "Ellograph Demi";
+  src: url("fonts/ellographcf-demibold-webfont.woff2") format("woff2"),
+    url("fonts/ellographcf-demibold-webfont.woff") format("woff");
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Quincy Medium Italic";
+  src: url("fonts/quincycf-mediumitalic-webfont.woff2") format("woff2"),
+    url("fonts/quincycf-mediumitalic-webfont.woff") format("woff");
+  font-weight: normal;
+  font-style: normal;
+}
+::selection {
+  background-color: var(--fg-color);
+  color: var(--bg-color);
+}
+
+body {
+  height: 100%;
+  /* background: var(--bg-color); */
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body.cursor #pointer {
+  display: block;
+}
+body.expanded {
+  overflow: hidden;
+}
+#pointer {
+  width: 20px;
+  height: 20px;
+  position: fixed;
+  background-image: url(../img/eye.png);
+  background-size: cover;
+  background-repeat: no-repeat;
+  z-index: 50;
+  pointer-events: none;
+  top: -10px;
+  left: -10px;
+  display: none;
+}
+.link #pointer {
+  background-image: url(../img/arrow.png);
+}
+
+#viewer,
+#c {
+  position: fixed;
+  height: 100vh;
+  top: 0;
+  left: 0;
+  width: 34%;
+}
+#c {
+  z-index: -1;
+}
+#viewer {
+  z-index: 0;
+  text-align: center;
+  pointer-events: none;
+  text-align: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-width: 260px;
+  transition: none;
+}
+#viewer canvas {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  z-index: -2;
+  opacity: 1;
+}
+#viewer video,
+#viewer img {
+  display: none;
+}
+.viewing #viewer video {
+  opacity: 1;
+}
+
+#viewer h4 {
+  width: 100%;
+  display: block;
+  position: absolute;
+  color: var(--bg-color);
+  font-weight: normal;
+  font-family: "Ellograph Light";
+  font-size: 12px;
+  text-transform: uppercase;
+  z-index: -1;
+  opacity: 0.4;
+  margin: 0;
+}
+
+#viewer.pin #videoFrame * {
+  visibility: hidden;
+}
+#viewer.pin #videoFrame:after {
+  background-image: url(/img/aipin.png);
+  background-size: 30%;
+}
+#viewer.video #videoWrapper {
+  width: 93%;
+
+  height: min-content;
+  position: relative;
+  display: flex;
+  align-content: center;
+  justify-content: center;
+  max-height: 31vh;
+}
+
+#viewer.social #videoWrapper {
+  width: 100%;
+
+  height: min-content;
+  position: relative;
+  display: flex;
+  align-content: center;
+  justify-content: center;
+  border-radius: 50%;
+}
+
+#social-icons {
+  display: none;
+  width: 146px;
+  height: 146px;
+  border-radius: 50%;
+  overflow: hidden;
+  background-color: var(--bg-color);
+  position: relative;
+}
+#viewer.social #social-icons {
+  display: block;
+}
+#social-track {
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.2s var(--ease-bounce);
+  transform: translateY(calc(var(--social-index, 0) * -146px));
+}
+#social-track svg {
+  flex-shrink: 0;
+  width: 146px;
+  height: 146px;
+}
+.viewing #viewer.social h4, .viewing #viewer.pin h4 {
+  opacity: 0;
+}
+#viewer.video #videoWrapper video,
+#viewer.social #videoWrapper img {
+  object-fit: cover;
+}
+#viewer.phone #videoWrapper {
+  background-color: black !important;
+}
+
+#viewer.phone #videoWrapper,
+#viewer.video #videoWrapper {
+  background-color: black;
+  border-radius: 32px;
+  overflow: hidden;
+  position: relative;
+  z-index: 1;
+}
+#viewer #videoWrapper video,
+#viewer #videoWrapper img {
+  width: 100%;
+  border-radius: 22px;
+  display: block;
+  position: relative;
+}
+
+#viewer #videoWrapper {
+  height: 88vh;
+  width: 40.5vh;
+}
+#viewer.phone #videoWrapper,
+#viewer.video #videoWrapper {
+  display: grid;
+}
+#viewer.phone #videoWrapper > *,
+#viewer.video #videoWrapper > * {
+  grid-area: 1/1;
+}
+#viewer.social .ratio {
+  display: none;
+}
+#viewer.phone #videoWrapper video {
+  object-fit: contain;
+  border-radius: 0;
+  /* height: 100%; */
+}
+.viewing #viewer {
+  opacity: 1;
+}
+#videoFrame {
+  transform: scale(0.88);
+  opacity: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.4s var(--ease-bounce), opacity 0.4s var(--ease-bounce);
+}
+.viewing #videoFrame {
+  transform: scale(0.9);
+  opacity: 1;
+}
+
+.video #videoFrame:after,
+.social #videoFrame:after {
+  background-image: none;
+}
+#videoFrame:after {
+  background-image: url(/img/phone-frame-2.png);
+}
+#videoFrame:after {
+  position: absolute;
+  content: "";
+  z-index: 1000;
+
+  background-repeat: no-repeat;
+  width: 100%;
+  height: 100%;
+
+  left: 0;
+  background-size: contain;
+  background-position: center center;
+  top: 0;
+}
+
+#main {
+  width: 66%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  background: var(--bg-color);
+  box-sizing: border-box;
+  overflow-x: hidden;
+  position: absolute;
+  right: 0px;
+  /* height: 100%; */
+}
+
+#hero {
+  height: var(--header-div-height);
+  max-width: 100%;
+  display: flex;
+  justify-content: left;
+  width: 100%;
+  min-height: 400px;
+  max-height: 860px;
+}
+
+#hero-inner {
+  max-width: 700px;
+  width: 100%;
+}
+
+#hero h1 {
+  color: var(--fg-color);
+  font-family: "Quincy Light";
+  font-size: 70px;
+  font-weight: normal;
+  letter-spacing: -2px;
+  max-width: 400px;
+  line-height: 80%;
+  margin: 24px 0 0 24px;
+}
+
+.row {
+  width: 100%;
+  transform: translate3d(0px, 0px, 0px);
+  margin-bottom: 100px;
+  position: relative;
+}
+
+.viewing .row.active {
+  opacity: 1;
+  z-index: 10;
+}
+
+.row ul {
+  list-style: none;
+  font-weight: normal;
+  font-family: "Ellograph Demi";
+  font-size: 29px;
+  padding: 0;
+  margin: 0;
+  line-height: 32px;
+  color: var(--fg-color);
+  text-transform: lowercase;
+  letter-spacing: -1px;
+}
+.row ul li {
+  cursor: none;
+  padding: 20px 24px 26px;
+  border-top: 1px solid;
+  border-color: var(--fg-color);
+  text-decoration: underline;
+  text-decoration-color: rgba(var(--fg-rgb), 1);
+}
+.row ul li.active {
+  background-color: var(--scrim);
+  text-decoration-color: transparent;
+}
+.row ul li:last-child {
+  border-bottom: 1px solid;
+  border-color: var(--fg-color);
+}
+.row ul li a {
+  cursor: none;
+  display: block;
+  width: 100%;
+  padding: 20px 24px;
+  height: 100%;
+  margin: -20px -24px;
+  color: var(--fg-color);
+}
+
+.active ul li {
+  opacity: 1;
+}
+
+.row h2 {
+  color: var(--fg-color);
+  font-weight: normal;
+  font-family: "Quincy Text Italic";
+  font-size: 56px;
+  letter-spacing: -1px;
+  line-height: 100%;
+  margin: 0 24px 10px 24px;
+}
+.row h2 a:visited{
+  color: inherit;
+}
+.row h2 a{
+  color: inherit;
+}
+.row h2 a:hover{
+  color: black;
+}
+
+.row h3 {
+  color: var(--fg-color);
+  font-weight: normal;
+  font-family: "Ellograph Light";
+  font-size: 21px;
+  letter-spacing: -1px;
+  line-height: 100%;
+  margin: 0 0 24px 24px;
+}
+span.cursor {
+  animation-duration: 0.5s;
+  animation-name: cursor;
+  animation-iteration-count: infinite;
+  animation-direction: alternate;
+  animation-timing-function: cubic-bezier(0.87, 0, 0.13, 1);
+  display: inline-block;
+}
+.row h2 i {
+  font-family: "Quincy Medium Italic";
+  display: block;
+  font-style: normal;
+  font-size: 29px;
+  margin-bottom: -18px;
+}
+
+.bar {
+  display: flex;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--fg-color);
+  margin-bottom: 24px;
+  padding: 24px;
+  box-sizing: border-box;
+}
+
+.bar svg rect {
+  fill: var(--fg-color);
+}
+
+.bar svg path {
+  fill: var(--bg-color);
+}
+
+.bar em {
+  font-style: normal;
+  padding-right: 4px;
+  font-size: 21px;
+  top: 2px;
+  position: relative;
+}
+
+.bar span.copyright {
+  font-family: "Ellograph Demi";
+  font-style: normal;
+  font-size: 14.75px;
+  line-height: 24px;
+  letter-spacing: -0.5px;
+  white-space: nowrap;
+  color: var(--fg-color);
+  top: -2px;
+  position: relative;
+  margin-left: 12px;
+}
+
+.legal {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 24px;
+  padding: 0px 24px;
+  box-sizing: border-box;
+}
+
+.legal span {
+  flex-basis: calc(50% - 12px);
+  margin: 0;
+
+  font-family: "Quincy Light";
+  font-style: normal;
+  font-size: 14.75px;
+  line-height: 19px;
+  text-align: justify;
+
+  color: var(--fg-color);
+  margin-bottom: -20px;
+  word-break: break-word;
+  -webkit-hyphens: auto;
+  hyphens: auto;
+}
+.legal span:after {
+  content: "";
+  display: inline-block;
+  width: 100%;
+}
+.legal a{
+  text-decoration: none;
+  color: inherit;
+}
+.legal a:visited{
+  color: inherit;
+}
+#viewerHit {
+  position: fixed;
+  width: 44px;
+  height: 44px;
+  top: 0;
+  right: 0;
+  z-index: 20;
+  pointer-events: none;
+  background-color: var(--bg-color);
+  border-radius: 22px;
+  margin: 42px;
+  box-shadow: 0px 0px 40px rgba(0, 0, 0, 0.2);
+  display: none;
+  background-image: url(../img/eye.png);
+  background-size: 60%;
+  background-repeat: no-repeat;
+  background-position: center;
+  transform: translateX(70vw) scaleX(-1);
+  transition: transform 0.4s var(--ease-bounce);
+}
+span.comma {
+  display: inline;
+}
+@media (max-aspect-ratio: 16/12) {
+  html {
+    background: var(--bg-color);
+  }
+  #main {
+    overflow-x: auto;
+    width: 100%;
+    transition: opacity 0.2s linear;
+    opacity: 1;
+    height: auto;
+    background-color: transparent;
+  }
+  #hero {
+    height: var(--header-div-height-mobile);
+  }
+  #viewer {
+    width: 100%;
+    z-index: 10;
+    text-align: center;
+    display: flex;
+    justify-content: flex-end;
+    align-items: flex-start;
+    transform: translateX(70vw);
+    transition: transform 0.4s var(--ease-bounce), opacity 0.4s var(--ease-bounce);
+    background-color: rgba(var(--bg-rgb), 0);
+    opacity: 0;
+  }
+  #viewer h4 {
+    display: none;
+  }
+  #viewerHit span {
+    width: 100%;
+    height: 100%;
+    display: block;
+    text-align: center;
+    line-height: 38px;
+    opacity: 0;
+    font-weight: normal;
+    font-family: "Ellograph Demi";
+    font-size: 44px;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
+  .expanded #viewerHit {
+    background-color: var(--fg-color);
+    color: var(--bg-color);
+    background-image: none;
+  }
+  .expanded #viewerHit span {
+    opacity: 1;
+  }
+  .viewing #viewerHit {
+    transform: translateX(0) scaleX(-1);
+  }
+  .viewing #viewerHit {
+    pointer-events: all;
+  }
+  .viewing #viewer {
+    transform: translateX(0px);
+  }
+
+  .viewing.expanded #viewer #videoFrame {
+    transform: scale(1) translateX(0);
+    flex-basis: 100% !important;
+    opacity: 1;
+    min-height: 0;
+    margin: 0;
+  }
+  .viewing.expanded #viewer.video #videoFrame {
+    max-width: 100%;
+    transform: scale(1) translateX(0) translateY(30%);
+  }
+  .expanded #main {
+    opacity: 0;
+  }
+
+  .viewing.expanded #viewer {
+    background-color: rgba(var(--bg-rgb), 1);
+  }
+  #viewer #videoFrame {
+    transform-origin: top right;
+    transform: scale(0.9);
+    opacity: 1;
+
+    margin-right: 24px;
+    margin-top: 12px;
+    flex-basis: 44vw;
+    padding: 4.5vh 5%;
+    box-sizing: border-box;
+  }
+  #viewer #videoWrapper {
+    height: auto;
+    box-shadow: 0 0 40px 20px rgba(0, 0, 0, 0.2);
+  }
+  #viewer.social #videoFrame {
+    transform: scale(0.9);
+  }
+  #viewer.video #videoFrame {
+    padding-top: 24px;
+  }
+  #viewer.video #videoWrapper{
+    max-height: none;
+  }
+  #viewer.social #videoFrame,
+  #viewer.video #videoFrame {
+    max-width: 400px;
+    align-items: flex-start;
+    flex-basis: auto;
+    width: auto;
+    margin-right: 0;
+  }
+
+  #viewer #videoWrapper > * {
+    grid-area: 1/1;
+  }
+
+  #viewer.social #social-icons {
+    border-radius: 50%;
+  }
+
+  .row,
+  #hero {
+    max-width: none;
+    display: block;
+  }
+
+  .row {
+    margin-bottom: 80px;
+  }
+
+  .footer {
+    margin-bottom: 40px;
+  }
+
+  #hero h1 {
+    font-size: 54.25px;
+    margin: 24px 24px 0 24px;
+    max-width: 100%;
+    color: var(--bg-color);
+  }
+
+  .row h2 {
+    font-size: 36px;
+    letter-spacing: -0.5px;
+    margin: 0 24px 6px 24px;
+    line-height: 100%;
+  }
+
+  .row h2:after {
+    content: "";
+    display: block;
+  }
+  .row h2 i {
+    font-size: 21px;
+    margin-bottom: -12px;
+  }
+  .row ul {
+    font-size: 24px;
+    line-height: 30px;
+  }
+  .footer {
+    flex-direction: column;
+  }
+
+  .footer .col {
+    padding: 24px;
+  }
+
+  .bar,
+  .legal {
+    display: flex;
+  }
+  .bar {
+    align-content: center;
+    align-items: center;
+    margin-bottom: 24px;
+  }
+  .bar span.copyright {
+    text-align: right;
+    line-height: 14px;
+  }
+  .legal {
+    display: block;
+    text-align: justify;
+    margin-bottom: 24px;
+  }
+
+  .legal span {
+    display: inline;
+  }
+  .legal span:first-child:after {
+    display: none;
+  }
+
+  #c {
+    width: 100%;
+    height: calc(var(--header-div-height-mobile) - 24px);
+    position: absolute;
+    z-index: -4;
+    min-height: 382px;
+    max-height: 840px;
+  }
+  #viewerHit {
+    display: none;
+  }
+}
+@media (hover: none) and (pointer: coarse) {
+  #pointer {
+    visibility: hidden;
+  }
+  #viewerHit {
+    display: block;
+  }
+  .row ul li a:after {
+    content: " \2197";
+    text-decoration: none;
+    margin-left: 4px;
+    font-weight: normal;
+    font-family: "Ellograph Demi";
+    display: inline-block;
+    position: relative;
+    top: -2px;
+    margin-right: -20px;
+  }
+}
+@media (max-width: 600px) and (max-aspect-ratio: 16/12) {
+  body.viewing {
+    cursor: none;
+  }
+  #viewerHit {
+    margin: 16px;
+  }
+  #viewer #videoFrame {
+    transform-origin: top right;
+    transform: scale(0.4);
+    padding: 7% 5%;
+    transition: transform 0.4s var(--ease-bounce);
+  }
+  #viewer.video #videoFrame {
+    transform: scale(0.7);
+  }
+}
+@media (max-width: 380px) {
+  span.comma {
+    display: none;
+  }
+  .bar span.copyright {
+    top: -4px;
+    white-space: normal;
+  }
+}
+@media (prefers-color-scheme: dark) {
+  #viewer h4 {
+    color: var(--fg-color);
+    mix-blend-mode: difference;
+  }
+}
+/* ==========================================================================
+   Helper classes
+   ========================================================================== */
+
+/*
+ * Hide visually and from screen readers
+ */
+
+.hidden,
+[hidden] {
+  display: none !important;
+}
+
+/*
+ * Hide only visually, but have it available for screen readers:
+ * https://snook.ca/archives/html_and_css/hiding-content-for-accessibility
+ *
+ * 1. For long content, line feeds are not interpreted as spaces and small width
+ *    causes content to wrap 1 word per line:
+ *    https://medium.com/@jessebeach/beware-smushed-off-screen-accessible-text-5952a4c2cbfe
+ */
+
+.sr-only {
+  border: 0;
+  clip: rect(0, 0, 0, 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  white-space: nowrap;
+  width: 1px;
+  /* 1 */
+}
+
+/*
+ * Extends the .sr-only class to allow the element
+ * to be focusable when navigated to via the keyboard:
+ * https://www.drupal.org/node/897638
+ */
+
+.sr-only.focusable:active,
+.sr-only.focusable:focus {
+  clip: auto;
+  height: auto;
+  margin: 0;
+  overflow: visible;
+  position: static;
+  white-space: inherit;
+  width: auto;
+}
+
+/*
+ * Hide visually and from screen readers, but maintain layout
+ */
+
+.invisible {
+  visibility: hidden;
+}
+
+/*
+ * Clearfix: contain floats
+ *
+ * For modern browsers
+ * 1. The space content is one way to avoid an Opera bug when the
+ *    `contenteditable` attribute is included anywhere else in the document.
+ *    Otherwise it causes space to appear at the top and bottom of elements
+ *    that receive the `clearfix` class.
+ * 2. The use of `table` rather than `block` is only necessary if using
+ *    `:before` to contain the top-margins of child elements.
+ */
+
+.clearfix::before,
+.clearfix::after {
+  content: " ";
+  display: table;
+}
+
+.clearfix::after {
+  clear: both;
+}
+
+/* ==========================================================================
+   EXAMPLE Media Queries for Responsive Design.
+   These examples override the primary ('mobile first') styles.
+   Modify as content requires.
+   ========================================================================== */
+
+@media only screen and (min-width: 35em) {
+  /* Style adjustments for viewports that meet the condition */
+}
+
+@media print,
+  (-webkit-min-device-pixel-ratio: 1.25),
+  (min-resolution: 1.25dppx),
+  (min-resolution: 120dpi) {
+  /* Style adjustments for high resolution devices */
+}
+
+/* ==========================================================================
+   Print styles.
+   Inlined to avoid the additional HTTP request:
+   https://www.phpied.com/delay-loading-your-print-css/
+   ========================================================================== */
+
+@media print {
+  *,
+  *::before,
+  *::after {
+    background: #fff !important;
+    color: #000 !important;
+    /* Black prints faster */
+    box-shadow: none !important;
+    text-shadow: none !important;
+  }
+
+  a,
+  a:visited {
+    text-decoration: underline;
+  }
+
+  a[href]::after {
+    content: " (" attr(href) ")";
+  }
+
+  abbr[title]::after {
+    content: " (" attr(title) ")";
+  }
+
+  /*
+   * Don't show links that are fragment identifiers,
+   * or use the `javascript:` pseudo protocol
+   */
+  a[href^="#"]::after,
+  a[href^="javascript:"]::after {
+    content: "";
+  }
+
+  pre {
+    white-space: pre-wrap !important;
+  }
+
+  pre,
+  blockquote {
+    border: 1px solid #999;
+    page-break-inside: avoid;
+  }
+
+  /*
+   * Printing Tables:
+   * https://web.archive.org/web/20180815150934/http://css-discuss.incutio.com/wiki/Printing_Tables
+   */
+  thead {
+    display: table-header-group;
+  }
+
+  tr,
+  img {
+    page-break-inside: avoid;
+  }
+
+  p,
+  h2,
+  h3 {
+    orphans: 3;
+    widows: 3;
+  }
+
+  h2,
+  h3 {
+    page-break-after: avoid;
+  }
+}
