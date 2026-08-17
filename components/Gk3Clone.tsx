@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import "./Gk3Clone.css";
+import Noise from "./Noise";
 
 type ViewerMode = "phone" | "video" | "social" | "pin";
 
@@ -385,8 +386,6 @@ export function Gk3Clone() {
     let latestLight: [number, number, number] = [...baseIndigo];
     let colorDelta = 0;
     let colorDirection = 1;
-    let noiseScale = 1.8;
-    let noiseAmount = 0.1;
 
     const syncThemeColor = (color: [number, number, number]) => {
       let themeColor = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]');
@@ -415,14 +414,11 @@ export function Gk3Clone() {
     const setGradient = () => {
       const newDark = rotateRgb(baseSaturated, colorDelta);
       const newLight = rotateRgb(baseIndigo, colorDelta);
-      const gradientAmount = (colorDelta + 12) / 24;
       const fgColor = accentCrimson;
       const bgColor = newLight;
       const panelColor = adjustLightness(newDark, -0.06);
       latestDark = newDark;
       latestLight = newLight;
-      noiseScale = 1.4 + gradientAmount * 1.8;
-      noiseAmount = 0.08 + gradientAmount * 0.1;
 
       root.style.setProperty("--fg-rgb", `${fgColor[0]}, ${fgColor[1]}, ${fgColor[2]}`);
       root.style.setProperty("--bg-rgb", `${bgColor[0]}, ${bgColor[1]}, ${bgColor[2]}`);
@@ -485,8 +481,6 @@ export function Gk3Clone() {
           uniform vec3 extcolor1;
           uniform vec3 extcolor2;
           uniform vec3 uCapColor;
-          uniform float uNoiseScale;
-          uniform float uNoiseAmount;
 
           mat2 rotate2d(float angle){
             return mat2(cos(angle),-sin(angle),
@@ -540,12 +534,6 @@ export function Gk3Clone() {
             float grayscaleValue = clamp(dot(finalColor.rgb, vec3(0.299, 0.587, 0.114)), 0.0, 0.95);
             vec3 preComp = mix(extcolor2, extcolor1, grayscaleValue);
             preComp += (1.0/255.0) * gradientNoise(gl_FragCoord.xy) - (0.5/255.0);
-
-            float t = mod(iTime * 8.0, 4096.0);
-            vec2 grainUv = gl_FragCoord.xy * uNoiseScale + vec2(t * 2.0, t * 2.7);
-            float grain = gradientNoise(grainUv) - 0.5;
-            float broad = gradientNoise(gl_FragCoord.xy * (0.06 + uNoiseScale * 0.06) + vec2(t * 0.45, t * 0.6)) - 0.5;
-            preComp += grain * uNoiseAmount + broad * uNoiseAmount * 0.55;
 
             vec3 noiseCap = uCapColor;
             float capLum = dot(noiseCap, vec3(0.299, 0.587, 0.114));
@@ -611,8 +599,6 @@ export function Gk3Clone() {
         latestLight[1] / 255,
         latestLight[2] / 255
       );
-      gl.uniform1f(gl.getUniformLocation(program, "uNoiseScale"), noiseScale);
-      gl.uniform1f(gl.getUniformLocation(program, "uNoiseAmount"), noiseAmount);
       gl.drawArrays(gl.TRIANGLES, 0, 3);
       raf = requestAnimationFrame(render);
     };
@@ -822,6 +808,13 @@ export function Gk3Clone() {
         </div>
       </div>
       <canvas id="c" ref={canvasRef} />
+      <Noise
+        patternSize={250}
+        patternScaleX={1}
+        patternScaleY={1}
+        patternRefreshInterval={2}
+        patternAlpha={15}
+      />
     </>
   );
 }
