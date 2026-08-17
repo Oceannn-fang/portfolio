@@ -378,12 +378,13 @@ export function Gk3Clone() {
 
   useEffect(() => {
     const root = document.documentElement;
-    const baseSaturated: [number, number, number] = [19, 69, 250];
-    const basePastel: [number, number, number] = [211, 254, 215];
+    const baseSaturated: [number, number, number] = [9, 42, 130];
+    const basePastel: [number, number, number] = [52, 150, 255];
+    const accentCrimson: [number, number, number] = [220, 20, 60];
     let latestDark: [number, number, number] = [...baseSaturated];
     let latestLight: [number, number, number] = [...basePastel];
     let colorDelta = 0;
-    let isDarkMode = window.matchMedia("(prefers-color-scheme: dark)").matches;
+    let colorDirection = 1;
 
     const syncThemeColor = (color: [number, number, number]) => {
       let themeColor = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]');
@@ -412,59 +413,34 @@ export function Gk3Clone() {
     const setGradient = () => {
       const newDark = rotateRgb(baseSaturated, colorDelta);
       const newLight = rotateRgb(basePastel, colorDelta);
-      const luminance = (rgb: [number, number, number]) => {
-        const [r, g, b] = rgb.map((value) => {
-          const channel = value / 255;
-          return channel <= 0.03928 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4;
-        });
-        return 0.2126 * r + 0.7152 * g + 0.0722 * b;
-      };
-      const ratio =
-        (Math.max(luminance(newDark), luminance(newLight)) + 0.05) /
-        (Math.min(luminance(newDark), luminance(newLight)) + 0.05);
-      const contrastOffset = Math.min(1.5, Math.max(0, ((5 - ratio) / 4) * 1.5));
-      const darkContrast = adjustLightness(newDark, -contrastOffset * 0.1);
-
-      let fgColor: [number, number, number];
-      let bgColor: [number, number, number];
-      if (isDarkMode) {
-        fgColor = adjustLightness(newLight, 0.08);
-        bgColor = adjustLightness(darkContrast, -0.1);
-        latestDark = adjustLightness(fgColor, -0.08);
-        latestLight = bgColor;
-      } else {
-        fgColor = darkContrast;
-        bgColor = newLight;
-        latestDark = darkContrast;
-        latestLight = adjustLightness(newLight, -0.06);
-      }
+      const fgColor = accentCrimson;
+      const bgColor = newDark;
+      const panelColor = adjustLightness(newDark, -0.06);
+      latestDark = newDark;
+      latestLight = newLight;
 
       root.style.setProperty("--fg-rgb", `${fgColor[0]}, ${fgColor[1]}, ${fgColor[2]}`);
       root.style.setProperty("--bg-rgb", `${bgColor[0]}, ${bgColor[1]}, ${bgColor[2]}`);
       root.style.setProperty("--fg-color", `rgb(${fgColor[0]}, ${fgColor[1]}, ${fgColor[2]})`);
       root.style.setProperty("--bg-color", `rgb(${bgColor[0]}, ${bgColor[1]}, ${bgColor[2]})`);
-      root.style.setProperty("--panel-color", `rgb(${bgColor[0]}, ${bgColor[1]}, ${bgColor[2]})`);
-      root.style.setProperty(
-        "--scrim",
-        isDarkMode
-          ? `rgba(${fgColor[0]}, ${fgColor[1]}, ${fgColor[2]}, 0.08)`
-          : "rgba(0, 0, 0, 0.4)"
-      );
-      syncThemeColor(fgColor);
-      setFavicon(isDarkMode ? bgColor : fgColor, isDarkMode ? fgColor : bgColor);
+      root.style.setProperty("--panel-color", `rgb(${panelColor[0]}, ${panelColor[1]}, ${panelColor[2]})`);
+      root.style.setProperty("--scrim", "rgba(30, 144, 255, 0.12)");
+      syncThemeColor(bgColor);
+      setFavicon(bgColor, fgColor);
 
-      colorDelta += 0.5;
-      if (colorDelta > 360) colorDelta = 0;
+      colorDelta += 0.45 * colorDirection;
+      if (colorDelta > 12) {
+        colorDelta = 12;
+        colorDirection = -1;
+      }
+      if (colorDelta < -12) {
+        colorDelta = -12;
+        colorDirection = 1;
+      }
     };
 
     setGradient();
     const gradientTimer = window.setInterval(setGradient, 1000 / 15);
-    const darkModeQuery = window.matchMedia("(prefers-color-scheme: dark)");
-    const onDarkModeChange = (event: MediaQueryListEvent) => {
-      isDarkMode = event.matches;
-      setGradient();
-    };
-    darkModeQuery.addEventListener("change", onDarkModeChange);
 
     const canvas = canvasRef.current;
     let gl: WebGLRenderingContext | null = null;
@@ -626,7 +602,6 @@ export function Gk3Clone() {
     window.addEventListener("resize", start);
 
     return () => {
-      darkModeQuery.removeEventListener("change", onDarkModeChange);
       window.clearInterval(gradientTimer);
       window.removeEventListener("scroll", start);
       window.removeEventListener("resize", start);
@@ -689,10 +664,10 @@ export function Gk3Clone() {
       return (
         <div className="row bar" key={row.id}>
           <svg width="70" height="24" viewBox="0 0 70 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <rect width="70" height="24" rx="12" fill="#1345F9"></rect>
-            <path d="M24.83 11.338H19.135C18.761 11.338 18.54 11.559 18.54 11.933V13.633C18.54 14.007 18.761 14.228 19.135 14.228H22.195C22.297 14.228 22.365 14.296 22.365 14.398V14.959C21.345 15.163 19.968 15.299 17.741 15.35C12.59 15.486 11.264 14.262 11.264 12.154C11.264 10.046 12.59 8.958 17.741 8.958C21.005 8.958 22.484 9.281 23.606 9.672C23.946 9.791 24.269 9.859 24.439 9.57L25.238 8.142C25.442 7.785 25.442 7.598 25.085 7.343C24.371 6.833 22.11 6 17.52 6C11.077 6 8 7.649 8 12.154C8 16.659 11.077 18.308 17.52 18.308C22.144 18.308 24.405 17.475 25.119 16.965C25.306 16.812 25.425 16.676 25.425 16.557V11.933C25.425 11.559 25.204 11.338 24.83 11.338Z" fill="#D3FED7"></path>
-            <path d="M43.9194 17.407L35.8614 11.202L43.6304 6.901C44.1574 6.629 44.0554 6.204 43.4604 6.204H39.7714C39.4994 6.204 39.2274 6.238 38.9724 6.374L30.7614 10.862V6.799C30.7614 6.425 30.5234 6.204 30.1664 6.204H28.2114C27.8374 6.204 27.6164 6.425 27.6164 6.799V17.509C27.6164 17.883 27.8374 18.104 28.2114 18.104H30.1664C30.5234 18.104 30.7614 17.883 30.7614 17.509V14.041L33.2774 12.647L40.0604 17.866C40.2814 18.002 40.5024 18.104 40.7914 18.104H43.6814C44.2424 18.104 44.3784 17.747 43.9194 17.407Z" fill="#D3FED7"></path>
-            <path d="M61.7798 14.772C61.7628 12.664 59.4508 11.525 56.2208 11.236L60.0968 9.451C60.4198 9.298 60.5048 9.077 60.5048 8.737V6.799C60.5048 6.425 60.2838 6.204 59.9098 6.204H46.9558C46.5818 6.204 46.3608 6.425 46.3608 6.799V8.074C46.3608 8.448 46.5818 8.669 46.9558 8.669H56.6118L52.1918 10.692C51.9028 10.811 51.7668 11.066 51.7668 11.389V12.749C51.7668 13.123 51.9878 13.344 52.3788 13.344C55.8978 13.344 58.5328 14.007 58.5498 14.67C58.5668 15.095 57.4788 15.571 53.9598 15.571C50.2708 15.571 48.3498 14.874 47.1938 14.534C46.8538 14.449 46.4968 14.483 46.3948 14.738L45.7828 15.928C45.6298 16.302 45.5788 16.489 45.9358 16.744C46.6838 17.254 49.4548 18.24 54.1978 18.24C58.2778 18.24 61.7968 17.526 61.7798 14.772Z" fill="#D3FED7"></path>
+            <rect width="70" height="24" rx="12"></rect>
+            <path d="M24.83 11.338H19.135C18.761 11.338 18.54 11.559 18.54 11.933V13.633C18.54 14.007 18.761 14.228 19.135 14.228H22.195C22.297 14.228 22.365 14.296 22.365 14.398V14.959C21.345 15.163 19.968 15.299 17.741 15.35C12.59 15.486 11.264 14.262 11.264 12.154C11.264 10.046 12.59 8.958 17.741 8.958C21.005 8.958 22.484 9.281 23.606 9.672C23.946 9.791 24.269 9.859 24.439 9.57L25.238 8.142C25.442 7.785 25.442 7.598 25.085 7.343C24.371 6.833 22.11 6 17.52 6C11.077 6 8 7.649 8 12.154C8 16.659 11.077 18.308 17.52 18.308C22.144 18.308 24.405 17.475 25.119 16.965C25.306 16.812 25.425 16.676 25.425 16.557V11.933C25.425 11.559 25.204 11.338 24.83 11.338Z"></path>
+            <path d="M43.9194 17.407L35.8614 11.202L43.6304 6.901C44.1574 6.629 44.0554 6.204 43.4604 6.204H39.7714C39.4994 6.204 39.2274 6.238 38.9724 6.374L30.7614 10.862V6.799C30.7614 6.425 30.5234 6.204 30.1664 6.204H28.2114C27.8374 6.204 27.6164 6.425 27.6164 6.799V17.509C27.6164 17.883 27.8374 18.104 28.2114 18.104H30.1664C30.5234 18.104 30.7614 17.883 30.7614 17.509V14.041L33.2774 12.647L40.0604 17.866C40.2814 18.002 40.5024 18.104 40.7914 18.104H43.6814C44.2424 18.104 44.3784 17.747 43.9194 17.407Z"></path>
+            <path d="M61.7798 14.772C61.7628 12.664 59.4508 11.525 56.2208 11.236L60.0968 9.451C60.4198 9.298 60.5048 9.077 60.5048 8.737V6.799C60.5048 6.425 60.2838 6.204 59.9098 6.204H46.9558C46.5818 6.204 46.3608 6.425 46.3608 6.799V8.074C46.3608 8.448 46.5818 8.669 46.9558 8.669H56.6118L52.1918 10.692C51.9028 10.811 51.7668 11.066 51.7668 11.389V12.749C51.7668 13.123 51.9878 13.344 52.3788 13.344C55.8978 13.344 58.5328 14.007 58.5498 14.67C58.5668 15.095 57.4788 15.571 53.9598 15.571C50.2708 15.571 48.3498 14.874 47.1938 14.534C46.8538 14.449 46.4968 14.483 46.3948 14.738L45.7828 15.928C45.6298 16.302 45.5788 16.489 45.9358 16.744C46.6838 17.254 49.4548 18.24 54.1978 18.24C58.2778 18.24 61.7968 17.526 61.7798 14.772Z"></path>
           </svg>
           <span className="copyright">
             <em>&copy;</em>2026<span className="comma">,</span>
