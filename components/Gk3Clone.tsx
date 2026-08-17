@@ -378,13 +378,15 @@ export function Gk3Clone() {
 
   useEffect(() => {
     const root = document.documentElement;
-    const baseSaturated: [number, number, number] = [9, 42, 130];
-    const basePastel: [number, number, number] = [52, 150, 255];
+    const baseSaturated: [number, number, number] = [8, 18, 78];
+    const baseIndigo: [number, number, number] = [34, 78, 178];
     const accentCrimson: [number, number, number] = [220, 20, 60];
     let latestDark: [number, number, number] = [...baseSaturated];
-    let latestLight: [number, number, number] = [...basePastel];
+    let latestLight: [number, number, number] = [...baseIndigo];
     let colorDelta = 0;
     let colorDirection = 1;
+    let noiseScale = 1.35;
+    let noiseAmount = 0.035;
 
     const syncThemeColor = (color: [number, number, number]) => {
       let themeColor = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]');
@@ -412,19 +414,22 @@ export function Gk3Clone() {
 
     const setGradient = () => {
       const newDark = rotateRgb(baseSaturated, colorDelta);
-      const newLight = rotateRgb(basePastel, colorDelta);
+      const newLight = rotateRgb(baseIndigo, colorDelta);
+      const gradientAmount = (colorDelta + 12) / 24;
       const fgColor = accentCrimson;
       const bgColor = newDark;
       const panelColor = adjustLightness(newDark, -0.06);
       latestDark = newDark;
       latestLight = newLight;
+      noiseScale = 1.2 + gradientAmount * 0.9;
+      noiseAmount = 0.02 + gradientAmount * 0.04;
 
       root.style.setProperty("--fg-rgb", `${fgColor[0]}, ${fgColor[1]}, ${fgColor[2]}`);
       root.style.setProperty("--bg-rgb", `${bgColor[0]}, ${bgColor[1]}, ${bgColor[2]}`);
       root.style.setProperty("--fg-color", `rgb(${fgColor[0]}, ${fgColor[1]}, ${fgColor[2]})`);
       root.style.setProperty("--bg-color", `rgb(${bgColor[0]}, ${bgColor[1]}, ${bgColor[2]})`);
       root.style.setProperty("--panel-color", `rgb(${panelColor[0]}, ${panelColor[1]}, ${panelColor[2]})`);
-      root.style.setProperty("--scrim", "rgba(30, 144, 255, 0.12)");
+      root.style.setProperty("--scrim", "rgba(26, 56, 140, 0.16)");
       syncThemeColor(bgColor);
       setFavicon(bgColor, fgColor);
 
@@ -479,6 +484,8 @@ export function Gk3Clone() {
           uniform float iTime;
           uniform vec3 extcolor1;
           uniform vec3 extcolor2;
+          uniform float uNoiseScale;
+          uniform float uNoiseAmount;
 
           mat2 rotate2d(float angle){
             return mat2(cos(angle),-sin(angle),
@@ -533,8 +540,11 @@ export function Gk3Clone() {
             vec3 preComp = mix(extcolor2, extcolor1, grayscaleValue);
             preComp += (1.0/255.0) * gradientNoise(gl_FragCoord.xy) - (0.5/255.0);
 
-            float grain = gradientNoise(gl_FragCoord.xy + fract(iTime)) - 0.5;
-            preComp += grain * 0.04;
+            float t = mod(iTime, 4096.0);
+            vec2 grainUv = gl_FragCoord.xy * uNoiseScale + vec2(t * 0.7, t * 0.9);
+            float grain = gradientNoise(grainUv) - 0.5;
+            float broad = gradientNoise(gl_FragCoord.xy * (0.04 + uNoiseScale * 0.05) + t * 0.05) - 0.5;
+            preComp += grain * uNoiseAmount + broad * uNoiseAmount * 0.32;
 
             gl_FragColor = vec4(preComp, 1.0);
           }
@@ -586,6 +596,8 @@ export function Gk3Clone() {
         latestDark[1] / 255,
         latestDark[2] / 255
       );
+      gl.uniform1f(gl.getUniformLocation(program, "uNoiseScale"), noiseScale);
+      gl.uniform1f(gl.getUniformLocation(program, "uNoiseAmount"), noiseAmount);
       gl.drawArrays(gl.TRIANGLES, 0, 3);
       raf = requestAnimationFrame(render);
     };

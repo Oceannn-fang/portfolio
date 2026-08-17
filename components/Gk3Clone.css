@@ -19,9 +19,7 @@
   --header-height: 100%;
   --ease-bounce: cubic-bezier(0.34, 1.17, 0.35, 1);
   --warm-white: #f5efe6;
-  --electric-blue: #1e90ff;
-  --chroma-blue: rgba(30, 144, 255, 0.78);
-  --chroma-red: rgba(220, 20, 60, 0.78);
+  --indigo: #3d63c7;
 }
 
 @keyframes cursor {
@@ -173,7 +171,7 @@ textarea {
   font-style: normal;
 }
 ::selection {
-  background-color: var(--electric-blue);
+  background-color: var(--indigo);
   color: var(--warm-white);
 }
 
@@ -257,7 +255,6 @@ body.expanded {
   z-index: -1;
   opacity: 0.55;
   margin: 0;
-  text-shadow: -1px 0 0 var(--chroma-blue), 1px 0 0 var(--chroma-red);
 }
 
 #viewer.pin #videoFrame * {
@@ -436,7 +433,6 @@ body.expanded {
   max-width: 400px;
   line-height: 80%;
   margin: 24px 0 0 24px;
-  text-shadow: -3px 0 0 var(--chroma-blue), 3px 0 0 var(--chroma-red);
 }
 
 .row {
@@ -462,7 +458,6 @@ body.expanded {
   color: var(--fg-color);
   text-transform: lowercase;
   letter-spacing: -1px;
-  text-shadow: -2px 0 0 var(--chroma-blue), 2px 0 0 var(--chroma-red);
 }
 .row ul li {
   cursor: none;
@@ -502,7 +497,6 @@ body.expanded {
   letter-spacing: -1px;
   line-height: 100%;
   margin: 0 24px 10px 24px;
-  text-shadow: -2px 0 0 var(--chroma-blue), 2px 0 0 var(--chroma-red);
 }
 .row h2 a:visited{
   color: inherit;
@@ -511,7 +505,7 @@ body.expanded {
   color: inherit;
 }
 .row h2 a:hover{
-  color: var(--electric-blue);
+  color: var(--indigo);
 }
 
 .row h3 {
@@ -522,7 +516,6 @@ body.expanded {
   letter-spacing: -1px;
   line-height: 100%;
   margin: 0 0 24px 24px;
-  text-shadow: -1px 0 0 var(--chroma-blue), 1px 0 0 var(--chroma-red);
 }
 span.cursor {
   animation-duration: 0.5s;
@@ -576,7 +569,6 @@ span.cursor {
   top: -2px;
   position: relative;
   margin-left: 12px;
-  text-shadow: -1px 0 0 var(--chroma-blue), 1px 0 0 var(--chroma-red);
 }
 
 .legal {
@@ -602,7 +594,6 @@ span.cursor {
   word-break: break-word;
   -webkit-hyphens: auto;
   hyphens: auto;
-  text-shadow: -1px 0 0 var(--chroma-blue), 1px 0 0 var(--chroma-red);
 }
 .legal span:after {
   content: "";
