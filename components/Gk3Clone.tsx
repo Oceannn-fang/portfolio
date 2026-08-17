@@ -378,15 +378,15 @@ export function Gk3Clone() {
 
   useEffect(() => {
     const root = document.documentElement;
-    const baseSaturated: [number, number, number] = [8, 18, 78];
-    const baseIndigo: [number, number, number] = [34, 78, 178];
+    const baseSaturated: [number, number, number] = [4, 9, 46];
+    const baseIndigo: [number, number, number] = [8, 18, 78];
     const accentCrimson: [number, number, number] = [220, 20, 60];
     let latestDark: [number, number, number] = [...baseSaturated];
     let latestLight: [number, number, number] = [...baseIndigo];
     let colorDelta = 0;
     let colorDirection = 1;
-    let noiseScale = 1.35;
-    let noiseAmount = 0.035;
+    let noiseScale = 1.8;
+    let noiseAmount = 0.1;
 
     const syncThemeColor = (color: [number, number, number]) => {
       let themeColor = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]');
@@ -417,19 +417,19 @@ export function Gk3Clone() {
       const newLight = rotateRgb(baseIndigo, colorDelta);
       const gradientAmount = (colorDelta + 12) / 24;
       const fgColor = accentCrimson;
-      const bgColor = newDark;
+      const bgColor = newLight;
       const panelColor = adjustLightness(newDark, -0.06);
       latestDark = newDark;
       latestLight = newLight;
-      noiseScale = 1.2 + gradientAmount * 0.9;
-      noiseAmount = 0.02 + gradientAmount * 0.04;
+      noiseScale = 1.4 + gradientAmount * 1.8;
+      noiseAmount = 0.08 + gradientAmount * 0.1;
 
       root.style.setProperty("--fg-rgb", `${fgColor[0]}, ${fgColor[1]}, ${fgColor[2]}`);
       root.style.setProperty("--bg-rgb", `${bgColor[0]}, ${bgColor[1]}, ${bgColor[2]}`);
       root.style.setProperty("--fg-color", `rgb(${fgColor[0]}, ${fgColor[1]}, ${fgColor[2]})`);
       root.style.setProperty("--bg-color", `rgb(${bgColor[0]}, ${bgColor[1]}, ${bgColor[2]})`);
       root.style.setProperty("--panel-color", `rgb(${panelColor[0]}, ${panelColor[1]}, ${panelColor[2]})`);
-      root.style.setProperty("--scrim", "rgba(26, 56, 140, 0.16)");
+      root.style.setProperty("--scrim", "rgba(8, 18, 78, 0.34)");
       syncThemeColor(bgColor);
       setFavicon(bgColor, fgColor);
 
@@ -453,7 +453,7 @@ export function Gk3Clone() {
     let raf = 0;
     let running = false;
     let seed = window.matchMedia("(max-width: 850px)").matches ? 10 : Math.random() * 100;
-    const visible = () => !(window.scrollY > (canvas?.height ?? 0) && window.matchMedia("(max-width: 850px)").matches);
+    const visible = () => true;
 
     const compileShader = (type: number, source: string) => {
       if (!gl) return null;
@@ -484,6 +484,7 @@ export function Gk3Clone() {
           uniform float iTime;
           uniform vec3 extcolor1;
           uniform vec3 extcolor2;
+          uniform vec3 uCapColor;
           uniform float uNoiseScale;
           uniform float uNoiseAmount;
 
@@ -540,11 +541,19 @@ export function Gk3Clone() {
             vec3 preComp = mix(extcolor2, extcolor1, grayscaleValue);
             preComp += (1.0/255.0) * gradientNoise(gl_FragCoord.xy) - (0.5/255.0);
 
-            float t = mod(iTime, 4096.0);
-            vec2 grainUv = gl_FragCoord.xy * uNoiseScale + vec2(t * 0.7, t * 0.9);
+            float t = mod(iTime * 8.0, 4096.0);
+            vec2 grainUv = gl_FragCoord.xy * uNoiseScale + vec2(t * 2.0, t * 2.7);
             float grain = gradientNoise(grainUv) - 0.5;
-            float broad = gradientNoise(gl_FragCoord.xy * (0.04 + uNoiseScale * 0.05) + t * 0.05) - 0.5;
-            preComp += grain * uNoiseAmount + broad * uNoiseAmount * 0.32;
+            float broad = gradientNoise(gl_FragCoord.xy * (0.06 + uNoiseScale * 0.06) + vec2(t * 0.45, t * 0.6)) - 0.5;
+            preComp += grain * uNoiseAmount + broad * uNoiseAmount * 0.55;
+
+            vec3 noiseCap = uCapColor;
+            float capLum = dot(noiseCap, vec3(0.299, 0.587, 0.114));
+            float preLum = dot(preComp, vec3(0.299, 0.587, 0.114));
+            if (preLum > capLum) {
+              preComp *= capLum / preLum;
+            }
+            preComp = min(preComp, noiseCap);
 
             gl_FragColor = vec4(preComp, 1.0);
           }
@@ -595,6 +604,12 @@ export function Gk3Clone() {
         latestDark[0] / 255,
         latestDark[1] / 255,
         latestDark[2] / 255
+      );
+      gl.uniform3f(
+        gl.getUniformLocation(program, "uCapColor"),
+        latestLight[0] / 255,
+        latestLight[1] / 255,
+        latestLight[2] / 255
       );
       gl.uniform1f(gl.getUniformLocation(program, "uNoiseScale"), noiseScale);
       gl.uniform1f(gl.getUniformLocation(program, "uNoiseAmount"), noiseAmount);

@@ -349,23 +349,23 @@ template {
 }
 
 :root {
-  --base-saturated: rgb(8, 18, 78);
-  --base-indigo: rgb(34, 78, 178);
+  --base-saturated: rgb(4, 9, 46);
+  --base-indigo: rgb(8, 18, 78);
   --fg-color: rgb(220, 20, 60);
   --fg-rgb: 220, 20, 60;
-  --bg-color: var(--base-saturated);
+  --bg-color: var(--base-indigo);
   --bg-rgb: 8, 18, 78;
-  --scrim: rgba(26, 56, 140, 0.16);
-  --panel-color: rgb(6, 13, 58);
+  --scrim: rgba(8, 18, 78, 0.32);
+  --panel-color: rgb(4, 9, 46);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
     --fg-color: rgb(220, 20, 60);
     --fg-rgb: 220, 20, 60;
-    --bg-color: rgb(5, 12, 56);
-    --bg-rgb: 5, 12, 56;
-    --scrim: rgba(24, 52, 128, 0.18);
-    --panel-color: rgb(4, 9, 42);
+    --bg-color: rgb(7, 15, 66);
+    --bg-rgb: 7, 15, 66;
+    --scrim: rgba(7, 15, 66, 0.34);
+    --panel-color: rgb(3, 7, 38);
   }
 }

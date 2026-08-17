@@ -19,7 +19,7 @@
   --header-height: 100%;
   --ease-bounce: cubic-bezier(0.34, 1.17, 0.35, 1);
   --warm-white: #f5efe6;
-  --indigo: #3d63c7;
+  --indigo: #08124e;
 }
 
 @keyframes cursor {
@@ -206,8 +206,14 @@ body.expanded {
   background-image: url(/gk3-assets/img/arrow.png);
 }
 
-#viewer,
 #c {
+  position: fixed;
+  height: 100vh;
+  top: 0;
+  left: 0;
+  width: 100%;
+}
+#viewer {
   position: fixed;
   height: 100vh;
   top: 0;
@@ -216,6 +222,7 @@ body.expanded {
 }
 #c {
   z-index: -1;
+  pointer-events: none;
 }
 #viewer {
   z-index: 0;
@@ -401,7 +408,7 @@ body.expanded {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  background: var(--bg-color);
+  background: transparent;
   box-sizing: border-box;
   overflow-x: hidden;
   position: absolute;
@@ -827,11 +834,11 @@ span.comma {
 
   #c {
     width: 100%;
-    height: calc(var(--header-div-height-mobile) - 24px);
-    position: absolute;
-    z-index: -4;
-    min-height: 382px;
-    max-height: 840px;
+    height: 100vh;
+    position: fixed;
+    z-index: -1;
+    min-height: 0;
+    max-height: none;
   }
   #viewerHit {
     display: none;
