@@ -9,6 +9,7 @@ type NoiseProps = {
   patternScaleY?: number;
   patternRefreshInterval?: number;
   patternAlpha?: number;
+  patternDensity?: number;
 };
 
 const Noise = ({
@@ -16,7 +17,8 @@ const Noise = ({
   patternScaleX = 1,
   patternScaleY = 1,
   patternRefreshInterval = 2,
-  patternAlpha = 15
+  patternAlpha = 15,
+  patternDensity = 100,
 }: NoiseProps) => {
   const grainRef = useRef<HTMLCanvasElement>(null);
 
@@ -29,7 +31,7 @@ const Noise = ({
 
     let frame = 0;
     let animationId: number;
-    const canvasSize = 1024;
+    const canvasSize = 384;
 
     const resize = () => {
       if (!canvas) return;
@@ -41,18 +43,26 @@ const Noise = ({
     };
 
     const drawGrain = () => {
-      const imageData = ctx.createImageData(canvasSize, canvasSize);
-      const data = imageData.data;
+      const cellWidth = Math.max(1, Math.round((patternSize * patternScaleX) / 100));
+      const cellHeight = Math.max(1, Math.round((patternSize * patternScaleY) / 100));
+      ctx.clearRect(0, 0, canvasSize, canvasSize);
+      ctx.globalAlpha = patternAlpha / 255;
 
-      for (let i = 0; i < data.length; i += 4) {
-        const value = Math.random() * 255;
-        data[i] = value;
-        data[i + 1] = value;
-        data[i + 2] = value;
-        data[i + 3] = patternAlpha;
+      for (let y = 0; y < canvasSize; y += cellHeight) {
+        for (let x = 0; x < canvasSize; x += cellWidth) {
+          if (Math.random() * 100 >= patternDensity) continue;
+          const value = Math.floor(Math.random() * 256);
+          ctx.fillStyle = `rgb(${value}, ${value}, ${value})`;
+          ctx.fillRect(
+            x,
+            y,
+            Math.min(cellWidth, canvasSize - x),
+            Math.min(cellHeight, canvasSize - y)
+          );
+        }
       }
 
-      ctx.putImageData(imageData, 0, 0);
+      ctx.globalAlpha = 1;
     };
 
     const loop = () => {
@@ -71,7 +81,7 @@ const Noise = ({
       window.removeEventListener("resize", resize);
       window.cancelAnimationFrame(animationId);
     };
-  }, [patternSize, patternScaleX, patternScaleY, patternRefreshInterval, patternAlpha]);
+  }, [patternSize, patternScaleX, patternScaleY, patternRefreshInterval, patternAlpha, patternDensity]);
 
   return (
     <canvas

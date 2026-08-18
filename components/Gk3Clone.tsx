@@ -287,6 +287,15 @@ function adjustLightness(rgb: [number, number, number], delta: number): [number,
   const [h, s, l] = rgbToHsl(rgb[0], rgb[1], rgb[2]);
   return hslToRgb(h, s, Math.min(1, Math.max(0, l + delta))) as [number, number, number];
 }
+const defaultNoiseSettings = {
+  enabled: true,
+  cellSize: 2,
+  density: 80,
+  refreshInterval: 6,
+  alpha: 14,
+};
+
+type NoiseSettings = typeof defaultNoiseSettings;
 
 export function Gk3Clone() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -303,6 +312,17 @@ export function Gk3Clone() {
   const [placeholder, setPlaceholder] = useState("lorem ipsum");
   const [activeItem, setActiveItem] = useState<React.ReactNode | null>(null);
   const [currentMedia, setCurrentMedia] = useState<string | null>(null);
+  const [noiseSettings, setNoiseSettings] = useState<NoiseSettings>(() => {
+    if (typeof window === "undefined") return defaultNoiseSettings;
+    try {
+      const stored = window.localStorage.getItem("gk3-noise-settings-v2");
+      if (stored) return { ...defaultNoiseSettings, ...JSON.parse(stored) };
+    } catch {
+      // Ignore malformed local settings and use the defaults.
+    }
+    return defaultNoiseSettings;
+  });
+  const [noiseTunerOpen, setNoiseTunerOpen] = useState(false);
 
   useEffect(() => {
     document.body.classList.add("gk3-page");
@@ -317,6 +337,14 @@ export function Gk3Clone() {
       document.body.classList.remove("gk3-page", "viewing", "expanded", "cursor", "link");
     };
   }, []);
+  useEffect(() => {
+    try {
+      window.localStorage.setItem("gk3-noise-settings-v2", JSON.stringify(noiseSettings));
+    } catch {
+      // localStorage can be unavailable in private browsing; the tuner still works for the session.
+    }
+  }, [noiseSettings]);
+
 
   useEffect(() => {
     document.body.classList.toggle("viewing", viewing);
@@ -808,13 +836,111 @@ export function Gk3Clone() {
         </div>
       </div>
       <canvas id="c" ref={canvasRef} />
-      <Noise
-        patternSize={250}
-        patternScaleX={1}
-        patternScaleY={1}
-        patternRefreshInterval={1}
-        patternAlpha={48}
-      />
+      {noiseSettings.enabled ? (
+        <Noise
+          patternSize={noiseSettings.cellSize * 100}
+          patternScaleX={1}
+          patternScaleY={1}
+          patternRefreshInterval={noiseSettings.refreshInterval}
+          patternAlpha={noiseSettings.alpha}
+          patternDensity={noiseSettings.density}
+        />
+      ) : null}
+      <div id="noise-tuner" aria-label="Noise settings">
+        <button
+          id="noise-tuner-toggle"
+          type="button"
+          aria-expanded={noiseTunerOpen}
+          onClick={() => setNoiseTunerOpen((open) => !open)}
+        >
+          Noise
+        </button>
+        {noiseTunerOpen ? (
+          <div id="noise-tuner-panel">
+            <label>
+              <span>Size</span>
+              <input
+                type="range"
+                min="1"
+                max="8"
+                step="1"
+                value={noiseSettings.cellSize}
+                onChange={(event) =>
+                  setNoiseSettings((settings) => ({
+                    ...settings,
+                    cellSize: Number(event.target.value),
+                  }))
+                }
+              />
+              <output>{noiseSettings.cellSize}px</output>
+            </label>
+            <label>
+              <span>Density</span>
+              <input
+                type="range"
+                min="20"
+                max="100"
+                step="5"
+                value={noiseSettings.density}
+                onChange={(event) =>
+                  setNoiseSettings((settings) => ({
+                    ...settings,
+                    density: Number(event.target.value),
+                  }))
+                }
+              />
+              <output>{noiseSettings.density}%</output>
+            </label>
+            <label>
+              <span>Rate</span>
+              <input
+                type="range"
+                min="4"
+                max="12"
+                step="1"
+                value={noiseSettings.refreshInterval}
+                onChange={(event) =>
+                  setNoiseSettings((settings) => ({
+                    ...settings,
+                    refreshInterval: Number(event.target.value),
+                  }))
+                }
+              />
+              <output>{noiseSettings.refreshInterval}f</output>
+            </label>
+            <label>
+              <span>Alpha</span>
+              <input
+                type="range"
+                min="4"
+                max="32"
+                step="2"
+                value={noiseSettings.alpha}
+                onChange={(event) =>
+                  setNoiseSettings((settings) => ({
+                    ...settings,
+                    alpha: Number(event.target.value),
+                  }))
+                }
+              />
+              <output>{noiseSettings.alpha}</output>
+            </label>
+            <label id="noise-tuner-enabled">
+              <span>Enabled</span>
+              <input
+                type="checkbox"
+                checked={noiseSettings.enabled}
+                onChange={(event) =>
+                  setNoiseSettings((settings) => ({
+                    ...settings,
+                    enabled: event.target.checked,
+                  }))
+                }
+              />
+            </label>
+          </div>
+        ) : null}
+      </div>
     </>
   );
 }
