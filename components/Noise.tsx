@@ -31,7 +31,8 @@ const Noise = ({
 
     let frame = 0;
     let animationId: number;
-    const canvasSize = 384;
+    const canvasSize = 256;
+    const imageData = ctx.createImageData(canvasSize, canvasSize);
 
     const resize = () => {
       if (!canvas) return;
@@ -45,28 +46,33 @@ const Noise = ({
     const drawGrain = () => {
       const cellWidth = Math.max(1, Math.round((patternSize * patternScaleX) / 100));
       const cellHeight = Math.max(1, Math.round((patternSize * patternScaleY) / 100));
-      ctx.clearRect(0, 0, canvasSize, canvasSize);
-      ctx.globalAlpha = patternAlpha / 255;
+      const data = imageData.data;
+      data.fill(0);
 
       for (let y = 0; y < canvasSize; y += cellHeight) {
+        const drawHeight = Math.min(cellHeight, canvasSize - y);
         for (let x = 0; x < canvasSize; x += cellWidth) {
           if (Math.random() * 100 >= patternDensity) continue;
           const value = Math.floor(Math.random() * 256);
-          ctx.fillStyle = `rgb(${value}, ${value}, ${value})`;
-          ctx.fillRect(
-            x,
-            y,
-            Math.min(cellWidth, canvasSize - x),
-            Math.min(cellHeight, canvasSize - y)
-          );
+          const drawWidth = Math.min(cellWidth, canvasSize - x);
+          for (let offsetY = 0; offsetY < drawHeight; offsetY += 1) {
+            let index = ((y + offsetY) * canvasSize + x) * 4;
+            for (let offsetX = 0; offsetX < drawWidth; offsetX += 1) {
+              data[index] = value;
+              data[index + 1] = value;
+              data[index + 2] = value;
+              data[index + 3] = patternAlpha;
+              index += 4;
+            }
+          }
         }
       }
 
-      ctx.globalAlpha = 1;
+      ctx.putImageData(imageData, 0, 0);
     };
 
     const loop = () => {
-      if (frame % patternRefreshInterval === 0) {
+      if (!document.hidden && frame % patternRefreshInterval === 0) {
         drawGrain();
       }
       frame++;
