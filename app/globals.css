@@ -350,12 +350,12 @@ template {
 
 :root {
   --base-saturated: rgb(4, 9, 46);
-  --base-indigo: rgb(8, 18, 78);
+  --base-indigo: rgb(16, 34, 128);
   --fg-color: rgb(220, 20, 60);
   --fg-rgb: 220, 20, 60;
   --bg-color: var(--base-indigo);
-  --bg-rgb: 8, 18, 78;
-  --scrim: rgba(8, 18, 78, 0.32);
+  --bg-rgb: 16, 34, 128;
+  --scrim: rgba(16, 34, 128, 0.32);
   --panel-color: rgb(4, 9, 46);
 }
 

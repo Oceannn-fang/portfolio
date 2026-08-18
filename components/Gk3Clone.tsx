@@ -380,7 +380,7 @@ export function Gk3Clone() {
   useEffect(() => {
     const root = document.documentElement;
     const baseSaturated: [number, number, number] = [4, 9, 46];
-    const baseIndigo: [number, number, number] = [8, 18, 78];
+    const baseIndigo: [number, number, number] = [16, 34, 128];
     const accentCrimson: [number, number, number] = [220, 20, 60];
     let latestDark: [number, number, number] = [...baseSaturated];
     let latestLight: [number, number, number] = [...baseIndigo];
@@ -425,7 +425,7 @@ export function Gk3Clone() {
       root.style.setProperty("--fg-color", `rgb(${fgColor[0]}, ${fgColor[1]}, ${fgColor[2]})`);
       root.style.setProperty("--bg-color", `rgb(${bgColor[0]}, ${bgColor[1]}, ${bgColor[2]})`);
       root.style.setProperty("--panel-color", `rgb(${panelColor[0]}, ${panelColor[1]}, ${panelColor[2]})`);
-      root.style.setProperty("--scrim", "rgba(8, 18, 78, 0.34)");
+      root.style.setProperty("--scrim", "rgba(16, 34, 128, 0.34)");
       syncThemeColor(bgColor);
       setFavicon(bgColor, fgColor);
 
@@ -812,8 +812,8 @@ export function Gk3Clone() {
         patternSize={250}
         patternScaleX={1}
         patternScaleY={1}
-        patternRefreshInterval={2}
-        patternAlpha={15}
+        patternRefreshInterval={1}
+        patternAlpha={48}
       />
     </>
   );
