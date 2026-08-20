@@ -31,38 +31,57 @@ const Noise = ({
 
     let frame = 0;
     let animationId: number;
-    const canvasSize = 256;
-    const imageData = ctx.createImageData(canvasSize, canvasSize);
+    let imageData: ImageData | null = null;
+    let pixels: Uint32Array | null = null;
+    const maxDimension = 1024;
 
-    const resize = () => {
-      if (!canvas) return;
-      canvas.width = canvasSize;
-      canvas.height = canvasSize;
+    const prepare = () => {
+      const maxEdge = Math.max(window.innerWidth, window.innerHeight);
+      const scale = Math.min(1, maxDimension / Math.max(1, maxEdge));
+      const width = Math.max(64, Math.round(window.innerWidth * scale));
+      const height = Math.max(64, Math.round(window.innerHeight * scale));
 
-      canvas.style.width = "100vw";
-      canvas.style.height = "100vh";
+      canvas.width = width;
+      canvas.height = height;
+      canvas.style.opacity = String(Math.max(0, Math.min(1, patternAlpha / 255)));
+      imageData = ctx.createImageData(width, height);
+      pixels = new Uint32Array(
+        imageData.data.buffer,
+        imageData.data.byteOffset,
+        imageData.data.byteLength / Uint32Array.BYTES_PER_ELEMENT
+      );
     };
 
     const drawGrain = () => {
+      if (!imageData || !pixels) return;
       const cellWidth = Math.max(1, Math.round((patternSize * patternScaleX) / 100));
       const cellHeight = Math.max(1, Math.round((patternSize * patternScaleY) / 100));
-      const data = imageData.data;
-      data.fill(0);
+      const w = canvas.width;
+      const h = canvas.height;
+      const densityThreshold = Math.min(100, Math.max(0, patternDensity)) / 100;
+      pixels.fill(0);
 
-      for (let y = 0; y < canvasSize; y += cellHeight) {
-        const drawHeight = Math.min(cellHeight, canvasSize - y);
-        for (let x = 0; x < canvasSize; x += cellWidth) {
-          if (Math.random() * 100 >= patternDensity) continue;
+      if (cellWidth === 1 && cellHeight === 1) {
+        for (let i = 0; i < pixels.length; i += 1) {
+          if (Math.random() >= densityThreshold) continue;
           const value = Math.floor(Math.random() * 256);
-          const drawWidth = Math.min(cellWidth, canvasSize - x);
-          for (let offsetY = 0; offsetY < drawHeight; offsetY += 1) {
-            let index = ((y + offsetY) * canvasSize + x) * 4;
-            for (let offsetX = 0; offsetX < drawWidth; offsetX += 1) {
-              data[index] = value;
-              data[index + 1] = value;
-              data[index + 2] = value;
-              data[index + 3] = patternAlpha;
-              index += 4;
+          pixels[i] = (255 << 24) | (value << 16) | (value << 8) | value;
+        }
+      } else {
+        for (let y = 0; y < h; y += cellHeight) {
+          const drawHeight = Math.min(cellHeight, h - y);
+          for (let x = 0; x < w; x += cellWidth) {
+            if (Math.random() >= densityThreshold) continue;
+            const value = Math.floor(Math.random() * 256);
+            const rgba = (255 << 24) | (value << 16) | (value << 8) | value;
+            const drawWidth = Math.min(cellWidth, w - x);
+            for (let offsetY = 0; offsetY < drawHeight; offsetY += 1) {
+              let index = (y + offsetY) * w + x;
+              const end = index + drawWidth;
+              while (index < end) {
+                pixels[index] = rgba;
+                index += 1;
+              }
             }
           }
         }
@@ -79,8 +98,12 @@ const Noise = ({
       animationId = window.requestAnimationFrame(loop);
     };
 
+    const resize = () => {
+      prepare();
+    };
+
     window.addEventListener("resize", resize);
-    resize();
+    prepare();
     loop();
 
     return () => {
@@ -90,12 +113,7 @@ const Noise = ({
   }, [patternSize, patternScaleX, patternScaleY, patternRefreshInterval, patternAlpha, patternDensity]);
 
   return (
-    <canvas
-      className="noise-overlay"
-      ref={grainRef}
-      aria-hidden="true"
-      style={{ imageRendering: "pixelated" }}
-    />
+    <canvas className="noise-overlay" ref={grainRef} aria-hidden="true" />
   );
 };
 

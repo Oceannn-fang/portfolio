@@ -289,9 +289,9 @@ function adjustLightness(rgb: [number, number, number], delta: number): [number,
 }
 const defaultNoiseSettings = {
   enabled: true,
-  cellSize: 2,
-  density: 55,
-  refreshInterval: 12,
+  cellSize: 1,
+  density: 100,
+  refreshInterval: 6,
   alpha: 10,
 };
 
@@ -315,7 +315,7 @@ export function Gk3Clone() {
   const [noiseSettings, setNoiseSettings] = useState<NoiseSettings>(() => {
     if (typeof window === "undefined") return defaultNoiseSettings;
     try {
-      const stored = window.localStorage.getItem("gk3-noise-settings-v4");
+      const stored = window.localStorage.getItem("gk3-noise-settings-v6");
       if (stored) return { ...defaultNoiseSettings, ...JSON.parse(stored) };
     } catch {
       // Ignore malformed local settings and use the defaults.
@@ -339,7 +339,7 @@ export function Gk3Clone() {
   }, []);
   useEffect(() => {
     try {
-      window.localStorage.setItem("gk3-noise-settings-v4", JSON.stringify(noiseSettings));
+      window.localStorage.setItem("gk3-noise-settings-v6", JSON.stringify(noiseSettings));
     } catch {
       // localStorage can be unavailable in private browsing; the tuner still works for the session.
     }
