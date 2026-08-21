@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import "./Gk3Clone.css";
 import Noise from "./Noise";
+import { setSharedNoisePhase } from "./noisePhase";
 
 type ViewerMode = "phone" | "video" | "social" | "pin";
 
@@ -289,10 +290,6 @@ function adjustLightness(rgb: [number, number, number], delta: number): [number,
 }
 const defaultNoiseSettings = {
   enabled: true,
-  cellSize: 1,
-  density: 100,
-  refreshInterval: 6,
-  alpha: 10,
 };
 
 type NoiseSettings = typeof defaultNoiseSettings;
@@ -315,7 +312,7 @@ export function Gk3Clone() {
   const [noiseSettings, setNoiseSettings] = useState<NoiseSettings>(() => {
     if (typeof window === "undefined") return defaultNoiseSettings;
     try {
-      const stored = window.localStorage.getItem("gk3-noise-settings-v6");
+      const stored = window.localStorage.getItem("gk3-noise-settings-v7");
       if (stored) return { ...defaultNoiseSettings, ...JSON.parse(stored) };
     } catch {
       // Ignore malformed local settings and use the defaults.
@@ -339,7 +336,7 @@ export function Gk3Clone() {
   }, []);
   useEffect(() => {
     try {
-      window.localStorage.setItem("gk3-noise-settings-v6", JSON.stringify(noiseSettings));
+      window.localStorage.setItem("gk3-noise-settings-v7", JSON.stringify(noiseSettings));
     } catch {
       // localStorage can be unavailable in private browsing; the tuner still works for the session.
     }
@@ -447,6 +444,8 @@ export function Gk3Clone() {
       const panelColor = adjustLightness(newDark, -0.06);
       latestDark = newDark;
       latestLight = newLight;
+      const luminance = latestLight[0] * 0.299 + latestLight[1] * 0.587 + latestLight[2] * 0.114;
+      setSharedNoisePhase((luminance - 29) / (52.2 - 29));
 
       root.style.setProperty("--fg-rgb", `${fgColor[0]}, ${fgColor[1]}, ${fgColor[2]}`);
       root.style.setProperty("--bg-rgb", `${bgColor[0]}, ${bgColor[1]}, ${bgColor[2]}`);
@@ -838,12 +837,12 @@ export function Gk3Clone() {
       <canvas id="c" ref={canvasRef} />
       {noiseSettings.enabled ? (
         <Noise
-          patternSize={noiseSettings.cellSize * 100}
+          patternSize={100}
           patternScaleX={1}
           patternScaleY={1}
-          patternRefreshInterval={noiseSettings.refreshInterval}
-          patternAlpha={noiseSettings.alpha}
-          patternDensity={noiseSettings.density}
+          patternRefreshInterval={2}
+          patternAlpha={10}
+          patternDensity={50}
         />
       ) : null}
       <div id="noise-tuner" aria-label="Noise settings">
@@ -859,71 +858,19 @@ export function Gk3Clone() {
           <div id="noise-tuner-panel">
             <label>
               <span>Size</span>
-              <input
-                type="range"
-                min="1"
-                max="8"
-                step="1"
-                value={noiseSettings.cellSize}
-                onChange={(event) =>
-                  setNoiseSettings((settings) => ({
-                    ...settings,
-                    cellSize: Number(event.target.value),
-                  }))
-                }
-              />
-              <output>{noiseSettings.cellSize}px</output>
+              <output>1px</output>
             </label>
             <label>
               <span>Density</span>
-              <input
-                type="range"
-                min="10"
-                max="100"
-                step="5"
-                value={noiseSettings.density}
-                onChange={(event) =>
-                  setNoiseSettings((settings) => ({
-                    ...settings,
-                    density: Number(event.target.value),
-                  }))
-                }
-              />
-              <output>{noiseSettings.density}%</output>
+              <output>auto 30-70%</output>
             </label>
             <label>
               <span>Rate</span>
-              <input
-                type="range"
-                min="4"
-                max="60"
-                step="2"
-                value={noiseSettings.refreshInterval}
-                onChange={(event) =>
-                  setNoiseSettings((settings) => ({
-                    ...settings,
-                    refreshInterval: Number(event.target.value),
-                  }))
-                }
-              />
-              <output>{noiseSettings.refreshInterval}f</output>
+              <output>auto 1-5f</output>
             </label>
             <label>
               <span>Alpha</span>
-              <input
-                type="range"
-                min="4"
-                max="32"
-                step="2"
-                value={noiseSettings.alpha}
-                onChange={(event) =>
-                  setNoiseSettings((settings) => ({
-                    ...settings,
-                    alpha: Number(event.target.value),
-                  }))
-                }
-              />
-              <output>{noiseSettings.alpha}</output>
+              <output>10</output>
             </label>
             <label id="noise-tuner-enabled">
               <span>Enabled</span>

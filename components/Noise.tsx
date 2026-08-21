@@ -2,6 +2,17 @@
 
 import { useRef, useEffect } from "react";
 import "./Noise.css";
+import { noisePhase } from "./noisePhase";
+
+const DENSITY_MIN = 30;
+const DENSITY_MAX = 70;
+const INTERVAL_MIN = 1;
+const INTERVAL_MAX = 5;
+
+const easePhase = (value: number) => {
+  const t = Math.min(1, Math.max(0, value));
+  return t * t * (3 - 2 * t);
+};
 
 type NoiseProps = {
   patternSize?: number;
@@ -52,13 +63,13 @@ const Noise = ({
       );
     };
 
-    const drawGrain = () => {
+    const drawGrain = (densityValue: number) => {
       if (!imageData || !pixels) return;
       const cellWidth = Math.max(1, Math.round((patternSize * patternScaleX) / 100));
       const cellHeight = Math.max(1, Math.round((patternSize * patternScaleY) / 100));
       const w = canvas.width;
       const h = canvas.height;
-      const densityThreshold = Math.min(100, Math.max(0, patternDensity)) / 100;
+      const densityThreshold = Math.min(100, Math.max(0, densityValue)) / 100;
       pixels.fill(0);
 
       if (cellWidth === 1 && cellHeight === 1) {
@@ -91,10 +102,17 @@ const Noise = ({
     };
 
     const loop = () => {
-      if (!document.hidden && frame % patternRefreshInterval === 0) {
-        drawGrain();
+      if (!document.hidden) {
+        frame += 1;
+        const phase = noisePhase.active ? easePhase(noisePhase.value) : 0;
+        const density = noisePhase.active
+          ? DENSITY_MIN + (DENSITY_MAX - DENSITY_MIN) * phase
+          : patternDensity;
+        const refreshInterval = noisePhase.active
+          ? Math.max(1, Math.round(INTERVAL_MAX - (INTERVAL_MAX - INTERVAL_MIN) * phase))
+          : patternRefreshInterval;
+        if (frame % refreshInterval === 0) drawGrain(density);
       }
-      frame++;
       animationId = window.requestAnimationFrame(loop);
     };
 
