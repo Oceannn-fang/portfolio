@@ -24,7 +24,7 @@ export function Work() {
           fontSize: "0.7rem",
           letterSpacing: "0.4em",
           textTransform: "uppercase",
-          color: "var(--color-ash-dim)",
+          color: "var(--color-dim)",
           marginBottom: "4rem",
         }}
       >
@@ -45,15 +45,14 @@ export function Work() {
               justifyContent: "space-between",
               alignItems: "center",
               padding: "2rem 0",
-              borderTop: "1px solid rgba(168, 176, 188, 0.1)",
+              borderTop: "1px solid rgba(0,0,0,0.1)",
               textDecoration: "none",
-              color: "var(--color-bone)",
+              color: "var(--color-ivory)",
               position: "relative",
               overflow: "hidden",
             }}
             whileHover={{ paddingLeft: "1.5rem" }}
           >
-            {/* Hover background */}
             <motion.div
               className="work-hover-bg"
               initial={false}
@@ -61,7 +60,7 @@ export function Work() {
                 position: "absolute",
                 inset: 0,
                 background:
-                  "linear-gradient(90deg, rgba(107,158,255,0.04) 0%, transparent 60%)",
+                  "linear-gradient(90deg, rgba(0,0,0,0.03) 0%, transparent 60%)",
                 opacity: 0,
                 transition: "opacity 0.4s",
               }}
@@ -95,12 +94,12 @@ export function Work() {
                 style={{
                   fontFamily: "var(--font-sans)",
                   fontSize: "0.75rem",
-                  color: "var(--color-ash-dim)",
+                  color: "var(--color-dim)",
                 }}
               >
                 {work.subtitle}
               </span>
-              <div style={{ display: "flex", gap: "0.5rem", marginTop: "0.25rem" }}>
+              <div style={{ display: "flex", gap: "0.5rem", marginTop: "0.25rem", flexWrap: "wrap" }}>
                 {work.tags.map((tag) => (
                   <span
                     key={tag}
@@ -109,8 +108,8 @@ export function Work() {
                       fontSize: "0.6rem",
                       letterSpacing: "0.12em",
                       textTransform: "uppercase",
-                      color: "var(--color-ash-dim)",
-                      border: "1px solid rgba(168, 176, 188, 0.15)",
+                      color: "var(--color-dim)",
+                      border: "1px solid var(--color-border)",
                       borderRadius: "2px",
                       padding: "0.1rem 0.45rem",
                     }}
@@ -133,7 +132,7 @@ export function Work() {
                 style={{
                   fontFamily: "var(--font-sans)",
                   fontSize: "0.8rem",
-                  color: "var(--color-ash-dim)",
+                  color: "var(--color-dim)",
                 }}
               >
                 {work.year}
@@ -142,10 +141,10 @@ export function Work() {
                 whileHover={{ x: 3, rotate: 90 }}
                 transition={{ type: "spring", stiffness: 300, damping: 20 }}
                 style={{
-                  color: "var(--color-blue-ice)",
+                  color: "var(--color-flame)",
                   fontSize: "1rem",
                   display: "inline-block",
-                  opacity: 0.5,
+                  opacity: 0.6,
                 }}
               >
                 &rarr;
@@ -157,4 +156,3 @@ export function Work() {
     </section>
   );
 }
-

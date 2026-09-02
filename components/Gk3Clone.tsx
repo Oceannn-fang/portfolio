@@ -232,6 +232,14 @@ const rows: Row[] = [
   },
 ];
 
+const mediaNames = Array.from(
+  new Set(
+    rows.flatMap((row) =>
+      (row.items ?? []).map((item) => item.media).filter((media): media is string => Boolean(media))
+    )
+  )
+);
+
 function rgbToHsl(r: number, g: number, b: number) {
   r /= 255;
   g /= 255;
@@ -288,6 +296,7 @@ function adjustLightness(rgb: [number, number, number], delta: number): [number,
   const [h, s, l] = rgbToHsl(rgb[0], rgb[1], rgb[2]);
   return hslToRgb(h, s, Math.min(1, Math.max(0, l + delta))) as [number, number, number];
 }
+
 const defaultNoiseSettings = {
   enabled: true,
 };
@@ -300,6 +309,7 @@ export function Gk3Clone() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const videoFrameRef = useRef<HTMLDivElement>(null);
   const clearVideoTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const mediaCacheRef = useRef<Record<string, { video: string; poster: string }>>({});
   const flipRef = useRef(1);
   const [viewing, setViewing] = useState(false);
   const [expanded, setExpanded] = useState(false);
@@ -307,8 +317,9 @@ export function Gk3Clone() {
   const [activeRow, setActiveRow] = useState<string | null>(null);
   const [socialIndex, setSocialIndex] = useState(0);
   const [placeholder, setPlaceholder] = useState("lorem ipsum");
-  const [activeItem, setActiveItem] = useState<React.ReactNode | null>(null);
+  const [activeItem, setActiveItem] = useState<string | null>(null);
   const [currentMedia, setCurrentMedia] = useState<string | null>(null);
+  const [mediaCacheVersion, setMediaCacheVersion] = useState(0);
   const [noiseSettings, setNoiseSettings] = useState<NoiseSettings>(() => {
     if (typeof window === "undefined") return defaultNoiseSettings;
     try {
@@ -334,6 +345,7 @@ export function Gk3Clone() {
       document.body.classList.remove("gk3-page", "viewing", "expanded", "cursor", "link");
     };
   }, []);
+
   useEffect(() => {
     try {
       window.localStorage.setItem("gk3-noise-settings-v7", JSON.stringify(noiseSettings));
@@ -342,6 +354,44 @@ export function Gk3Clone() {
     }
   }, [noiseSettings]);
 
+  useEffect(() => {
+    let disposed = false;
+    const cache = mediaCacheRef.current;
+
+    const load = async () => {
+      await Promise.all(
+        mediaNames.map(async (media) => {
+          const name = media.replace(/\.mp4$/i, "");
+          if (disposed || cache[name]) return;
+          const videoUrl = await fetch(`/gk3-assets/video/${name}.mp4`)
+            .then((response) => (response.ok ? response.blob() : null))
+            .then((blob) => (blob ? URL.createObjectURL(blob) : null))
+            .catch(() => null);
+          const posterUrl = await fetch(`/gk3-assets/img/${name}.jpg`)
+            .then((response) => (response.ok ? response.blob() : null))
+            .then((blob) => (blob ? URL.createObjectURL(blob) : null))
+            .catch(() => null);
+
+          if (disposed) {
+            if (videoUrl) URL.revokeObjectURL(videoUrl);
+            if (posterUrl) URL.revokeObjectURL(posterUrl);
+            return;
+          }
+
+          cache[name] = {
+            video: videoUrl ?? `/gk3-assets/video/${name}.mp4`,
+            poster: posterUrl ?? `/gk3-assets/img/${name}.jpg`,
+          };
+        })
+      );
+      if (!disposed) setMediaCacheVersion((version) => version + 1);
+    };
+
+    load();
+    return () => {
+      disposed = true;
+    };
+  }, []);
 
   useEffect(() => {
     document.body.classList.toggle("viewing", viewing);
@@ -365,11 +415,11 @@ export function Gk3Clone() {
         clearVideoTimerRef.current = null;
       }
       const mediaName = currentMedia.replace(/\.mp4$/i, "");
+      const cached = mediaCacheRef.current[mediaName];
       video.style.display = "block";
-      video.src = `/gk3-assets/video/${mediaName}.mp4`;
-      video.poster = `/gk3-assets/img/${mediaName}.jpg`;
+      video.src = cached?.video ?? `/gk3-assets/video/${mediaName}.mp4`;
+      video.poster = cached?.poster ?? `/gk3-assets/img/${mediaName}.jpg`;
       video.load();
-      video.play().catch(() => {});
       const floating = window.matchMedia("(max-aspect-ratio: 16/12)").matches;
       if (floating && viewerClass === "phone" && videoFrame) {
         videoFrame.style.flexBasis = `${video.getBoundingClientRect().width + 100}px`;
@@ -391,7 +441,7 @@ export function Gk3Clone() {
     return () => {
       if (clearVideoTimerRef.current) clearTimeout(clearVideoTimerRef.current);
     };
-  }, [viewing, currentMedia, viewerClass]);
+  }, [viewing, currentMedia, viewerClass, mediaCacheVersion]);
 
   useEffect(() => {
     const onMove = (event: MouseEvent) => {
@@ -649,12 +699,12 @@ export function Gk3Clone() {
     };
   }, []);
 
-  const prepViewer = (rowId: string, item: WorkItem) => {
+  const prepViewer = (rowId: string, item: WorkItem, index: number) => {
     setViewerClass(item.viewer ?? "phone");
     setActiveRow(rowId);
     setViewing(true);
     setPlaceholder(placeholders[Math.floor(Math.random() * placeholders.length)]);
-    setActiveItem(item.text);
+    setActiveItem(`${rowId}-${index}`);
     setCurrentMedia(item.media ?? null);
     setSocialIndex(
       Math.max(0, socialItems.findIndex((label) => label.toLowerCase() === String(item.text ?? "").toLowerCase()))
@@ -673,7 +723,6 @@ export function Gk3Clone() {
     setActiveRow(null);
     setActiveItem(null);
     setCurrentMedia(null);
-    setViewerClass("phone");
     setPlaceholder(placeholders[Math.floor(Math.random() * placeholders.length)]);
     document.body.classList.remove("cursor", "link", "expanded");
     setExpanded(false);
@@ -752,17 +801,17 @@ export function Gk3Clone() {
             {(row.items ?? []).map((item, index) => (
               <li
                 key={`${row.id}-${index}`}
-                className={activeRow === row.id && activeItem === item.text ? "active" : ""}
+                className={activeRow === row.id && activeItem === `${row.id}-${index}` ? "active" : ""}
                 data-viewer={item.viewer}
                 data-media={item.media}
                 onMouseEnter={() => {
                   if (item.viewer && !window.matchMedia("(hover: none) and (pointer: coarse)").matches) {
-                    prepViewer(row.id, item);
+                    prepViewer(row.id, item, index);
                   }
                 }}
                 onClick={() => {
                   if (item.viewer && !item.href && window.matchMedia("(hover: none) and (pointer: coarse)").matches) {
-                    prepViewer(row.id, item);
+                    prepViewer(row.id, item, index);
                   }
                 }}
               >
@@ -805,13 +854,19 @@ export function Gk3Clone() {
               muted
               playsInline
               loop
+              onLoadedMetadata={(event) => {
+                const video = event.currentTarget;
+                video.muted = true;
+                if (viewing && currentMedia && viewerClass !== "social" && viewerClass !== "pin") {
+                  video.play().catch(() => {});
+                }
+              }}
               onError={(event) => {
                 const video = event.currentTarget;
                 const currentSrc = video.getAttribute("src");
                 if (currentSrc && currentSrc !== "/gk3-assets/video/404.mp4") {
                   video.src = "/gk3-assets/video/404.mp4";
                   video.load();
-                  video.play().catch(() => {});
                 }
               }}
             />

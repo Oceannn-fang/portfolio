@@ -89,7 +89,7 @@ function OrbitItem({ item, index, totalItems, path, itemSize, rotation, progress
         offsetAnchor: "center center",
         offsetDistance,
       }}
-      onMouseEnter={() => onItemHover?.(index)}
+      onMouseEnter={() => onItemHover?.(index)} onClick={() => onItemHover?.(index)}
       onMouseLeave={() => onItemHover?.(null)}
     >
       <div style={{ transform: `rotate(${-rotation}deg)` }}>{item}</div>

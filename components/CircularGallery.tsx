@@ -1,24 +1,20 @@
-﻿"use client";
+"use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useMemo } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { allAlbums } from "@/lib/data";
 import "./CircularGallery.css";
 
-export default function CircularGallery() {
-  const [expandedIdx, setExpandedIdx] = useState<number | null>(null);
-  const scrollRef = useRef<HTMLDivElement>(null);
-  const [expandingAlbum, setExpandingAlbum] = useState<typeof allAlbums[0] | null>(null);
-  const [showTracklist, setShowTracklist] = useState(false);
+export default function CircularGallery({ heading = "RECENT LISTENS" }: { heading?: string }) {
   const [selectedAlbum, setSelectedAlbum] = useState<typeof allAlbums[0] | null>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
 
-  const handleAlbumClick = (album: typeof allAlbums[0], idx: number) => {
-    if (selectedAlbum === album) {
+  const handleAlbumClick = (album: typeof allAlbums[0]) => {
+    if (selectedAlbum?.name === album.name && selectedAlbum?.artist === album.artist) {
       setSelectedAlbum(null);
       return;
     }
     setSelectedAlbum(album);
-    setExpandedIdx(idx);
   };
 
   return (
@@ -30,27 +26,30 @@ export default function CircularGallery() {
         transition={{ duration: 0.6 }}
         className="track-heading"
       >
-        RECENT LISTENS
+        {heading}
       </motion.h2>
 
       {/* Horizontal scrollable album row */}
       <div className="track-album-row" ref={scrollRef}>
         <div className="track-album-track">
-          {allAlbums.map((album, i) => (
-            <motion.button
-              key={i}
-              className={"track-album-chip" + (selectedAlbum === album ? " active" : "")}
-              onClick={() => handleAlbumClick(album, i)}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.97 }}
-              layout
-            >
-              <div className="track-chip-img">
-                <img src={album.src} alt={album.name} draggable={false} />
-              </div>
-              <span className="track-chip-name">{album.name}</span>
-            </motion.button>
-          ))}
+          {allAlbums.map((album, i) => {
+            const isActive = selectedAlbum?.name === album.name && selectedAlbum?.artist === album.artist;
+            return (
+              <motion.button
+                key={`${album.name}-${i}`}
+                className={"track-album-chip" + (isActive ? " active" : "")}
+                onClick={() => handleAlbumClick(album)}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.97 }}
+                layout
+              >
+                <div className="track-chip-img">
+                  <img src={album.src} alt={album.name} draggable={false} />
+                </div>
+                <span className="track-chip-name">{album.name}</span>
+              </motion.button>
+            );
+          })}
         </div>
       </div>
 
@@ -58,7 +57,7 @@ export default function CircularGallery() {
       <AnimatePresence mode="wait">
         {selectedAlbum && (
           <motion.div
-            key={selectedAlbum.name}
+            key={selectedAlbum.name + selectedAlbum.artist}
             className="track-expanded"
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: "auto", opacity: 1 }}
@@ -73,16 +72,16 @@ export default function CircularGallery() {
                 <h3 className="track-expanded-name">{selectedAlbum.name}</h3>
                 <p className="track-expanded-artist">{selectedAlbum.artist}</p>
                 <ol className="track-list">
-                  {(selectedAlbum as any).tracks?.map((track: string, ti: number) => (
+                  {selectedAlbum.tracks?.map((track: string, ti: number) => (
                     <li key={ti} className="track-item">
                       <span className="track-num">{String(ti + 1).padStart(2, "0")}</span>
                       <span className="track-title">{track}</span>
                     </li>
                   ))}
                 </ol>
-                {(selectedAlbum as any).spotifyUrl ? (
+                {selectedAlbum.spotifyUrl ? (
                   <a
-                    href={(selectedAlbum as any).spotifyUrl}
+                    href={selectedAlbum.spotifyUrl}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="track-spotify-btn"

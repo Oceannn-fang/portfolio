@@ -5,7 +5,7 @@ import { useState, useEffect } from "react";
 
 const links = [
   { label: "About", href: "#about" },
-  { label: "Work", href: "#work" },
+  { label: "Portfolio", href: "#portfolio" },
   { label: "Contact", href: "#contact" },
 ];
 
@@ -37,29 +37,31 @@ export function Navbar() {
           transition: "padding 0.4s cubic-bezier(0.22, 1, 0.36, 1)",
           backdropFilter: scrolled ? "blur(12px) saturate(1.2)" : "none",
           WebkitBackdropFilter: scrolled ? "blur(12px) saturate(1.2)" : "none",
-          backgroundColor: scrolled ? "rgba(245, 242, 237, 0.85)" : "transparent",
+          backgroundColor: scrolled ? "rgba(255,255,255,0.82)" : "transparent",
         }}
       >
         <a
           href="#"
           style={{
             fontFamily: "var(--font-serif-en)",
-            fontSize: "1.125rem",
-            letterSpacing: "0.05em",
-            color: "var(--color-bone)",
+            fontSize: "1.25rem",
+            letterSpacing: "0.02em",
+            color: "var(--color-ivory)",
             textDecoration: "none",
           }}
         >
-          &#9673;
+          F.
         </a>
         <div
           style={{
             display: "flex",
-            gap: "2rem",
+            gap: "1.75rem",
             fontFamily: "var(--font-sans)",
             fontSize: "0.75rem",
             letterSpacing: "0.15em",
             textTransform: "uppercase",
+            flexWrap: "wrap",
+            justifyContent: "flex-end",
           }}
         >
           {links.map((link) => (
@@ -67,14 +69,14 @@ export function Navbar() {
               key={link.label}
               href={link.href}
               style={{
-                color: "var(--color-ash)",
+                color: "var(--color-dim)",
                 textDecoration: "none",
                 position: "relative",
                 paddingBottom: "2px",
                 transition: "color 0.3s",
               }}
-              onMouseEnter={(e) => (e.currentTarget.style.color = "var(--color-bone)")}
-              onMouseLeave={(e) => (e.currentTarget.style.color = "var(--color-ash)")}
+              onMouseEnter={(e) => (e.currentTarget.style.color = "var(--color-ivory)")}
+              onMouseLeave={(e) => (e.currentTarget.style.color = "var(--color-dim)")}
             >
               {link.label}
             </a>
@@ -91,11 +93,10 @@ export function Navbar() {
           transformOrigin: "0%",
           scaleX,
           background:
-            "linear-gradient(90deg, var(--color-blue-ice), var(--color-blue-muted))",
+            "linear-gradient(90deg, var(--color-ivory), var(--color-faint))",
           zIndex: 101,
         }}
       />
     </>
   );
 }
-

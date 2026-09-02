@@ -12,39 +12,8 @@ export function Listening() {
   const hoveredAlbum = hoveredIndex !== null ? recentAlbums[hoveredIndex] : null;
 
   return (
-    <section
-      id="listening"
-      style={{
-        padding: "6rem 2rem 8rem",
-        position: "relative",
-      }}
-    >
-      <div
-        style={{
-          maxWidth: "72rem",
-          margin: "0 auto",
-          marginBottom: "3rem",
-          textAlign: "center",
-        }}
-      >
-        <motion.h2
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-100px" }}
-          transition={{ duration: 0.6 }}
-          style={{
-            fontFamily: "var(--font-sans)",
-            fontSize: "0.7rem",
-            letterSpacing: "0.4em",
-            textTransform: "uppercase",
-            color: "var(--color-ash-dim)",
-          }}
-        >
-          Recently Listened
-        </motion.h2>
-      </div>
-
-      <div style={{ maxWidth: "64rem", margin: "0 auto", position: "relative" }}>
+    <div className="listening-orbit">
+      <div style={{ maxWidth: "100%", position: "relative" }}>
         <OrbitImages
           images={albumImages}
           shape="ellipse"
@@ -64,21 +33,24 @@ export function Listening() {
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   transition={{ duration: 0.2, ease: "easeOut" }}
                   style={{
-                    padding: "0.75rem 1.25rem",
+                    padding: "0.9rem 1.25rem",
                     borderRadius: "6px",
-                    background: "rgba(245,242,237,0.9)",
-                    backdropFilter: "blur(12px)",
-                    WebkitBackdropFilter: "blur(12px)",
-                    border: "1px solid rgba(168,176,188,0.1)",
+                    background: "var(--panel-color)",
+                    backdropFilter: "blur(14px)",
+                    WebkitBackdropFilter: "blur(14px)",
+                    border: "1px solid rgba(var(--fg-rgb), 0.22)",
+                    boxShadow: "0 16px 50px rgba(0, 0, 0, 0.35)",
                   }}
                 >
                   <div
                     style={{
-                      fontFamily: "var(--font-sans)",
-                      fontSize: "0.8rem",
+                      fontFamily: "var(--font-serif-en)",
+                      fontSize: "0.95rem",
                       fontWeight: 500,
                       color: "var(--color-bone)",
-                      whiteSpace: "nowrap",
+                      whiteSpace: "normal",
+                      lineHeight: 1.25,
+                      maxWidth: "min(280px, 64vw)",
                     }}
                   >
                     {hoveredAlbum.name}
@@ -86,14 +58,39 @@ export function Listening() {
                   <div
                     style={{
                       fontFamily: "var(--font-sans)",
-                      fontSize: "0.65rem",
+                      fontSize: "0.66rem",
                       color: "var(--color-ash-dim)",
-                      marginTop: "0.15rem",
-                      whiteSpace: "nowrap",
+                      marginTop: "0.18rem",
+                      whiteSpace: "normal",
+                      lineHeight: 1.25,
+                      maxWidth: "min(280px, 64vw)",
                     }}
                   >
                     {hoveredAlbum.artist}
                   </div>
+                  {hoveredAlbum.spotifyUrl ? (
+                    <a
+                      href={hoveredAlbum.spotifyUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      style={{
+                        pointerEvents: "auto",
+                        display: "inline-flex",
+                        marginTop: "0.65rem",
+                        padding: "0.35rem 0.7rem",
+                        borderRadius: "999px",
+                        border: "1px solid rgba(29, 185, 84, 0.65)",
+                        color: "#1db954",
+                        fontFamily: "var(--font-sans)",
+                        fontSize: "0.6rem",
+                        letterSpacing: "0.1em",
+                        textDecoration: "none",
+                        textTransform: "uppercase",
+                      }}
+                    >
+                      open in spotify ↗
+                    </a>
+                  ) : null}
                 </motion.div>
               ) : (
                 <div
@@ -105,13 +102,13 @@ export function Listening() {
                     opacity: 0.6,
                   }}
                 >
-                  Hover to reveal
+                  hover to reveal
                 </div>
               )}
             </div>
           }
         />
       </div>
-    </section>
+    </div>
   );
 }

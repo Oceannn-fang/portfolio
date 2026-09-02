@@ -27,7 +27,7 @@ export function About() {
           fontSize: "0.7rem",
           letterSpacing: "0.4em",
           textTransform: "uppercase",
-          color: "var(--color-ash-dim)",
+          color: "var(--color-dim)",
           marginBottom: "3rem",
         }}
       >
@@ -51,7 +51,7 @@ export function About() {
             fontFamily: "var(--font-serif-en)",
             fontSize: "clamp(1.25rem, 3vw, 2rem)",
             lineHeight: 1.5,
-            color: "var(--color-bone)",
+            color: "var(--color-ivory)",
             maxWidth: "42rem",
             fontStyle: "italic",
             letterSpacing: "-0.01em",
@@ -65,7 +65,7 @@ export function About() {
             fontFamily: "var(--font-serif-cn)",
             fontSize: "clamp(1rem, 2vw, 1.25rem)",
             lineHeight: 1.9,
-            color: "var(--color-ash)",
+            color: "var(--color-dim)",
             maxWidth: "38rem",
           }}
         >
@@ -73,13 +73,12 @@ export function About() {
         </p>
       </motion.div>
 
-      {/* Timeline */}
       <motion.div
         initial={{ opacity: 0 }}
         whileInView={{ opacity: 1 }}
         viewport={{ once: true, margin: "-50px" }}
         transition={{ duration: 0.8, delay: 0.3 }}
-        style={{ borderTop: "1px solid rgba(168, 176, 188, 0.12)" }}
+        style={{ borderTop: "1px solid rgba(0,0,0,0.1)" }}
       >
         {timeline.map((item, i) => (
           <motion.div
@@ -92,7 +91,7 @@ export function About() {
               display: "flex",
               gap: "2rem",
               padding: "1.5rem 0",
-              borderBottom: "1px solid rgba(168, 176, 188, 0.08)",
+              borderBottom: "1px solid rgba(0,0,0,0.08)",
               alignItems: "flex-start",
             }}
           >
@@ -100,7 +99,7 @@ export function About() {
               style={{
                 fontFamily: "var(--font-sans)",
                 fontSize: "0.7rem",
-                color: "var(--color-ash-dim)",
+                color: "var(--color-dim)",
                 minWidth: "3.5rem",
                 paddingTop: "0.15rem",
                 letterSpacing: "0.1em",
@@ -113,7 +112,7 @@ export function About() {
                 style={{
                   fontFamily: "var(--font-serif-en)",
                   fontSize: "1rem",
-                  color: "var(--color-bone)",
+                  color: "var(--color-ivory)",
                   display: "block",
                   marginBottom: "0.15rem",
                 }}
@@ -124,7 +123,7 @@ export function About() {
                 style={{
                   fontFamily: "var(--font-sans)",
                   fontSize: "0.75rem",
-                  color: "var(--color-ash)",
+                  color: "var(--color-dim)",
                 }}
               >
                 {item.subtitle}
@@ -133,7 +132,7 @@ export function About() {
                 style={{
                   fontFamily: "var(--font-sans)",
                   fontSize: "0.7rem",
-                  color: "var(--color-ash-dim)",
+                  color: "var(--color-faint)",
                   display: "block",
                   marginTop: "0.3rem",
                 }}

@@ -1,9 +1,25 @@
 ﻿"use client";
 
 import { motion } from "motion/react";
+import { useRef, useState } from "react";
 import { profile } from "@/lib/data";
 
 export function Contact() {
+  const [copied, setCopied] = useState(false);
+  const timerRef = useRef<number | undefined>(undefined);
+
+  const copyEmail = async (event: React.MouseEvent<HTMLAnchorElement>) => {
+    event.preventDefault();
+    try {
+      await navigator.clipboard.writeText(profile.email);
+    } catch {
+      window.prompt("Copy email", profile.email);
+    }
+    setCopied(true);
+    window.clearTimeout(timerRef.current);
+    timerRef.current = window.setTimeout(() => setCopied(false), 2000);
+  };
+
   return (
     <section
       id="contact"
@@ -28,7 +44,7 @@ export function Contact() {
           fontSize: "0.7rem",
           letterSpacing: "0.4em",
           textTransform: "uppercase",
-          color: "var(--color-ash-dim)",
+          color: "var(--color-dim)",
           marginBottom: "3rem",
         }}
       >
@@ -43,7 +59,7 @@ export function Contact() {
         style={{
           fontFamily: "var(--font-serif-cn)",
           fontSize: "clamp(0.9rem, 1.5vw, 1.1rem)",
-          color: "var(--color-ash)",
+          color: "var(--color-dim)",
           marginBottom: "2rem",
           letterSpacing: "0.05em",
         }}
@@ -53,6 +69,7 @@ export function Contact() {
 
       <motion.a
         href={`mailto:${profile.email}`}
+        onClick={copyEmail}
         initial={{ opacity: 0, y: 30 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, margin: "-100px" }}
@@ -60,29 +77,45 @@ export function Contact() {
         style={{
           fontFamily: "var(--font-serif-en)",
           fontSize: "clamp(1.5rem, 5vw, 3.5rem)",
-          color: "var(--color-bone)",
+          color: "var(--color-ivory)",
           textDecoration: "none",
-          marginBottom: "4rem",
+          marginBottom: "1.5rem",
           position: "relative",
           transition: "color 0.3s",
           letterSpacing: "-0.01em",
+          cursor: "pointer",
         }}
         onMouseEnter={(e) =>
-          (e.currentTarget.style.color = "var(--color-blue-ice)")
+          (e.currentTarget.style.color = "var(--color-flame)")
         }
         onMouseLeave={(e) =>
-          (e.currentTarget.style.color = "var(--color-bone)")
+          (e.currentTarget.style.color = "var(--color-ivory)")
         }
       >
         {profile.email}
       </motion.a>
+
+      <motion.p
+        aria-live="polite"
+        style={{
+          height: "1rem",
+          fontFamily: "var(--font-sans)",
+          fontSize: "0.65rem",
+          letterSpacing: "0.2em",
+          textTransform: "uppercase",
+          color: "var(--color-dim)",
+          marginBottom: "3rem",
+        }}
+      >
+        {copied ? "Email copied" : ""}
+      </motion.p>
 
       <motion.div
         initial={{ opacity: 0 }}
         whileInView={{ opacity: 1 }}
         viewport={{ once: true }}
         transition={{ duration: 0.8, delay: 0.5 }}
-        style={{ display: "flex", gap: "2.5rem" }}
+        style={{ display: "flex", gap: "2.5rem", flexWrap: "wrap", justifyContent: "center" }}
       >
         {profile.socials.map((social) => (
           <a
@@ -95,16 +128,16 @@ export function Contact() {
               fontSize: "0.75rem",
               letterSpacing: "0.15em",
               textTransform: "uppercase",
-              color: "var(--color-ash)",
+              color: "var(--color-dim)",
               textDecoration: "none",
               position: "relative",
               transition: "color 0.3s",
             }}
             onMouseEnter={(e) =>
-              (e.currentTarget.style.color = "var(--color-blue-ice)")
+              (e.currentTarget.style.color = "var(--color-ivory)")
             }
             onMouseLeave={(e) =>
-              (e.currentTarget.style.color = "var(--color-ash)")
+              (e.currentTarget.style.color = "var(--color-dim)")
             }
           >
             {social.label}
@@ -123,7 +156,7 @@ export function Contact() {
           fontSize: "0.6rem",
           letterSpacing: "0.2em",
           textTransform: "uppercase",
-          color: "var(--color-ash-dim)",
+          color: "var(--color-faint)",
         }}
       >
         Next.js / Motion / Tailwind
@@ -131,4 +164,3 @@ export function Contact() {
     </section>
   );
 }
-

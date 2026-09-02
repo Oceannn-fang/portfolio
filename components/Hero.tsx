@@ -36,7 +36,7 @@ export function Hero() {
             fontSize: "0.75rem",
             letterSpacing: "0.4em",
             textTransform: "uppercase",
-            color: "var(--color-ash-dim)",
+            color: "var(--color-dim)",
             textAlign: "center",
             marginBottom: "1.5rem",
           }}
@@ -53,13 +53,8 @@ export function Hero() {
             fontSize: "clamp(3rem, 12vw, 9rem)",
             lineHeight: 0.95,
             textAlign: "center",
-            color: "var(--color-bone)",
+            color: "var(--color-ivory)",
             letterSpacing: "-0.03em",
-            background:
-              "linear-gradient(135deg, var(--color-bone) 40%, var(--color-blue-ice) 100%)",
-            WebkitBackgroundClip: "text",
-            WebkitTextFillColor: "transparent",
-            backgroundClip: "text",
           }}
         >
           {profile.name}
@@ -72,7 +67,7 @@ export function Hero() {
           style={{
             fontFamily: "var(--font-serif-cn)",
             fontSize: "clamp(1rem, 2.5vw, 1.5rem)",
-            color: "var(--color-ash)",
+            color: "var(--color-dim)",
             textAlign: "center",
             marginTop: "1.5rem",
             letterSpacing: "0.08em",
@@ -93,7 +88,7 @@ export function Hero() {
           flexDirection: "column",
           alignItems: "center",
           gap: "0.5rem",
-          color: "var(--color-ash-dim)",
+          color: "var(--color-dim)",
         }}
       >
         <span
@@ -113,7 +108,7 @@ export function Hero() {
             width: "1px",
             height: "40px",
             background:
-              "linear-gradient(to bottom, var(--color-ash-dim), transparent)",
+              "linear-gradient(to bottom, var(--color-dim), transparent)",
           }}
         />
       </motion.div>
