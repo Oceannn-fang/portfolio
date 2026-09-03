@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Arc Vinyl Archive</title>
+    <link rel="icon" href="data:," />
+    <link rel="stylesheet" href="styles.css?v=idle-motion-6" />
+  </head>
+  <body>
+    <main class="archive-shell" aria-label="Curved album cover browser">
+      <div class="grain" aria-hidden="true"></div>
+      <canvas id="three-canvas"></canvas>
+
+      <section class="stage">
+        <div class="arc-layer arc-layer-top" data-lane="top" aria-label="Upper album stream"></div>
+        <div class="arc-layer arc-layer-bottom" data-lane="bottom" aria-label="Lower album stream"></div>
+
+        <section class="focus" aria-live="polite">
+          <div class="focus-cover">
+            <img class="focus-cover-image" src="" alt="" />
+          </div>
+          <div class="focus-copy">
+            <button class="play-button" type="button" aria-pressed="false">
+              <span class="play-icon" aria-hidden="true">
+                <span class="play-triangle"></span>
+                <span class="pause-bars"><i></i><i></i></span>
+              </span>
+              <span class="play-label">Play preview</span>
+              <span class="play-meter" aria-hidden="true"><i></i><i></i><i></i></span>
+            </button>
+          </div>
+        </section>
+      </section>
+      <audio class="preview-audio" preload="none"></audio>
+    </main>
+
+    <script src="album_previews.js?v=mobile-arc-1"></script>
+    <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.164.1/build/three.module.js"
+      }
+    }
+    </script>
+    <script type="module" src="script.js?v=idle-motion-6"></script>
+  </body>
+</html>
