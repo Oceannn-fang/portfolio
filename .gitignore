@@ -28,8 +28,16 @@ _test2.txt
 # codex temp files
 .ssh-proxy.ps1
 
+# 第三方研学子项目（自带 .git，不纳入 portfolio 仓库与 Vercel 构建）
+qwen-max-case_v1/
+
 .vercel
 
 fix_*.js
 test_output.ps1
 *.log
+
+# Spotify OAuth 机密：环境变量与运行时 token
+# .env.local 已由上方 .env*.local 规则覆盖，此处显式重申以防规则被改动
+.env.local
+lib/spotify-token.json

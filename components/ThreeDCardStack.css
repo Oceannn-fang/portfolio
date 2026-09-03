@@ -1,0 +1,453 @@
+/* ==================================================================
+   ThreeDCardStack.css
+   原版 3dmotion 项目 styles.css 的忠实移植。
+
+   移植调整（组件运行在 Gk3Clone viewer 面板内，而非独立页面）：
+   - 移除 *, *::before, *::after 全局 reset 与 html/body 样式，避免污染宿主页面；
+   - 所有 position: fixed 改为 position: absolute（相对 .tdcs-root 定位）；
+   - 所有选择器加 .tdcs-root 前缀防止样式泄露；
+   - :root CSS 变量改为定义在 .tdcs-root 上；
+   - 顶部引入原版使用的 Google Fonts（Archivo Black / JetBrains Mono）。
+   ================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Archivo+Black&family=JetBrains+Mono:wght@300;400&display=swap');
+
+/* ------------------------------------------------------------------ */
+/* 根容器（替代原版的 html/body + :root）                               */
+/* ------------------------------------------------------------------ */
+
+.tdcs-root {
+  --bg: #0B0B09;
+  --text: #F4EFE2;
+  --text-dim: #8B8376;
+  --text-faint: #4A4640;
+  --accent-lime: #D7FF49;
+  --accent-orange: #FF5F3D;
+  --accent-blue: #84D7FF;
+  --card-bg: rgba(18, 17, 14, 0.94);
+  --card-border: rgba(244, 239, 226, 0.08);
+
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'JetBrains Mono', monospace;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  /* viewer 面板默认 pointer-events:none，组件必须自己接管 */
+  pointer-events: auto;
+}
+
+.tdcs-root:focus {
+  outline: none;
+}
+
+/* ------------------------------------------------------------------ */
+/* 背景氛围层                                                          */
+/* ------------------------------------------------------------------ */
+
+.tdcs-root .bg-grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(244, 239, 226, 0.015) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(244, 239, 226, 0.015) 1px, transparent 1px);
+  background-size: 72px 72px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.tdcs-root .bg-glow {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 50% 40% at 50% 55%, rgba(215, 255, 73, 0.018) 0%, transparent 100%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.tdcs-root .bg-vignette {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at center, transparent 35%, rgba(5, 5, 4, 0.65) 100%);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.tdcs-root .bg-noise {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 100;
+  opacity: 0.03;
+  mix-blend-mode: overlay;
+}
+
+/* ------------------------------------------------------------------ */
+/* 页头                                                                */
+/* ------------------------------------------------------------------ */
+
+.tdcs-root .site-header {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  padding: 28px 36px 0;
+  z-index: 50;
+  pointer-events: none;
+  transition: opacity 0.35s ease;
+}
+
+.tdcs-root .site-header.is-hidden {
+  opacity: 0;
+}
+
+.tdcs-root .header-title {
+  font-family: 'Archivo Black', 'Impact', 'Arial Black', sans-serif;
+  font-size: clamp(32px, 6vw, 80px);
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  line-height: 0.9;
+  color: var(--text);
+  text-transform: uppercase;
+  margin: 0;
+}
+
+.tdcs-root .header-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.tdcs-root .meta-tag {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  font-weight: 400;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  color: var(--text-faint);
+}
+
+.tdcs-root .meta-sep {
+  color: var(--text-faint);
+  opacity: 0.3;
+  font-size: 9px;
+}
+
+/* ------------------------------------------------------------------ */
+/* 聚焦背板                                                            */
+/* ------------------------------------------------------------------ */
+
+.tdcs-root .focus-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(5, 5, 4, 0.85);
+  z-index: 9;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.4s ease;
+}
+
+.tdcs-root .focus-backdrop.is-active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* ------------------------------------------------------------------ */
+/* 轮播舞台                                                            */
+/* ------------------------------------------------------------------ */
+
+.tdcs-root .carousel-wrapper {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+}
+
+.tdcs-root .carousel {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  perspective: 1200px;
+  transform-style: preserve-3d;
+}
+
+/* ------------------------------------------------------------------ */
+/* 卡片                                                                */
+/* ------------------------------------------------------------------ */
+
+.tdcs-root .card {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 280px;
+  height: 420px;
+  margin-left: -140px;
+  margin-top: -190px;
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 14px;
+  display: flex;
+  flex-direction: column;
+  will-change: transform, opacity, filter;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  box-shadow:
+    0 8px 40px rgba(0, 0, 0, 0.5),
+    0 2px 8px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(244, 239, 226, 0.06);
+  cursor: pointer;
+}
+
+.tdcs-root .card::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: 15px;
+  background: linear-gradient(165deg, rgba(244, 239, 226, 0.08) 0%, transparent 40%, transparent 70%, rgba(244, 239, 226, 0.03) 100%);
+  pointer-events: none;
+  z-index: 5;
+}
+
+.tdcs-root .card-image-wrap {
+  position: relative;
+  width: 100%;
+  height: 240px;
+  border-radius: 14px 14px 0 0;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.tdcs-root .card-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.tdcs-root .card-image-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, transparent 50%, rgba(18, 17, 14, 0.95) 100%);
+  pointer-events: none;
+}
+
+.tdcs-root .card-badge {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 8px;
+  font-weight: 400;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  padding: 4px 8px;
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  color: var(--card-accent, var(--accent-lime));
+  border: 1px solid rgba(244, 239, 226, 0.08);
+  z-index: 2;
+}
+
+.tdcs-root .card-ver {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 8px;
+  font-weight: 300;
+  letter-spacing: 1px;
+  color: rgba(244, 239, 226, 0.5);
+  z-index: 2;
+}
+
+.tdcs-root .card-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 16px 18px 18px;
+  gap: 6px;
+  position: relative;
+  z-index: 3;
+}
+
+.tdcs-root .card-title {
+  font-family: 'Archivo Black', 'Impact', sans-serif;
+  font-size: 18px;
+  font-weight: 900;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--text);
+  line-height: 1.1;
+}
+
+.tdcs-root .card-subtitle {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  font-weight: 300;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--card-accent, var(--accent-lime));
+  opacity: 0.8;
+}
+
+.tdcs-root .card-desc {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  font-weight: 300;
+  letter-spacing: 0.5px;
+  line-height: 1.5;
+  color: var(--text-dim);
+  margin-top: 4px;
+}
+
+.tdcs-root .card-bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: auto;
+  padding-top: 10px;
+  border-top: 1px solid rgba(244, 239, 226, 0.05);
+}
+
+.tdcs-root .card-bottom-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 7px;
+  font-weight: 300;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--text-faint);
+}
+
+.tdcs-root .card-bottom-val {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 8px;
+  font-weight: 400;
+  letter-spacing: 1px;
+  color: var(--text-dim);
+}
+
+.tdcs-root .card.is-focused {
+  box-shadow:
+    0 20px 80px rgba(0, 0, 0, 0.6),
+    0 4px 16px rgba(0, 0, 0, 0.4),
+    0 0 60px rgba(215, 255, 73, 0.06),
+    inset 0 1px 0 rgba(244, 239, 226, 0.1);
+  border-color: rgba(244, 239, 226, 0.15);
+  cursor: default;
+}
+
+/* ------------------------------------------------------------------ */
+/* 底部 readout                                                        */
+/* ------------------------------------------------------------------ */
+
+.tdcs-root .readout {
+  position: absolute;
+  bottom: 28px;
+  left: 36px;
+  z-index: 50;
+  display: flex;
+  align-items: flex-end;
+  gap: 16px;
+  pointer-events: none;
+  transition: opacity 0.35s ease;
+}
+
+.tdcs-root .readout.is-hidden {
+  opacity: 0;
+}
+
+.tdcs-root .readout-index {
+  font-family: 'Archivo Black', 'Impact', sans-serif;
+  font-size: 48px;
+  font-weight: 900;
+  line-height: 1;
+  color: var(--text);
+  opacity: 0.15;
+}
+
+.tdcs-root .readout-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding-bottom: 6px;
+}
+
+.tdcs-root .readout-title {
+  font-family: 'Archivo Black', 'Impact', sans-serif;
+  font-size: 14px;
+  font-weight: 900;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--text);
+}
+
+.tdcs-root .readout-sub {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  font-weight: 300;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+
+/* ------------------------------------------------------------------ */
+/* 响应式（与原版断点一致）                                             */
+/* ------------------------------------------------------------------ */
+
+@media (max-width: 1024px) {
+  .tdcs-root .card { width: 240px; height: 360px; margin-left: -120px; margin-top: -160px; }
+  .tdcs-root .card-image-wrap { height: 200px; }
+  .tdcs-root .card-title { font-size: 16px; }
+  .tdcs-root .header-title { padding-right: 20px; }
+}
+
+@media (max-width: 768px) {
+  .tdcs-root .card { width: 200px; height: 300px; margin-left: -100px; margin-top: -130px; border-radius: 10px; }
+  .tdcs-root .card::before { border-radius: 11px; }
+  .tdcs-root .card-image-wrap { height: 168px; border-radius: 10px 10px 0 0; }
+  .tdcs-root .card-info { padding: 12px 14px 14px; gap: 4px; }
+  .tdcs-root .card-title { font-size: 14px; }
+  .tdcs-root .card-subtitle { font-size: 8px; }
+  .tdcs-root .card-desc { font-size: 8px; margin-top: 2px; }
+  .tdcs-root .card-badge { font-size: 7px; padding: 3px 6px; top: 8px; left: 8px; }
+  .tdcs-root .card-ver { font-size: 7px; top: 8px; right: 8px; }
+  .tdcs-root .card-bottom { padding-top: 8px; }
+  .tdcs-root .site-header { padding: 20px 20px 0; }
+  .tdcs-root .header-meta { margin-top: 6px; }
+  .tdcs-root .meta-tag { font-size: 8px; }
+  .tdcs-root .readout { bottom: 20px; left: 20px; gap: 12px; }
+  .tdcs-root .readout-index { font-size: 36px; }
+  .tdcs-root .readout-title { font-size: 12px; }
+  .tdcs-root .readout-sub { font-size: 8px; }
+}
+
+@media (max-width: 480px) {
+  .tdcs-root .card { width: 160px; height: 240px; margin-left: -80px; margin-top: -100px; border-radius: 8px; }
+  .tdcs-root .card::before { border-radius: 9px; }
+  .tdcs-root .card-image-wrap { height: 130px; border-radius: 8px 8px 0 0; }
+  .tdcs-root .card-info { padding: 8px 10px 10px; gap: 3px; }
+  .tdcs-root .card-title { font-size: 12px; letter-spacing: 0.5px; }
+  .tdcs-root .card-subtitle { font-size: 7px; letter-spacing: 1px; }
+  .tdcs-root .card-desc { display: none; }
+  .tdcs-root .card-badge { font-size: 6px; padding: 2px 5px; top: 6px; left: 6px; }
+  .tdcs-root .card-ver { font-size: 6px; top: 6px; right: 6px; }
+  .tdcs-root .card-bottom { padding-top: 6px; }
+  .tdcs-root .card-bottom-label { font-size: 6px; }
+  .tdcs-root .card-bottom-val { font-size: 7px; }
+  .tdcs-root .site-header { padding: 16px 16px 0; }
+  .tdcs-root .header-meta { display: none; }
+  .tdcs-root .readout { bottom: 16px; left: 16px; gap: 10px; }
+  .tdcs-root .readout-index { font-size: 28px; }
+  .tdcs-root .readout-title { font-size: 11px; letter-spacing: 1px; }
+  .tdcs-root .readout-sub { font-size: 7px; }
+}

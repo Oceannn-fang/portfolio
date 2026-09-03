@@ -355,6 +355,63 @@ body.expanded {
 #viewer.video #videoWrapper > * {
   grid-area: 1/1;
 }
+
+/* Music viewer 模式 */
+#viewer.music #videoWrapper {
+  display: none;
+}
+
+#viewer.music #videoFrame {
+  transform: scale(1);
+  opacity: 1;
+  align-items: stretch;
+  justify-content: stretch;
+}
+
+#musicViewer {
+  position: absolute;
+  inset: 24px;
+  width: auto;
+  height: auto;
+  pointer-events: auto;
+  z-index: 10;
+  background: rgba(11, 11, 9, 0.95);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-radius: 12px;
+  /* 与原网站 viewer 风格一致的边框 */
+  border: 1px solid rgba(244, 239, 226, 0.1);
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(244, 239, 226, 0.06);
+  overflow: hidden;
+}
+
+/* 修复：#viewer video, #viewer img { display: none } 会误伤音乐面板内的封面图片 */
+#musicViewer img {
+  display: block !important;
+}
+
+#viewer.music {
+  /* 与原 #viewer 宽度保持一致 */
+  width: 34%;
+  /* 修复：.viewing .row.active 的 z-index:10 会让行文字盖在音乐面板上，这里提升层级 */
+  z-index: 20;
+}
+
+/* music 模式下隐藏占位文字 */
+.viewing #viewer.music h4 {
+  opacity: 0;
+}
+
+@media (max-aspect-ratio: 16/12) {
+  #viewer.music {
+    width: 100%;
+  }
+}
+
+/* music 模式下去掉手机框装饰 */
+.music #videoFrame:after {
+  background-image: none !important;
+}
 #viewer.social .ratio {
   display: none;
 }

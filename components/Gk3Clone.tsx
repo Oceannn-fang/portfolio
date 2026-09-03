@@ -4,8 +4,9 @@ import { useEffect, useRef, useState } from "react";
 import "./Gk3Clone.css";
 import Noise from "./Noise";
 import { setSharedNoisePhase } from "./noisePhase";
+import MusicModule from "./MusicModule";
 
-type ViewerMode = "phone" | "video" | "social" | "pin";
+type ViewerMode = "phone" | "video" | "social" | "pin" | "music";
 
 type WorkItem = {
   text: React.ReactNode;
@@ -58,122 +59,14 @@ const socialSvgStrings = [
 
 const rows: Row[] = [
   {
-    id: "hp",
-    title: (
-      <>
-        director of ai software design at{" "}
-        <a href="https://www.hp-iq.com/" target="_new">
-          hp&nbsp;iq
-        </a>
-      </>
-    ),
-    h3: <>2025 {"\u2192"} 202<span className="cursor">{"\u9618"}</span></>,
+    id: "music",
+    title: <>listening</>,
+    h3: <>spotify</>,
     items: [
       {
-        text: "[redacted]",
-        viewer: "phone",
-        media: "404.mp4",
-        rowId: "hp",
-      },
-    ],
-  },
-  {
-    id: "humane",
-    title: <>humane</>,
-    h3: <>2022 {"\u2192"} 2025</>,
-    items: [
-      {
-        text: "ai pin",
-        href: "https://www.red-dot.org/project/ai-pin-72306",
-        target: "_new",
-        viewer: "pin",
-        media: "404.mp4",
-        rowId: "humane",
-      },
-    ],
-  },
-  {
-    id: "wavform",
-    title: (
-      <a href="https://wav.fm/" target="_new">
-        wavform
-      </a>
-    ),
-    h3: <>2021 {"\u2192"} 202<span className="cursor">{"\u9618"}</span></>,
-    items: [
-      {
-        text: "tracklist",
-        href: "https://wav.fm/",
-        target: "_new",
-        viewer: "phone",
-        media: "404.mp4",
-        rowId: "wavform",
-      },
-    ],
-  },
-  {
-    id: "instagram",
-    title: <>instagram</>,
-    h3: <>2018 {"\u2192"} 2022</>,
-    items: [
-      { text: "camera", viewer: "phone", media: "refresh.mp4", rowId: "instagram" },
-      { text: "type", viewer: "phone", media: "ig-text.mp4", rowId: "instagram" },
-      { text: "10th birthday", viewer: "phone", media: "birthday.mp4", rowId: "instagram" },
-      { text: "creation tools", viewer: "phone", media: "tools.mp4", rowId: "instagram" },
-      { text: "ar platform", viewer: "phone", media: "ar-platform.mp4", rowId: "instagram" },
-    ],
-  },
-  {
-    id: "facebook",
-    title: <>facebook video</>,
-    h3: <>2016 {"\u2192"} 2018</>,
-    items: [
-      { text: "live", viewer: "phone", media: "live.mp4", rowId: "facebook" },
-      {
-        text: <>watch party, mentions,&nbsp;etc.</>,
-        viewer: "phone",
-        media: "404.mp4",
-        rowId: "facebook",
-      },
-    ],
-  },
-  {
-    id: "parse",
-    title: <>parse</>,
-    h3: <>2014 {"\u2192"} 2016</>,
-    items: [
-      {
-        text: <>product &amp; brand</>,
-        href: "https://www.youtube.com/watch?v=89xIe8FbR2g",
-        target: "_new",
-        viewer: "video",
-        media: "parse.mp4",
-        rowId: "parse",
-      },
-    ],
-  },
-  {
-    id: "speaking",
-    title: (
-      <>
-        <i>occasional</i>speaking
-      </>
-    ),
-    solo: true,
-    items: [
-      {
-        text: <>chasing quality (loupe&nbsp;2019)</>,
-        href: "https://www.youtube.com/watch?v=rqOBnaKC5-A",
-        target: "_new",
-        viewer: "video",
-        media: "loupe.mp4",
-        rowId: "speaking",
-      },
-      {
-        text: <>designing at facebook (F8&nbsp;2016)</>,
-        viewer: "video",
-        media: "f8.mp4",
-        rowId: "speaking",
+        text: "recently played",
+        viewer: "music" as ViewerMode,
+        rowId: "music",
       },
     ],
   },
@@ -311,6 +204,8 @@ export function Gk3Clone() {
   const clearVideoTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const mediaCacheRef = useRef<Record<string, { video: string; poster: string }>>({});
   const flipRef = useRef(1);
+  // 延迟关闭 viewer，避免 music 面板与行重叠导致立即触发 mouseleave
+  const endViewerTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [viewing, setViewing] = useState(false);
   const [expanded, setExpanded] = useState(false);
   const [viewerClass, setViewerClass] = useState<ViewerMode>("phone");
@@ -343,6 +238,7 @@ export function Gk3Clone() {
     return () => {
       window.removeEventListener("scroll", updateScrollState);
       document.body.classList.remove("gk3-page", "viewing", "expanded", "cursor", "link");
+      if (endViewerTimerRef.current) clearTimeout(endViewerTimerRef.current);
     };
   }, []);
 
@@ -409,7 +305,7 @@ export function Gk3Clone() {
     const video = videoRef.current;
     const videoFrame = videoFrameRef.current;
     if (!video) return;
-    if (viewing && currentMedia && viewerClass !== "social" && viewerClass !== "pin") {
+    if (viewing && currentMedia && viewerClass !== "social" && viewerClass !== "pin" && viewerClass !== "music") {
       if (clearVideoTimerRef.current) {
         clearTimeout(clearVideoTimerRef.current);
         clearVideoTimerRef.current = null;
@@ -699,7 +595,15 @@ export function Gk3Clone() {
     };
   }, []);
 
+  const cancelEndViewerTimer = () => {
+    if (endViewerTimerRef.current) {
+      clearTimeout(endViewerTimerRef.current);
+      endViewerTimerRef.current = null;
+    }
+  };
+
   const prepViewer = (rowId: string, item: WorkItem, index: number) => {
+    cancelEndViewerTimer();
     setViewerClass(item.viewer ?? "phone");
     setActiveRow(rowId);
     setViewing(true);
@@ -719,6 +623,7 @@ export function Gk3Clone() {
   };
 
   const endViewer = () => {
+    cancelEndViewerTimer();
     setViewing(false);
     setActiveRow(null);
     setActiveItem(null);
@@ -796,7 +701,7 @@ export function Gk3Clone() {
       >
         {row.title ? <h2 className={row.solo ? "solo" : undefined}>{row.title}</h2> : null}
         {row.h3 ? <h3>{row.h3}</h3> : null}
-        <div className="work-wrapper" onMouseLeave={() => { if (!window.matchMedia("(hover: none) and (pointer: coarse)").matches) endViewer(); }}>
+        <div className="work-wrapper" onMouseLeave={() => { if (!window.matchMedia("(hover: none) and (pointer: coarse)").matches) { cancelEndViewerTimer(); endViewerTimerRef.current = setTimeout(endViewer, 150); } }}>
           <ul className={row.id === "elsewhere" ? undefined : "work"}>
             {(row.items ?? []).map((item, index) => (
               <li
@@ -887,6 +792,11 @@ export function Gk3Clone() {
               </div>
             </div>
           </div>
+          {viewing && viewerClass === "music" && (
+            <div id="musicViewer" onMouseEnter={cancelEndViewerTimer} onMouseLeave={() => { cancelEndViewerTimer(); endViewerTimerRef.current = setTimeout(endViewer, 150); }}>
+              <MusicModule />
+            </div>
+          )}
         </div>
       </div>
       <canvas id="c" ref={canvasRef} />

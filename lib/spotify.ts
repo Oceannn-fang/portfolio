@@ -1,0 +1,485 @@
+import { promises as fs } from 'node:fs';
+import nodePath from 'node:path';
+
+/**
+ * Spotify 服务端工具模块
+ *
+ * 职责：
+ * 1. Token 持久化（lib/spotify-token.json），文件缺失或损坏时返回 null
+ * 2. access_token 的自动续期（refresh_token 轮换 + 并发去重）
+ * 3. 带 Bearer 认证的 Spotify Web API GET 请求封装
+ * 4. 统一的 JSON 错误响应，供各 route.ts 直接返回
+ *
+ * 仅可在服务端（Node.js runtime）使用，禁止被客户端组件引入。
+ */
+
+// ---------------------------------------------------------------------------
+// 常量
+// ---------------------------------------------------------------------------
+
+/** Spotify Token 接口地址 */
+const TOKEN_ENDPOINT = 'https://accounts.spotify.com/api/token';
+
+/** Spotify Web API 基础地址 */
+const API_BASE = 'https://api.spotify.com';
+
+/** Token 持久化文件：项目根目录下的 lib/spotify-token.json（已加入 .gitignore） */
+const TOKEN_FILE_PATH = nodePath.join(process.cwd(), 'lib', 'spotify-token.json');
+
+/** 过期缓冲：提前 60 秒判定为过期，避免请求在途中 token 失效 */
+const EXPIRY_BUFFER_MS = 60 * 1000;
+
+// ---------------------------------------------------------------------------
+// 类型定义
+// ---------------------------------------------------------------------------
+
+/** 持久化到磁盘的 token 结构 */
+export interface SpotifyToken {
+  /** 访问令牌 */
+  access_token: string;
+  /** 刷新令牌，Spotify 会在刷新时轮换，需要一并保存 */
+  refresh_token?: string;
+  /** 令牌类型，通常为 Bearer */
+  token_type?: string;
+  /** 已授权的 scope，空格分隔 */
+  scope?: string;
+  /** 过期时间点（Unix 毫秒时间戳），由 expires_in 换算而来 */
+  expires_at: number;
+}
+
+/** Spotify 图片资源 */
+export interface SpotifyImage {
+  url: string;
+  height: number | null;
+  width: number | null;
+}
+
+/** Spotify 精简艺术家对象 */
+export interface SpotifyArtist {
+  id: string;
+  name: string;
+}
+
+/** Spotify 专辑对象（不同接口返回的字段丰俭不一，故多为可选） */
+export interface SpotifyAlbum {
+  id: string;
+  name: string;
+  images?: SpotifyImage[];
+  artists?: SpotifyArtist[];
+  release_date?: string;
+  total_tracks?: number;
+}
+
+/** Spotify 曲目对象 */
+export interface SpotifyTrack {
+  id: string;
+  name: string;
+  artists?: SpotifyArtist[];
+  album?: SpotifyAlbum;
+  duration_ms?: number;
+  track_number?: number;
+  preview_url?: string | null;
+}
+
+/** GET /v1/me/player/recently-played 原始响应 */
+export interface RecentlyPlayedResponse {
+  items: Array<{ track: SpotifyTrack; played_at: string }>;
+}
+
+/** GET /v1/me/albums 原始响应 */
+export interface SavedAlbumsResponse {
+  items: Array<{ added_at: string; album: SpotifyAlbum }>;
+}
+
+/** GET /v1/albums/{id}/tracks 原始响应 */
+export interface AlbumTracksResponse {
+  items: SpotifyTrack[];
+}
+
+// ---------------------------------------------------------------------------
+// 错误处理
+// ---------------------------------------------------------------------------
+
+/**
+ * Spotify 相关错误，自带 HTTP 状态码，路由捕获后可直接转成 JSON 响应。
+ * - 401：未授权 / 授权已失效，前端应引导用户重新走 OAuth
+ * - 500：环境变量或凭据配置错误
+ * - 502：Spotify 上游接口异常
+ */
+export class SpotifyError extends Error {
+  readonly status: number;
+
+  constructor(message: string, status = 500) {
+    super(message);
+    this.name = 'SpotifyError';
+    this.status = status;
+  }
+}
+
+/** 构造统一的 JSON 错误响应：{ error: 'message' } + 状态码 */
+export function jsonError(message: string, status: number): Response {
+  return new Response(JSON.stringify({ error: message }), {
+    status,
+    headers: {
+      'Content-Type': 'application/json; charset=utf-8',
+      'Cache-Control': 'no-store',
+    },
+  });
+}
+
+/**
+ * 构造统一的 JSON 成功响应。
+ * @param data 响应体
+ * @param cacheControl 缓存策略，默认不缓存以保证播放状态实时
+ */
+export function jsonOk(data: unknown, cacheControl = 'no-store'): Response {
+  return new Response(JSON.stringify(data), {
+    status: 200,
+    headers: {
+      'Content-Type': 'application/json; charset=utf-8',
+      'Cache-Control': cacheControl,
+    },
+  });
+}
+
+/** 把 Spotify Web API 的非 2xx 状态码转成对外的 JSON 错误响应 */
+export function upstreamError(status: number): Response {
+  if (status === 401 || status === 403) {
+    return jsonError('Spotify 授权已失效或权限不足，请重新访问 /api/auth/spotify 完成登录', 401);
+  }
+  if (status === 404) {
+    return jsonError('Spotify 资源不存在', 404);
+  }
+  if (status === 429) {
+    return jsonError('Spotify 接口触发限流，请稍后重试', 429);
+  }
+  return jsonError(`Spotify 接口调用失败（HTTP ${status}）`, 502);
+}
+
+/** 把任意异常归一化为 JSON 错误响应，供 route.ts 的 catch 分支复用 */
+export function toErrorResponse(error: unknown): Response {
+  if (error instanceof SpotifyError) {
+    return jsonError(error.message, error.status);
+  }
+  console.error('[spotify] 未预期的错误：', error);
+  return jsonError('服务器内部错误', 500);
+}
+
+// ---------------------------------------------------------------------------
+// 环境变量
+// ---------------------------------------------------------------------------
+
+/** 读取并校验 Client 凭据 */
+function getCredentials(): { clientId: string; clientSecret: string } {
+  const clientId = process.env.SPOTIFY_CLIENT_ID;
+  const clientSecret = process.env.SPOTIFY_CLIENT_SECRET;
+
+  if (!clientId || !clientSecret) {
+    throw new SpotifyError(
+      '缺少环境变量 SPOTIFY_CLIENT_ID / SPOTIFY_CLIENT_SECRET，请检查 .env.local',
+      500
+    );
+  }
+
+  // 拦截 .env.local 里的占位符，给出比 Spotify 的 invalid_client 更明确的提示
+  if (clientId === 'your_client_id_here' || clientSecret === 'your_client_secret_here') {
+    throw new SpotifyError(
+      'Spotify 凭据仍为占位符，请在 .env.local 中填入真实的 Client ID 与 Client Secret',
+      500
+    );
+  }
+
+  return { clientId, clientSecret };
+}
+
+/** 读取并校验 Client ID（跳转授权页只需 ID，不需要 Secret） */
+export function getClientId(): string {
+  return getCredentials().clientId;
+}
+
+/** 读取并校验 OAuth 回调地址 */
+export function getRedirectUri(): string {
+  const redirectUri = process.env.SPOTIFY_REDIRECT_URI;
+  if (!redirectUri) {
+    throw new SpotifyError('缺少环境变量 SPOTIFY_REDIRECT_URI，请检查 .env.local', 500);
+  }
+  return redirectUri;
+}
+
+// ---------------------------------------------------------------------------
+// Token 持久化
+// ---------------------------------------------------------------------------
+
+/**
+ * 内存兜底缓存。
+ * Serverless 等只读文件系统上写盘会失败，此时至少在单次进程生命周期内保住 token。
+ */
+let memoryToken: SpotifyToken | null = null;
+
+/** token 文件的绝对路径，便于调试与测试 */
+export function getTokenFilePath(): string {
+  return TOKEN_FILE_PATH;
+}
+
+/** 判断 token 是否已过期（含 60 秒缓冲） */
+function isExpired(token: SpotifyToken): boolean {
+  return Date.now() + EXPIRY_BUFFER_MS >= token.expires_at;
+}
+
+/**
+ * 读取持久化的 token。
+ * 文件不存在、JSON 损坏或字段缺失时返回 null（首次运行即为此情况）。
+ */
+export async function readToken(): Promise<SpotifyToken | null> {
+  try {
+    const raw = await fs.readFile(TOKEN_FILE_PATH, 'utf-8');
+    const parsed = JSON.parse(raw) as Partial<SpotifyToken>;
+
+    // 字段校验：结构不合法一律当作「没有 token」，避免带着脏数据去打接口
+    if (typeof parsed?.access_token !== 'string' || typeof parsed?.expires_at !== 'number') {
+      console.warn('[spotify] token 文件结构不合法，已忽略');
+      return memoryToken;
+    }
+
+    const token = parsed as SpotifyToken;
+    memoryToken = token;
+    return token;
+  } catch {
+    // ENOENT（未授权过）/ 解析失败 / 无读取权限，统一回退到内存缓存
+    return memoryToken;
+  }
+}
+
+/**
+ * 保存 token：先写内存再落盘。
+ * 落盘失败不会抛错，只记录告警，保证只读文件系统下授权流程依然可用。
+ */
+export async function saveToken(token: SpotifyToken): Promise<void> {
+  memoryToken = token;
+  try {
+    await fs.mkdir(nodePath.dirname(TOKEN_FILE_PATH), { recursive: true });
+    await fs.writeFile(TOKEN_FILE_PATH, JSON.stringify(token, null, 2), 'utf-8');
+  } catch (error) {
+    console.warn('[spotify] token 写入文件失败，已退化为进程内存缓存：', error);
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Token 接口调用
+// ---------------------------------------------------------------------------
+
+/** 构造 HTTP Basic 认证头 */
+function basicAuthHeader(clientId: string, clientSecret: string): string {
+  return `Basic ${Buffer.from(`${clientId}:${clientSecret}`).toString('base64')}`;
+}
+
+/** 把 Spotify token 接口的 error 码映射成合适的 HTTP 状态码 */
+function mapTokenErrorStatus(errorCode: unknown): number {
+  if (errorCode === 'invalid_client') return 500; // 凭据配置错误
+  if (errorCode === 'invalid_grant') return 401; // code / refresh_token 已失效，需重新授权
+  return 502; // 其余一律视为上游异常
+}
+
+/** 向 Spotify token 接口发起表单 POST，返回解析后的 JSON */
+async function postTokenEndpoint(body: URLSearchParams): Promise<Record<string, unknown>> {
+  const { clientId, clientSecret } = getCredentials();
+
+  const response = await fetch(TOKEN_ENDPOINT, {
+    method: 'POST',
+    headers: {
+      Authorization: basicAuthHeader(clientId, clientSecret),
+      'Content-Type': 'application/x-www-form-urlencoded',
+    },
+    body: body.toString(),
+    cache: 'no-store',
+  });
+
+  const text = await response.text();
+
+  let data: Record<string, unknown>;
+  try {
+    data = text ? (JSON.parse(text) as Record<string, unknown>) : {};
+  } catch {
+    throw new SpotifyError(`Spotify token 接口返回了非 JSON 内容（HTTP ${response.status}）`, 502);
+  }
+
+  if (!response.ok) {
+    const code = typeof data.error === 'string' ? data.error : `HTTP ${response.status}`;
+    const description = typeof data.error_description === 'string' ? ` - ${data.error_description}` : '';
+    throw new SpotifyError(`Spotify token 接口调用失败：${code}${description}`, mapTokenErrorStatus(data.error));
+  }
+
+  return data;
+}
+
+/** 把 token 接口的响应体归一化为 SpotifyToken 并落盘 */
+async function persistTokenResponse(
+  data: Record<string, unknown>,
+  fallbackRefreshToken: string
+): Promise<SpotifyToken> {
+  const accessToken = data.access_token;
+  const expiresIn = data.expires_in;
+
+  if (typeof accessToken !== 'string' || typeof expiresIn !== 'number') {
+    throw new SpotifyError('Spotify token 响应缺少 access_token / expires_in 字段', 502);
+  }
+
+  const token: SpotifyToken = {
+    access_token: accessToken,
+    // Spotify 只在轮换时才下发新的 refresh_token，缺失时沿用旧值
+    refresh_token: typeof data.refresh_token === 'string' ? data.refresh_token : fallbackRefreshToken,
+    token_type: typeof data.token_type === 'string' ? data.token_type : 'Bearer',
+    scope: typeof data.scope === 'string' ? data.scope : undefined,
+    expires_at: Date.now() + expiresIn * 1000,
+  };
+
+  await saveToken(token);
+  return token;
+}
+
+/**
+ * 用 refresh_token 换取新的 access_token，并持久化结果。
+ * @param refreshToken 刷新令牌
+ */
+export async function refreshAccessToken(refreshToken: string): Promise<SpotifyToken> {
+  const data = await postTokenEndpoint(
+    new URLSearchParams({
+      grant_type: 'refresh_token',
+      refresh_token: refreshToken,
+    })
+  );
+
+  return persistTokenResponse(data, refreshToken);
+}
+
+/**
+ * Authorization Code Flow：用授权码换取 token，并持久化到 lib/spotify-token.json。
+ * @param code Spotify 回调时带回的授权码
+ */
+export async function exchangeCodeForToken(code: string): Promise<SpotifyToken> {
+  const data = await postTokenEndpoint(
+    new URLSearchParams({
+      grant_type: 'authorization_code',
+      code,
+      redirect_uri: getRedirectUri(),
+    })
+  );
+
+  const token = await persistTokenResponse(data, '');
+
+  if (!token.refresh_token) {
+    // 没有 refresh_token 就无法长期续期，提前暴露问题而不是等到接口 401
+    throw new SpotifyError('Spotify 未返回 refresh_token，无法维持长期授权', 502);
+  }
+
+  return token;
+}
+
+/**
+ * 刷新去重：同一时刻只允许一个刷新请求在途。
+ * Spotify 会轮换 refresh_token，并发刷新会让彼此手中的 token 相互作废。
+ */
+let refreshing: Promise<string | null> | null = null;
+
+/**
+ * 获取可用的 access_token：未过期直接返回，已过期则自动刷新。
+ * @param forceRefresh 强制刷新（用于上游返回 401 后的重试）
+ * @returns 有效的 access_token；从未授权或无法续期时返回 null
+ */
+export async function getAccessToken(forceRefresh = false): Promise<string | null> {
+  const token = await readToken();
+  if (!token) return null;
+
+  if (!forceRefresh && !isExpired(token)) {
+    return token.access_token;
+  }
+
+  if (!token.refresh_token) {
+    // 没有 refresh_token 就无法续期，等同未授权
+    return null;
+  }
+
+  if (!refreshing) {
+    refreshing = refreshAccessToken(token.refresh_token)
+      .then((next) => next.access_token)
+      .catch((error) => {
+        console.error('[spotify] 刷新 access_token 失败：', error);
+        return null;
+      })
+      .finally(() => {
+        refreshing = null;
+      });
+  }
+
+  return refreshing;
+}
+
+// ---------------------------------------------------------------------------
+// Web API 请求封装
+// ---------------------------------------------------------------------------
+
+/**
+ * 带 Bearer 认证的 Spotify Web API GET 请求封装。
+ *
+ * @param path 以 /v1 开头的相对路径（如 /v1/me/albums?limit=20），也接受完整 URL
+ * @returns 上游原始 Response，由调用方决定如何解析
+ * @throws SpotifyError(401) 当本地没有可用 token 时
+ */
+export async function spotifyFetch(path: string): Promise<Response> {
+  const token = await getAccessToken();
+
+  if (!token) {
+    throw new SpotifyError('Spotify 未授权或授权已过期，请先访问 /api/auth/spotify 完成登录', 401);
+  }
+
+  const url = /^https?:\/\//.test(path) ? path : `${API_BASE}${path.startsWith('/') ? '' : '/'}${path}`;
+
+  const send = (accessToken: string) =>
+    fetch(url, {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        'Content-Type': 'application/json',
+      },
+      cache: 'no-store',
+    });
+
+  let response = await send(token);
+
+  // 上游 401 说明 token 在 Spotify 侧已失效（例如用户撤销授权），强制刷新后重试一次
+  if (response.status === 401) {
+    const retryToken = await getAccessToken(true);
+    if (retryToken && retryToken !== token) {
+      response = await send(retryToken);
+    }
+  }
+
+  return response;
+}
+
+// ---------------------------------------------------------------------------
+// 数据整形辅助
+// ---------------------------------------------------------------------------
+
+/** 从图片数组中挑出尺寸最大的一张，取不到时返回 null */
+export function pickLargestImage(images?: SpotifyImage[]): string | null {
+  if (!images || images.length === 0) return null;
+
+  let best = images[0];
+  for (const image of images) {
+    const bestArea = (best.width ?? 0) * (best.height ?? 0);
+    const area = (image.width ?? 0) * (image.height ?? 0);
+    if (area > bestArea) best = image;
+  }
+
+  return best?.url ?? null;
+}
+
+/** 把艺术家数组拼接成展示用字符串 */
+export function joinArtists(artists?: SpotifyArtist[]): string {
+  if (!artists || artists.length === 0) return '';
+  return artists
+    .map((artist) => artist?.name)
+    .filter((name): name is string => Boolean(name))
+    .join(', ');
+}
