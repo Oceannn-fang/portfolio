@@ -391,10 +391,9 @@ body.expanded {
 }
 
 #viewer.music {
-  /* 加宽面板：从 34% 调整为 50% */
-  width: 50%;
-  /* 降低高度：从 65vh 调整为 50vh，保持横向拉伸感 */
-  height: 50vh;
+  /* 手机比例：宽度 34%、高度 65vh，并垂直居中 */
+  width: 34%;
+  height: 65vh;
   top: 50%;
   transform: translateY(-50%);
   /* 修复：.viewing .row.active 的 z-index:10 会让行文字盖在音乐面板上，这里提升层级 */
@@ -409,8 +408,10 @@ body.expanded {
 @media (max-aspect-ratio: 16/12) {
   #viewer.music {
     width: 100%;
-    height: 100vh;
-    top: 0;
+    /* 限制高度，不占满整个视口，并用 top 偏移实现视觉垂直居中 */
+    height: 70vh;
+    max-height: 70vh;
+    top: 15vh;
     transform: translateX(70vw); /* 继承移动端隐藏行为 */
   }
 }
@@ -1266,9 +1267,17 @@ span.comma {
 @media (max-aspect-ratio: 16/12) {
   #viewer.showcase {
     width: 100%;
-    height: 100vh;
-    top: 0;
+    /* 限制高度，不占满整个视口，并用 top 偏移实现视觉垂直居中 */
+    height: 70vh;
+    max-height: 70vh;
+    top: 15vh;
     transform: translateX(70vw); /* 继承移动端隐藏行为 */
+  }
+  /* 修复：#viewer.showcase 的隐藏 transform 在源序上晚于 .viewing #viewer，
+     同特异性下会覆盖滑入行为，导致 showcase 在窄屏不显示。这里显式补回。 */
+  .viewing #viewer.showcase {
+    transform: translateX(0);
+    opacity: 1;
   }
 }
 

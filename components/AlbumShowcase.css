@@ -1,26 +1,67 @@
-/* 精选推荐 — iframe 容器 */
+/* 精选推荐 — viewer 面板内的轻量 2D 弧形专辑循环（纯 CSS） */
 .as-root {
   width: 100%;
   height: 100%;
-  overflow: hidden;
-  border-radius: 12px;
-}
-
-.as-iframe {
-  width: 100%;
-  height: 100%;
-  border: none;
-  display: block;
-}
-
-/* 加载占位符 */
-.as-loading {
-  width: 100%;
-  height: 100%;
   display: flex;
-  align-items: center;
+  flex-direction: column;
   justify-content: center;
-  color: rgba(244, 239, 226, 0.5);
-  font-size: 13px;
-  font-family: "Ellograph Light", sans-serif;
+  gap: 16px;
+  overflow: hidden;
+  padding: 20px 0;
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.15);
+}
+
+/* 单行滚动容器 */
+.as-lane {
+  overflow: hidden;
+  width: 100%;
+}
+
+/* 无缝滚动：内容复制一份，位移 -50% 即回到起点 */
+.as-track {
+  display: flex;
+  gap: 10px;
+  animation: scroll-left 40s linear infinite;
+  width: max-content;
+}
+
+.as-track-reverse {
+  animation: scroll-right 50s linear infinite;
+}
+
+@keyframes scroll-left {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes scroll-right {
+  0% {
+    transform: translateX(-50%);
+  }
+  100% {
+    transform: translateX(0);
+  }
+}
+
+/* 专辑封面：圆角矩形 + 轻微透视模拟弧形感 */
+.as-cover {
+  width: 80px;
+  height: 80px;
+  object-fit: cover;
+  border-radius: 6px;
+  flex-shrink: 0;
+  transform: perspective(400px) rotateX(3deg);
+}
+
+.as-lane-top .as-cover {
+  transform: perspective(400px) rotateX(5deg);
+}
+
+.as-lane-bottom .as-cover {
+  transform: perspective(400px) rotateX(-5deg);
 }
