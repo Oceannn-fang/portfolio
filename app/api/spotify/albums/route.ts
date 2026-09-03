@@ -21,8 +21,8 @@ const CACHE_CONTROL = 'private, max-age=3600, stale-while-revalidate=86400';
  */
 export async function GET(): Promise<Response> {
   try {
-    // limit=50：Spotify 单次请求上限，尽量一次拉满收藏专辑，避免网格空缺
-    const response = await spotifyFetch('/v1/me/albums?limit=50');
+    // limit=48：能被 3 和 4 整除，网格不会出现空缺行
+    const response = await spotifyFetch('/v1/me/albums?limit=48');
 
     if (!response.ok) {
       return upstreamError(response.status);

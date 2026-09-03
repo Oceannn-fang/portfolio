@@ -5,6 +5,7 @@ import "./Gk3Clone.css";
 import Noise from "./Noise";
 import { setSharedNoisePhase } from "./noisePhase";
 import MusicModule from "./MusicModule";
+import { Listening } from "./Listening";
 
 type ViewerMode = "phone" | "video" | "social" | "pin" | "music";
 
@@ -69,6 +70,12 @@ const rows: Row[] = [
         rowId: "music",
       },
     ],
+  },
+  {
+    id: "album-collection",
+    title: <>album picks</>,
+    h3: <>collections</>,
+    component: <Listening />,
   },
   {
     id: "elsewhere",
@@ -652,7 +659,13 @@ export function Gk3Clone() {
 
   const renderRow = (row: Row) => {
     if (row.component) {
-      return <div className="row rich-row" key={row.id}>{row.component}</div>;
+      return (
+        <div className="row rich-row" key={row.id}>
+          {row.title ? <h2>{row.title}</h2> : null}
+          {row.h3 ? <h3>{row.h3}</h3> : null}
+          {row.component}
+        </div>
+      );
     }
     if (row.bar) {
       return (

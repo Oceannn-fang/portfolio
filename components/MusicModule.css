@@ -43,7 +43,7 @@
 
 .mm-tab.active {
   color: var(--warm-white, #f5efe6);
-  border-bottom-color: var(--fg-color, rgb(220, 20, 60)); /* 激活指示器用原页面深红强调色 */
+  border-bottom-color: #84D7FF; /* 激活指示器用冷蓝色 */
 }
 
 /* ── 内容区（可滚动） ── */

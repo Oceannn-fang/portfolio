@@ -1216,3 +1216,19 @@ span.comma {
     align-items: flex-end;
   }
 }
+
+/* ── Listening 轨道组件适配 Gk3Clone 深色主题 ── */
+.listening-orbit {
+  --color-bone: #f0ebe3;
+  --color-ash: #a0a0a0;
+  --color-ash-dim: #787878;
+  --font-serif-en: "Quincy Text Italic", "Bona Nova", serif;
+  --font-serif-cn: "Source Han Serif CN", serif;
+  --font-sans: "Ellograph Light", "Satoshi", sans-serif;
+  width: 100%;
+  padding: 24px 0;
+}
+
+.listening-orbit .orbit-container {
+  aspect-ratio: 5 / 2 !important;
+}
