@@ -1,67 +1,62 @@
-/* 精选推荐 — viewer 面板内的轻量 2D 弧形专辑循环（纯 CSS） */
+/* 精选推荐 — viewer 面板内的 2D 弧形专辑循环（JS 驱动，复刻原版 music-cover-3d 弧形效果） */
 .as-root {
+  position: relative;
   width: 100%;
   height: 100%;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: 16px;
   overflow: hidden;
-  padding: 20px 0;
   border-radius: 12px;
-  background: rgba(0, 0, 0, 0.15);
+  /* 与原版一致的暖纸色渐变背景（--paper: #f4f1e9） */
+  background:
+    radial-gradient(circle at 18% 14%, rgba(219, 199, 159, 0.35), transparent 28%),
+    linear-gradient(135deg, #faf8f1 0%, #f4f1e9 52%, #ebe6dc 100%);
 }
 
-/* 单行滚动容器 */
-.as-lane {
-  overflow: hidden;
-  width: 100%;
-}
-
-/* 无缝滚动：内容复制一份，位移 -50% 即回到起点 */
-.as-track {
-  display: flex;
-  gap: 10px;
-  animation: scroll-left 40s linear infinite;
-  width: max-content;
-}
-
-.as-track-reverse {
-  animation: scroll-right 50s linear infinite;
-}
-
-@keyframes scroll-left {
-  0% {
-    transform: translateX(0);
-  }
-  100% {
-    transform: translateX(-50%);
-  }
-}
-
-@keyframes scroll-right {
-  0% {
-    transform: translateX(-50%);
-  }
-  100% {
-    transform: translateX(0);
-  }
-}
-
-/* 专辑封面：圆角矩形 + 轻微透视模拟弧形感 */
+/* 专辑封面：绝对定位，位置由 JS 每帧写入 transform */
 .as-cover {
-  width: 80px;
-  height: 80px;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 72px;
+  height: 72px;
   object-fit: cover;
   border-radius: 6px;
-  flex-shrink: 0;
-  transform: perspective(400px) rotateX(3deg);
+  box-shadow: 0 2px 10px rgba(36, 35, 31, 0.18);
+  will-change: transform, opacity;
+  pointer-events: none;
+  opacity: 0;
 }
 
-.as-lane-top .as-cover {
-  transform: perspective(400px) rotateX(5deg);
+/* 中央按钮："点击进入交互"，样式对齐原版 play-button 胶囊 */
+.as-cta {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 10;
+  padding: 9px 18px;
+  border: 1px solid rgba(36, 35, 31, 0.14);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.48);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  color: #24231f;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    transform 180ms cubic-bezier(0.16, 1, 0.3, 1),
+    border-color 180ms ease,
+    background 180ms ease;
 }
 
-.as-lane-bottom .as-cover {
-  transform: perspective(400px) rotateX(-5deg);
+.as-cta:hover {
+  border-color: rgba(63, 123, 111, 0.38);
+  background: rgba(255, 255, 255, 0.66);
+  transform: translate(-50%, -50%) scale(1.05);
+}
+
+.as-cta:active {
+  transform: translate(-50%, -50%) scale(0.97);
 }

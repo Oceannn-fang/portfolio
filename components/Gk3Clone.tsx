@@ -245,6 +245,14 @@ export function Gk3Clone() {
   const [noiseTunerOpen, setNoiseTunerOpen] = useState(false);
   // 精选推荐全屏浮层状态
   const [showcaseOpen, setShowcaseOpen] = useState(false);
+  // 预加载 3D 页面（隐藏 iframe），避免点击打开浮层时加载卡顿
+  const [preloadReady, setPreloadReady] = useState(false);
+
+  useEffect(() => {
+    // 延迟 3 秒后开始预加载，不影响首屏
+    const timer = setTimeout(() => setPreloadReady(true), 3000);
+    return () => clearTimeout(timer);
+  }, []);
 
   useEffect(() => {
     document.body.classList.add("gk3-page");
@@ -843,7 +851,7 @@ export function Gk3Clone() {
               onMouseEnter={cancelEndViewerTimer}
               onMouseLeave={() => { cancelEndViewerTimer(); endViewerTimerRef.current = setTimeout(endViewer, 150); }}
             >
-              <AlbumShowcase />
+              <AlbumShowcase onOpenOverlay={() => setShowcaseOpen(true)} />
             </div>
           )}
         </div>
@@ -859,6 +867,25 @@ export function Gk3Clone() {
           patternDensity={50}
         />
       ) : null}
+      {/* 预加载 music-cover-3d 资源（隐藏 iframe，浮层打开后移除） */}
+      {preloadReady && !showcaseOpen && (
+        <iframe
+          src="/music-cover-3d/index.html"
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            width: 0,
+            height: 0,
+            border: "none",
+            opacity: 0,
+            pointerEvents: "none",
+          }}
+          title="preload"
+          aria-hidden="true"
+          tabIndex={-1}
+        />
+      )}
       {/* 精选推荐全屏浮层 */}
       {showcaseOpen && (
         <div className="showcase-overlay">

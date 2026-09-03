@@ -1251,7 +1251,8 @@ span.comma {
   height: auto;
   pointer-events: auto;
   z-index: 10;
-  background: rgba(7, 7, 10, 0.96);
+  /* 暖纸色底，与 AlbumShowcase 的 paper 背景一致，避免圆角外透出深色 */
+  background: #f4f1e9;
   overflow: hidden;
 }
 /* 修复：#viewer img { display: none } 会误伤封面图片 */
