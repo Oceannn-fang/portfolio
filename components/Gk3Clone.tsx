@@ -5,7 +5,6 @@ import "./Gk3Clone.css";
 import Noise from "./Noise";
 import { setSharedNoisePhase } from "./noisePhase";
 import MusicModule from "./MusicModule";
-import { Listening } from "./Listening";
 import AlbumShowcase from "./AlbumShowcase";
 
 type ViewerMode = "phone" | "video" | "social" | "pin" | "music" | "showcase";
@@ -71,12 +70,6 @@ const rows: Row[] = [
         rowId: "music",
       },
     ],
-  },
-  {
-    id: "album-collection",
-    title: <>album picks</>,
-    h3: <>collections</>,
-    component: <Listening />,
   },
   {
     id: "showcase",
@@ -250,23 +243,6 @@ export function Gk3Clone() {
     return defaultNoiseSettings;
   });
   const [noiseTunerOpen, setNoiseTunerOpen] = useState(false);
-  // 精选推荐全屏浮层：由 Gk3Clone 根部渲染，避免 viewer 卸载时浮层被销毁
-  const [showcaseOpen, setShowcaseOpen] = useState(false);
-
-  // Esc 关闭浮层；打开时锁定页面滚动
-  useEffect(() => {
-    if (!showcaseOpen) return;
-    const onKey = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setShowcaseOpen(false);
-    };
-    window.addEventListener("keydown", onKey);
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => {
-      window.removeEventListener("keydown", onKey);
-      document.body.style.overflow = previousOverflow;
-    };
-  }, [showcaseOpen]);
 
   useEffect(() => {
     document.body.classList.add("gk3-page");
@@ -762,12 +738,6 @@ export function Gk3Clone() {
                   }
                 }}
                 onClick={() => {
-                  // 精选推荐：点击行项目文字直接弹出全屏浮层（不论桌面/触屏）
-                  if (item.viewer === "showcase" && !item.href) {
-                    if (!viewing) prepViewer(row.id, item, index);
-                    setShowcaseOpen(true);
-                    return;
-                  }
                   if (item.viewer && !item.href && window.matchMedia("(hover: none) and (pointer: coarse)").matches) {
                     prepViewer(row.id, item, index);
                   }
@@ -856,50 +826,11 @@ export function Gk3Clone() {
               onMouseEnter={cancelEndViewerTimer}
               onMouseLeave={() => { cancelEndViewerTimer(); endViewerTimerRef.current = setTimeout(endViewer, 150); }}
             >
-              <AlbumShowcase onOpenOverlay={() => setShowcaseOpen(true)} />
+              <AlbumShowcase />
             </div>
           )}
         </div>
       </div>
-      {showcaseOpen && (
-        <div
-          className="showcase-overlay"
-          role="dialog"
-          aria-modal="true"
-          aria-label="3D 唱片架"
-          onClick={() => setShowcaseOpen(false)}
-        >
-          <div className="showcase-overlay-frame" onClick={(event) => event.stopPropagation()}>
-            <header className="showcase-overlay-header">
-              <span className="showcase-overlay-title">
-                <em>arc</em>
-                <strong>vinyl archive</strong>
-                <i>· 3d shelf</i>
-              </span>
-              <button
-                type="button"
-                className="showcase-overlay-close"
-                aria-label="关闭"
-                onClick={() => setShowcaseOpen(false)}
-              >
-                <span aria-hidden="true">&times;</span>
-                <em>esc</em>
-              </button>
-            </header>
-            <iframe
-              className="showcase-overlay-iframe"
-              src="/music-cover-3d/index.html"
-              title="Arc Vinyl Archive"
-              allow="autoplay; fullscreen"
-              loading="lazy"
-            />
-            <footer className="showcase-overlay-footer" aria-hidden="true">
-              <span className="showcase-overlay-dot" />
-              <span>drag to rotate · click cover to focus · double-click to reset</span>
-            </footer>
-          </div>
-        </div>
-      )}
       <canvas id="c" ref={canvasRef} />
       {noiseSettings.enabled ? (
         <Noise
