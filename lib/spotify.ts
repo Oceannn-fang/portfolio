@@ -419,20 +419,46 @@ export async function getAccessToken(forceRefresh = false): Promise<string | nul
 // ---------------------------------------------------------------------------
 
 /**
- * 带 Bearer 认证的 Spotify Web API GET 请求封装。
+ * 服务端内存缓存（1 小时过期）
+ * 避免频繁调用 Spotify API，减少网络往返带来的卡顿。
+ * 缓存键为请求 URL，值为响应体文本 + 状态码 + 过期时间。
+ */
+const apiCache = new Map<string, { body: string; status: number; expiresAt: number }>();
+const CACHE_TTL = 60 * 60 * 1000; // 1 小时
+
+/** 定期清理过期缓存条目，避免内存泄漏（每 30 分钟执行一次） */
+setInterval(() => {
+  const now = Date.now();
+  for (const [key, entry] of apiCache) {
+    if (now >= entry.expiresAt) apiCache.delete(key);
+  }
+}, 30 * 60 * 1000);
+
+/**
+ * 带 Bearer 认证的 Spotify Web API GET 请求封装，内置服务端内存缓存。
  *
  * @param path 以 /v1 开头的相对路径（如 /v1/me/albums?limit=20），也接受完整 URL
  * @returns 上游原始 Response，由调用方决定如何解析
  * @throws SpotifyError(401) 当本地没有可用 token 时
  */
 export async function spotifyFetch(path: string): Promise<Response> {
+  const url = /^https?:\/\//.test(path) ? path : `${API_BASE}${path.startsWith('/') ? '' : '/'}${path}`;
+
+  // 1. 检查内存缓存是否有效，有效则直接返回缓存数据
+  const cached = apiCache.get(url);
+  if (cached && Date.now() < cached.expiresAt) {
+    return new Response(cached.body, {
+      status: cached.status,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
+
+  // 2. 缓存无效或不存在，调用 Spotify API
   const token = await getAccessToken();
 
   if (!token) {
     throw new SpotifyError('Spotify 未授权或授权已过期，请先访问 /api/auth/spotify 完成登录', 401);
   }
-
-  const url = /^https?:\/\//.test(path) ? path : `${API_BASE}${path.startsWith('/') ? '' : '/'}${path}`;
 
   const send = (accessToken: string) =>
     fetch(url, {
@@ -452,6 +478,12 @@ export async function spotifyFetch(path: string): Promise<Response> {
     if (retryToken && retryToken !== token) {
       response = await send(retryToken);
     }
+  }
+
+  // 3. 成功响应存入缓存，避免后续重复请求
+  if (response.ok || response.status === 204) {
+    const body = await response.clone().text();
+    apiCache.set(url, { body, status: response.status, expiresAt: Date.now() + CACHE_TTL });
   }
 
   return response;

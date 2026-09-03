@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import './MusicModule.css';
 
 // ── 数据类型定义 ──
@@ -56,10 +56,18 @@ function formatDuration(ms: number): string {
   return `${minutes}:${seconds.toString().padStart(2, '0')}`;
 }
 
-// ── 模块级缓存：避免每次 viewer 打开都重新请求 ──
+// ── 模块级缓存：避免每次 viewer 打开都重新请求，1 小时过期 ──
 let cachedTracks: Track[] | null = null;
 let cachedAlbums: Album[] | null = null;
 let cachedAuthed: boolean | null = null;
+/** 缓存写入时间戳，用于判断是否超过 1 小时有效期 */
+let cacheTimestamp = 0;
+const CACHE_DURATION = 60 * 60 * 1000; // 1 小时
+
+/** 检查缓存是否在有效期内 */
+function isCacheValid(): boolean {
+  return cacheTimestamp > 0 && Date.now() - cacheTimestamp < CACHE_DURATION;
+}
 
 // ── 组件 ──
 
@@ -78,10 +86,10 @@ export default function MusicModule() {
   const [error, setError] = useState<string | null>(null);
   const [authed, setAuthed] = useState(cachedAuthed !== false);
 
-  // 切换 tab 时拉取对应数据；有缓存则直接使用
+  // 切换 tab 时拉取对应数据；有缓存且未过期则直接使用
   useEffect(() => {
-    // 如果有缓存且已授权，跳过请求
-    if (cachedAuthed === true) {
+    // 如果有缓存且已授权且未过期，跳过请求
+    if (cachedAuthed === true && isCacheValid()) {
       if (activeTab === 'recent' && cachedTracks) {
         setTracks(cachedTracks);
         setLoading(false);
@@ -130,10 +138,12 @@ export default function MusicModule() {
         if (activeTab === 'recent') {
           const parsed = Array.isArray(data) ? data : data.tracks ?? [];
           cachedTracks = parsed;
+          cacheTimestamp = Date.now(); // 更新缓存时间戳
           setTracks(parsed);
         } else {
           const parsed = Array.isArray(data) ? data : data.albums ?? [];
           cachedAlbums = parsed;
+          cacheTimestamp = Date.now(); // 更新缓存时间戳
           setAlbums(parsed);
         }
       } catch (err) {
@@ -178,10 +188,47 @@ export default function MusicModule() {
     else setAlbumTracks(null);
   }
 
+  // ── 原生事件委托 ──
+  // 本组件被渲染在 Gk3Clone 的 viewer 面板中，该面板 DOM 可能被手动搬移到
+  // React 根容器之外，导致 React 的合成事件委托（onClick）无法捕获点击。
+  // 因此改用原生 addEventListener 在组件根节点上做事件委托。
+  /** 始终指向最新的点击处理逻辑，供原生监听器调用，避免闭包读到旧状态 */
+  const clickHandlerRef = useRef<(e: MouseEvent) => void>(() => {});
+  clickHandlerRef.current = (e: MouseEvent) => {
+    const target = e.target as HTMLElement;
+    // 点击落在 Spotify embed iframe 内部时忽略，避免误收起展开面板
+    if (target.closest('iframe')) return;
+    // Tab 切换
+    const tab = target.closest('[data-tab]') as HTMLElement | null;
+    if (tab) {
+      setActiveTab(tab.dataset.tab as 'recent' | 'albums');
+      return;
+    }
+    // 曲目行 / 专辑卡片：切换展开状态
+    const expandable = target.closest(
+      '[data-track-id], [data-album-id]'
+    ) as HTMLElement | null;
+    if (expandable) {
+      toggleExpand(
+        expandable.dataset.trackId ?? expandable.dataset.albumId ?? ''
+      );
+    }
+  };
+
+  // callback ref：组件有多个提前 return 分支，状态切换时 .mm-root 会被换成
+  // 新节点；React 19 支持 callback ref 返回清理函数，节点替换/卸载时自动解绑，
+  // 保证每个新节点都能正确绑定原生监听器
+  const attachRoot = (node: HTMLDivElement | null) => {
+    if (!node) return;
+    const handleClick = (e: MouseEvent) => clickHandlerRef.current(e);
+    node.addEventListener('click', handleClick);
+    return () => node.removeEventListener('click', handleClick);
+  };
+
   // 1. 未授权：居中授权按钮
   if (!authed) {
     return (
-      <div className="mm-root">
+      <div className="mm-root" ref={attachRoot}>
         <div className="mm-auth">
           <a className="mm-auth-btn" href="/api/auth/spotify">
             连接 Spotify
@@ -194,7 +241,7 @@ export default function MusicModule() {
   // 2. 加载中：三个跳动圆点
   if (loading) {
     return (
-      <div className="mm-root">
+      <div className="mm-root" ref={attachRoot}>
         <div className="mm-loading">
           <span className="mm-dot" />
           <span className="mm-dot" />
@@ -207,26 +254,26 @@ export default function MusicModule() {
   // 错误状态
   if (error) {
     return (
-      <div className="mm-root">
+      <div className="mm-root" ref={attachRoot}>
         <div className="mm-error">{error}</div>
       </div>
     );
   }
 
-  // 3. 正常渲染
+  // 3. 正常渲染（点击行为由根节点上的原生事件委托处理，不使用 React onClick）
   return (
-    <div className="mm-root">
+    <div className="mm-root" ref={attachRoot}>
       {/* Tabs */}
       <div className="mm-tabs">
         <button
           className={`mm-tab${activeTab === 'recent' ? ' active' : ''}`}
-          onClick={() => setActiveTab('recent')}
+          data-tab="recent"
         >
           最近收听
         </button>
         <button
           className={`mm-tab${activeTab === 'albums' ? ' active' : ''}`}
-          onClick={() => setActiveTab('albums')}
+          data-tab="albums"
         >
           最近专辑
         </button>
@@ -239,7 +286,7 @@ export default function MusicModule() {
             <div key={track.id + track.playedAt}>
               <div
                 className="mm-track-item"
-                onClick={() => toggleExpand(track.id)}
+                data-track-id={track.id}
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
@@ -283,7 +330,7 @@ export default function MusicModule() {
               <div
                 key={album.id}
                 className="mm-card"
-                onClick={() => toggleExpand(album.id)}
+                data-album-id={album.id}
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img

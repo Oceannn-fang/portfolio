@@ -7,7 +7,8 @@ import {
   type AlbumTracksResponse,
 } from '@/lib/spotify';
 
-export const dynamic = 'force-dynamic';
+/** 定时拉取策略：专辑曲目是公开数据，24 小时后台重新生成 */
+export const revalidate = 86400;
 
 /**
  * Spotify 资源 ID 为 base62 字符串。
@@ -15,8 +16,8 @@ export const dynamic = 'force-dynamic';
  */
 const SPOTIFY_ID_PATTERN = /^[A-Za-z0-9]{1,64}$/;
 
-/** 专辑曲目表几乎不会变化，允许浏览器私有缓存 1 小时 */
-const CACHE_CONTROL = 'private, max-age=3600, stale-while-revalidate=86400';
+/** 专辑曲目表几乎不会变化，允许公共缓存 24 小时 */
+const CACHE_CONTROL = 'public, max-age=86400';
 
 /**
  * GET /api/spotify/album-tracks/[id]

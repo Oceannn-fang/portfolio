@@ -8,10 +8,11 @@ import {
   type SavedAlbumsResponse,
 } from '@/lib/spotify';
 
-export const dynamic = 'force-dynamic';
+/** 定时拉取策略：每小时后台重新生成，减少实时请求带来的卡顿 */
+export const revalidate = 3600;
 
-/** 收藏专辑变动很少，允许浏览器私有缓存 5 分钟；private 避免被共享缓存转发 */
-const CACHE_CONTROL = 'private, max-age=300, stale-while-revalidate=600';
+/** 收藏专辑变动很少，浏览器私有缓存 1 小时；private 避免被共享缓存转发 */
+const CACHE_CONTROL = 'private, max-age=3600, stale-while-revalidate=86400';
 
 /**
  * GET /api/spotify/albums
@@ -20,7 +21,8 @@ const CACHE_CONTROL = 'private, max-age=300, stale-while-revalidate=600';
  */
 export async function GET(): Promise<Response> {
   try {
-    const response = await spotifyFetch('/v1/me/albums?limit=20');
+    // limit=50：Spotify 单次请求上限，尽量一次拉满收藏专辑，避免网格空缺
+    const response = await spotifyFetch('/v1/me/albums?limit=50');
 
     if (!response.ok) {
       return upstreamError(response.status);

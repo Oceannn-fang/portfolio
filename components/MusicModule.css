@@ -1,5 +1,6 @@
 /* ── MusicModule：嵌入 Gk3Clone viewer 面板的音乐模块 ── */
 /* 类名统一 mm- 前缀，避免污染全局样式 */
+/* 字体与色系沿用 Gk3Clone：Quincy CF / Ellograph CF，--warm-white 暖白、--fg-color 深红 */
 
 .mm-root {
   position: relative;
@@ -7,27 +8,30 @@
   height: 100%;
   overflow: hidden;
   pointer-events: auto;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  color: #F4EFE2;
+  font-family: "Ellograph Light", "Quincy Light", Georgia, serif;
+  color: var(--warm-white, #f5efe6);
   display: flex;
   flex-direction: column;
 }
 
-/* ── Tabs ── */
+/* ── Tabs：铺满顶部宽度，两个 tab 均分 ── */
 .mm-tabs {
   display: flex;
   gap: 0;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-  padding: 0 20px;
+  padding: 0; /* 去掉左右 padding，让 tab 铺满整行 */
   flex-shrink: 0;
 }
 
 .mm-tab {
-  padding: 16px 20px;
+  flex: 1; /* 均分宽度 */
+  text-align: center;
+  padding: 14px 0;
+  font-family: "Ellograph Light", sans-serif;
   font-size: 13px;
-  letter-spacing: 1px;
+  letter-spacing: 0.5px; /* 与原页面标题的紧凑字距对齐 */
   text-transform: uppercase;
-  color: #8B8376;
+  color: rgba(245, 239, 230, 0.45); /* 暖白低透明度，代替原灰褐色 */
   cursor: pointer;
   border-bottom: 2px solid transparent;
   transition: all 0.2s;
@@ -38,8 +42,8 @@
 }
 
 .mm-tab.active {
-  color: #F4EFE2;
-  border-bottom-color: #1DB954;
+  color: var(--warm-white, #f5efe6);
+  border-bottom-color: var(--fg-color, rgb(220, 20, 60)); /* 激活指示器用原页面深红强调色 */
 }
 
 /* ── 内容区（可滚动） ── */
@@ -86,8 +90,9 @@
 }
 
 .mm-track-name {
-  font-size: 14px;
-  font-weight: 500;
+  font-family: "Quincy Light", Georgia, serif; /* 与原页面标题字体一致 */
+  font-size: 15px;
+  font-weight: normal;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -95,21 +100,21 @@
 
 .mm-track-artist {
   font-size: 12px;
-  color: #8B8376;
+  color: rgba(245, 239, 230, 0.55); /* 暖白半透明，与原页面副文本色调统一 */
   margin-top: 2px;
 }
 
 .mm-track-time {
   font-size: 11px;
-  color: #4A4640;
+  color: rgba(245, 239, 230, 0.3);
   white-space: nowrap;
 }
 
-/* ── 专辑网格（窄面板下使用单列布局） ── */
+/* ── 专辑网格（响应式：根据面板宽度自动增减列数，最多 4 列） ── */
 .mm-grid {
   display: grid;
-  grid-template-columns: 1fr;
-  gap: 16px;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 12px;
 }
 
 .mm-card {
@@ -130,24 +135,30 @@
   width: 100%;
   aspect-ratio: 1;
   object-fit: cover;
+  display: block;
+  border-radius: 8px 8px 0 0;
 }
 
 .mm-card-info {
-  padding: 12px;
+  padding: 8px 10px;
 }
 
 .mm-card-name {
-  font-size: 13px;
-  font-weight: 600;
+  font-family: "Quincy Light", Georgia, serif; /* 与原页面标题字体一致 */
+  font-size: 12px;
+  font-weight: normal;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
 .mm-card-artist {
-  font-size: 11px;
-  color: #8B8376;
-  margin-top: 4px;
+  font-size: 10px;
+  color: rgba(245, 239, 230, 0.55);
+  margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* ── 展开详情（embed / 曲目列表） ── */
@@ -182,7 +193,7 @@
 
 .mm-album-track-num {
   width: 24px;
-  color: #4A4640;
+  color: rgba(245, 239, 230, 0.3);
   font-size: 12px;
 }
 
@@ -191,7 +202,7 @@
 }
 
 .mm-album-track-dur {
-  color: #8B8376;
+  color: rgba(245, 239, 230, 0.55);
   font-size: 12px;
 }
 
@@ -276,16 +287,12 @@
   height: 100%;
   padding: 20px;
   font-size: 13px;
-  color: #8B8376;
+  color: rgba(245, 239, 230, 0.55);
   text-align: center;
 }
 
 /* ── 响应式 ── */
 @media (max-width: 480px) {
-  .mm-grid {
-    grid-template-columns: 1fr;
-  }
-
   .mm-tab {
     padding: 12px 14px;
     font-size: 11px;

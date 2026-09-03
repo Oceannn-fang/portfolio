@@ -8,7 +8,11 @@ import {
   type RecentlyPlayedResponse,
 } from '@/lib/spotify';
 
-export const dynamic = 'force-dynamic';
+/** 定时拉取策略：每小时后台重新生成，减少实时请求带来的卡顿 */
+export const revalidate = 3600;
+
+/** 浏览器私有缓存 1 小时，过期后允许 stale-while-revalidate 再续 24 小时 */
+const CACHE_CONTROL = 'private, max-age=3600, stale-while-revalidate=86400';
 
 /**
  * GET /api/spotify/recently-played
@@ -42,7 +46,7 @@ export async function GET(): Promise<Response> {
       playedAt: item.played_at,
     }));
 
-    return jsonOk({ tracks });
+    return jsonOk({ tracks }, CACHE_CONTROL);
   } catch (error) {
     return toErrorResponse(error);
   }
