@@ -243,6 +243,8 @@ export function Gk3Clone() {
     return defaultNoiseSettings;
   });
   const [noiseTunerOpen, setNoiseTunerOpen] = useState(false);
+  // 精选推荐全屏浮层状态
+  const [showcaseOpen, setShowcaseOpen] = useState(false);
 
   useEffect(() => {
     document.body.classList.add("gk3-page");
@@ -258,6 +260,16 @@ export function Gk3Clone() {
       if (endViewerTimerRef.current) clearTimeout(endViewerTimerRef.current);
     };
   }, []);
+
+  // Esc 键关闭精选推荐浮层
+  useEffect(() => {
+    if (!showcaseOpen) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setShowcaseOpen(false);
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [showcaseOpen]);
 
   useEffect(() => {
     try {
@@ -738,6 +750,11 @@ export function Gk3Clone() {
                   }
                 }}
                 onClick={() => {
+                  // showcase 行：桌面端点击打开全屏浮层
+                  if (row.id === 'showcase') {
+                    setShowcaseOpen(true);
+                    return;
+                  }
                   if (item.viewer && !item.href && window.matchMedia("(hover: none) and (pointer: coarse)").matches) {
                     prepViewer(row.id, item, index);
                   }
@@ -842,6 +859,23 @@ export function Gk3Clone() {
           patternDensity={50}
         />
       ) : null}
+      {/* 精选推荐全屏浮层 */}
+      {showcaseOpen && (
+        <div className="showcase-overlay">
+          <button
+            className="showcase-close"
+            onClick={() => setShowcaseOpen(false)}
+          >
+            ×
+          </button>
+          <iframe
+            src="/music-cover-3d/index.html"
+            className="showcase-iframe"
+            title="Arc Vinyl Archive"
+            allow="autoplay"
+          />
+        </div>
+      )}
       <div id="noise-tuner" aria-label="Noise settings">
         <button
           id="noise-tuner-toggle"
