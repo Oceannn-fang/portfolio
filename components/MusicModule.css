@@ -43,7 +43,7 @@
 
 .mm-tab.active {
   color: var(--warm-white, #f5efe6);
-  border-bottom-color: #84D7FF; /* 激活指示器用冷蓝色 */
+  border-bottom-color: var(--bg-color, #84D7FF); /* 跟随页面动态背景色 */
 }
 
 /* ── 内容区（可滚动） ── */
@@ -110,10 +110,10 @@
   white-space: nowrap;
 }
 
-/* ── 专辑网格（响应式：根据面板宽度自动增减列数，最多 4 列） ── */
+/* ── 专辑网格（固定 3 列） ── */
 .mm-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  grid-template-columns: repeat(3, 1fr);
   gap: 12px;
 }
 
@@ -136,7 +136,7 @@
   aspect-ratio: 1;
   object-fit: cover;
   display: block;
-  border-radius: 8px 8px 0 0;
+  border-radius: 6px 6px 0 0;
 }
 
 .mm-card-info {

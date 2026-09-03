@@ -393,6 +393,10 @@ body.expanded {
 #viewer.music {
   /* 宽度与原版 phone viewer 一致（34%） */
   width: 34%;
+  /* 手机比例：高度缩短并垂直居中 */
+  height: 65vh;
+  top: 50%;
+  transform: translateY(-50%);
   /* 修复：.viewing .row.active 的 z-index:10 会让行文字盖在音乐面板上，这里提升层级 */
   z-index: 20;
 }
@@ -405,6 +409,9 @@ body.expanded {
 @media (max-aspect-ratio: 16/12) {
   #viewer.music {
     width: 100%;
+    height: 100vh;
+    top: 0;
+    transform: translateX(70vw); /* 继承移动端隐藏行为 */
   }
 }
 
@@ -1221,6 +1228,10 @@ span.comma {
 /* 宽度与原版 phone viewer 一致（34%） */
 #viewer.showcase {
   width: 34%;
+  /* 手机比例：高度缩短并垂直居中 */
+  height: 65vh;
+  top: 50%;
+  transform: translateY(-50%);
   z-index: 20;
 }
 #viewer.showcase #videoWrapper {
@@ -1255,5 +1266,8 @@ span.comma {
 @media (max-aspect-ratio: 16/12) {
   #viewer.showcase {
     width: 100%;
+    height: 100vh;
+    top: 0;
+    transform: translateX(70vw); /* 继承移动端隐藏行为 */
   }
 }
