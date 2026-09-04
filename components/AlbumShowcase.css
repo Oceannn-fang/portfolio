@@ -16,9 +16,9 @@
   position: absolute;
   top: 0;
   left: 0;
-  /* 封面增大 30%：72px → 94px */
-  width: 94px;
-  height: 94px;
+  /* 封面尺寸：viewer 宽度从 27% 恢复到 34% 后调回原版 72px */
+  width: 72px;
+  height: 72px;
   object-fit: cover;
   border-radius: 6px;
   box-shadow: 0 2px 10px rgba(36, 35, 31, 0.18);

@@ -408,16 +408,16 @@ body.expanded {
 @media (max-aspect-ratio: 16/12) {
   #viewer.music {
     width: 100%;
-    /* 限制高度，不占满整个视口，并用 top 偏移实现视觉垂直居中 */
-    height: 70vh;
-    max-height: 70vh;
-    top: 15vh;
+    /* 窄屏高度与 showcase/playlist 统一为 55vh，top 取 (100vh - 55vh) / 2 实现视觉垂直居中 */
+    height: 55vh;
+    max-height: 55vh;
+    top: 22.5vh;
     transform: translateX(70vw); /* 继承移动端隐藏行为 */
   }
   /* 窄屏下 videoFrame 按手机边框素材比例（1304:2866）约束宽度，防止内容溢出边框 */
   #viewer.music #videoFrame {
     flex-basis: auto;
-    width: calc(70vh * 1304 / 2866);
+    width: calc(55vh * 1304 / 2866);
     height: 100%;
     padding: 0;
     margin: 0 24px 0 auto;
@@ -482,16 +482,16 @@ body.expanded {
 @media (max-aspect-ratio: 16/12) {
   #viewer.playlist {
     width: 100%;
-    /* 限制高度，不占满整个视口，并用 top 偏移实现视觉垂直居中 */
-    height: 70vh;
-    max-height: 70vh;
-    top: 15vh;
+    /* 窄屏高度与 showcase/music 统一为 55vh，修复 70vh 时内容底部溢出手机边框 */
+    height: 55vh;
+    max-height: 55vh;
+    top: 22.5vh;
     transform: translateX(70vw); /* 继承移动端隐藏行为 */
   }
   /* 窄屏下 videoFrame 按手机边框素材比例约束宽度，防止内容溢出边框 */
   #viewer.playlist #videoFrame {
     flex-basis: auto;
-    width: calc(70vh * 1304 / 2866);
+    width: calc(55vh * 1304 / 2866);
     height: 100%;
     padding: 0;
     margin: 0 24px 0 auto;
@@ -1311,9 +1311,9 @@ span.comma {
 }
 
 /* ── 精选推荐 viewer 面板 ── */
-/* 整体宽度缩到 80%（34% × 0.8 ≈ 27%），不占满显示区域 */
+/* 宽度与 music/playlist viewer 统一为 34%（此前缩小到 27% 导致三者不一致） */
 #viewer.showcase {
-  width: 27%;
+  width: 34%;
   /* 手机比例：高度缩短并垂直居中 */
   height: 65vh;
   top: 50%;

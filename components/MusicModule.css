@@ -8,6 +8,8 @@
   height: 100%;
   overflow: hidden;
   pointer-events: auto;
+  /* 自带背景，与 viewer 面板底色一致，避免透明缝隙漏出页面背景 */
+  background: rgba(11, 11, 9, 0.95);
   font-family: "Ellograph Light", "Quincy Light", Georgia, serif;
   color: var(--warm-white, #f5efe6);
   display: flex;
@@ -21,14 +23,16 @@
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   padding: 0; /* 去掉左右 padding，让 tab 铺满整行 */
   flex-shrink: 0;
+  /* 背景与面板底色无缝衔接，不漏出下层内容 */
+  background: rgba(11, 11, 9, 0.95);
 }
 
 .mm-tab {
   flex: 1; /* 均分宽度 */
   text-align: center;
-  padding: 14px 0;
+  padding: 12px 0;
   font-family: "Ellograph Light", sans-serif;
-  font-size: 13px;
+  font-size: 11px; /* 缩小字号，与 viewer 面板比例协调 */
   letter-spacing: 0.5px; /* 与原页面标题的紧凑字距对齐 */
   text-transform: uppercase;
   color: rgba(245, 239, 230, 0.45); /* 暖白低透明度，代替原灰褐色 */
@@ -50,7 +54,7 @@
 .mm-content {
   flex: 1;
   overflow-y: auto;
-  padding: 20px;
+  padding: 20px 20px 20px 12px; /* 左侧收窄，曲目信息更靠左 */
 }
 
 .mm-content::-webkit-scrollbar {
@@ -67,7 +71,7 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 10px;
+  padding: 10px 10px 10px 4px; /* 左侧内边距收窄，信息更靠左对齐 */
   border-radius: 8px;
   cursor: pointer;
   transition: background 0.2s;
@@ -102,6 +106,55 @@
   font-size: 12px;
   color: rgba(245, 239, 230, 0.55); /* 暖白半透明，与原页面副文本色调统一 */
   margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ── hover 时溢出文本滚动显示完整内容（marquee） ──
+   文本本身 + ::after 复制的 data-text 首尾相接，左移一个文本宽度后无缝循环；
+   mm-marquee 类由 JS 在 hover 时测量、仅对真正溢出的文本添加；
+   外层 .mm-text 负责裁切（overflow: hidden），内层才能安全地 max-content 撑宽 */
+.mm-text {
+  overflow: hidden;
+}
+
+.mm-track-name,
+.mm-track-artist,
+.mm-card-name,
+.mm-card-artist {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mm-track-name.mm-marquee,
+.mm-track-artist.mm-marquee,
+.mm-card-name.mm-marquee,
+.mm-card-artist.mm-marquee {
+  display: inline-block; /* 宽度由 max-content 撑开，使 -50% 对应一个文本宽度 */
+  width: max-content;
+  max-width: none;
+  text-overflow: clip; /* 滚动中不再显示省略号 */
+  animation: mm-marquee 6s linear infinite;
+}
+
+.mm-track-name.mm-marquee::after,
+.mm-track-artist.mm-marquee::after,
+.mm-card-name.mm-marquee::after,
+.mm-card-artist.mm-marquee::after {
+  content: attr(data-text);
+  padding-left: 2rem; /* 两段文本间的间隔 */
+}
+
+@keyframes mm-marquee {
+  0%, 8% {
+    transform: translateX(0); /* 短暂停顿，让用户看清开头 */
+  }
+  92%, 100% {
+    /* 元素总宽 = 文本宽×2 + 2rem 间隔，位移一个“文本宽+间隔”后第二段正好接上 */
+    transform: translateX(calc(-50% - 1rem));
+  }
 }
 
 .mm-track-time {
@@ -139,26 +192,7 @@
   border-radius: 6px 6px 0 0;
 }
 
-/* 占位卡片 — 省略号样式 */
-.mm-card-placeholder {
-  cursor: default;
-  pointer-events: none;
-}
-
-.mm-card-placeholder-img {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(255, 255, 255, 0.04);
-  border-radius: 6px;
-}
-
-.mm-dots {
-  font-size: 24px;
-  letter-spacing: 4px;
-  opacity: 0.3;
-  color: var(--warm-white, #f5efe6);
-}
+/* 占位卡片已移除 */
 
 .mm-card-info {
   padding: 8px 10px;
@@ -315,7 +349,25 @@
 /* ── 响应式 ── */
 @media (max-width: 480px) {
   .mm-tab {
-    padding: 12px 14px;
+    padding: 10px 14px;
     font-size: 11px;
+  }
+}
+
+/* ── 窄屏（viewer 在右侧手机边框内）：与 Gk3Clone 断点保持一致 ── */
+@media (max-aspect-ratio: 16/12) {
+  /* 空间有限，隐藏收听时间戳 */
+  .mm-track-time {
+    display: none;
+  }
+
+  /* 专辑网格只呈现封面，隐藏文字信息 */
+  .mm-card-info {
+    display: none;
+  }
+
+  /* 去掉封面下方圆角，与卡片圆角对齐 */
+  .mm-card-img {
+    border-radius: 6px;
   }
 }

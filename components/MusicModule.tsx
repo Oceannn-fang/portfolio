@@ -265,8 +265,27 @@ export default function MusicModule() {
   const attachRoot = (node: HTMLDivElement | null) => {
     if (!node) return;
     const handleClick = (e: MouseEvent) => clickHandlerRef.current(e);
+    // hover 文本时测量是否溢出（scrollWidth > clientWidth），
+    // 仅对真正被截断的歌名/艺人名添加 mm-marquee 滚动类，移出时移除
+    const textSel =
+      '.mm-track-name, .mm-track-artist, .mm-card-name, .mm-card-artist';
+    const handleOver = (e: MouseEvent) => {
+      const el = (e.target as HTMLElement).closest(textSel);
+      if (!el) return;
+      if (el.scrollWidth > el.clientWidth) el.classList.add('mm-marquee');
+    };
+    const handleOut = (e: MouseEvent) => {
+      const el = (e.target as HTMLElement).closest(textSel);
+      el?.classList.remove('mm-marquee');
+    };
     node.addEventListener('click', handleClick);
-    return () => node.removeEventListener('click', handleClick);
+    node.addEventListener('mouseover', handleOver);
+    node.addEventListener('mouseout', handleOut);
+    return () => {
+      node.removeEventListener('click', handleClick);
+      node.removeEventListener('mouseover', handleOver);
+      node.removeEventListener('mouseout', handleOut);
+    };
   };
 
   // 1. 未授权：居中授权按钮
@@ -339,8 +358,17 @@ export default function MusicModule() {
                   alt={track.album.name}
                 />
                 <div className="mm-track-info">
-                  <div className="mm-track-name">{track.name}</div>
-                  <div className="mm-track-artist">{track.artist}</div>
+                  {/* data-text 供 CSS ::after 复制文本，hover 时 JS 测量溢出后加 mm-marquee 滚动 */}
+                  <div className="mm-text">
+                    <div className="mm-track-name" data-text={track.name}>
+                      {track.name}
+                    </div>
+                  </div>
+                  <div className="mm-text">
+                    <div className="mm-track-artist" data-text={track.artist}>
+                      {track.artist}
+                    </div>
+                  </div>
                 </div>
                 <div className="mm-track-time">
                   {formatTimeAgo(track.playedAt)}
@@ -383,8 +411,16 @@ export default function MusicModule() {
                   alt={album.name}
                 />
                 <div className="mm-card-info">
-                  <div className="mm-card-name">{album.name}</div>
-                  <div className="mm-card-artist">{album.artist}</div>
+                  <div className="mm-text">
+                    <div className="mm-card-name" data-text={album.name}>
+                      {album.name}
+                    </div>
+                  </div>
+                  <div className="mm-text">
+                    <div className="mm-card-artist" data-text={album.artist}>
+                      {album.artist}
+                    </div>
+                  </div>
                 </div>
                 {/* 性能优化：仅展开的专辑才挂载 iframe 与曲目列表 */}
                 {expandedId === album.id && (
@@ -422,13 +458,6 @@ export default function MusicModule() {
                 )}
               </div>
             ))}
-
-            {/* 占位元素 — 表示更多 */}
-            <div className="mm-card mm-card-placeholder">
-              <div className="mm-card-img mm-card-placeholder-img">
-                <span className="mm-dots">···</span>
-              </div>
-            </div>
           </div>
         )}
       </div>
