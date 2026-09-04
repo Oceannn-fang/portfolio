@@ -100,7 +100,7 @@ public/
 | `showcase` | 34% | 65vh | `top: 50%`, `translateY(-50%)` |
 | `playlist` | 34% | 65vh | `top: 50%`, `translateY(-50%)` |
 
-**桌面端边框样式**（内容面板 `#musicViewer` / `#showcaseViewer` / `#playlistViewer` 撑满 viewer，`inset: 0`）：
+**桌面端边框样式**（内容面板 `#musicViewer` / `#showcaseViewer` / `#playlistViewer`，`inset: 0 10%` 即左右各留 10%，实际占 80% 宽度）：
 
 ```css
 border-radius: 12px;
@@ -157,6 +157,18 @@ box-shadow: 0 8px 40px rgba(0, 0, 0, 0.5);
 | 网易云歌单 | Next.js `revalidate` 1h + 客户端模块级缓存 1h（`PlaylistModule.tsx`） |
 
 **预加载**：页面加载 2s 后调用 `warmMusicCache()` / `warmPlaylistCache()`，在用户 hover 触发 viewer 前提前写入客户端模块级缓存，避免首次打开出现 loading 态。
+
+## 加载动画（LoadingScreen）
+
+| 场景 | 行为 |
+|------|------|
+| 首次访问（无 `localStorage.gk3-visited` 且缓存无效） | 显示加载动画，并行预加载 3 个数据源，完成后淡出过渡到主页 |
+| 再次访问（有缓存或已标记访问过） | 跳过动画，恢复上次滚动位置（`localStorage.gk3-scroll`） |
+| 超时保底 | 最多等 8s，超时直接跳过 |
+
+**组件**：`components/LoadingScreen.tsx` + `LoadingScreen.css`
+
+**视觉**：深色背景 + 黑胶旋转环 + 极细进度线 + Ellograph 字体呼吸动效，淡出 0.75s。
 
 ## 开发环境
 
