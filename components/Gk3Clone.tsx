@@ -4,9 +4,9 @@ import { useEffect, useRef, useState } from "react";
 import "./Gk3Clone.css";
 import Noise from "./Noise";
 import { setSharedNoisePhase } from "./noisePhase";
-import MusicModule from "./MusicModule";
+import MusicModule, { warmMusicCache } from "./MusicModule";
 import AlbumShowcase from "./AlbumShowcase";
-import PlaylistModule from "./PlaylistModule";
+import PlaylistModule, { warmPlaylistCache } from "./PlaylistModule";
 
 type ViewerMode = "phone" | "video" | "social" | "pin" | "music" | "showcase" | "playlist";
 
@@ -268,6 +268,17 @@ export function Gk3Clone() {
   useEffect(() => {
     // 延迟 3 秒后开始预加载，不影响首屏
     const timer = setTimeout(() => setPreloadReady(true), 3000);
+    return () => clearTimeout(timer);
+  }, []);
+
+  // 预加载音乐数据：页面加载 2 秒后提前拉取 Spotify 与网易云接口，
+  // 写入各模块的模块级缓存，hover 打开 viewer 时秒开
+  useEffect(() => {
+    const preload = () => {
+      warmMusicCache();
+      warmPlaylistCache();
+    };
+    const timer = setTimeout(preload, 2000);
     return () => clearTimeout(timer);
   }, []);
 

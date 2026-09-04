@@ -69,6 +69,50 @@ function isCacheValid(): boolean {
   return cacheTimestamp > 0 && Date.now() - cacheTimestamp < CACHE_DURATION;
 }
 
+// 预热进行中标记，避免重复请求
+let warming = false;
+
+/** 预加载：由 Gk3Clone 在页面空闲时调用，提前写入模块缓存，hover 打开面板时秒开 */
+export function warmMusicCache() {
+  if (warming) return;
+  // 已有有效缓存（或已知未授权）则跳过
+  if (isCacheValid() || cachedAuthed === false) return;
+  warming = true;
+  // 与组件内解析逻辑一致：兼容数组与包裹对象两种返回结构
+  const load = async (url: string, apply: (data: unknown) => void) => {
+    const res = await fetch(url);
+    if (res.status === 401) {
+      cachedAuthed = false;
+      return;
+    }
+    if (!res.ok) return;
+    apply(await res.json());
+  };
+  Promise.all([
+    load('/api/spotify/recently-played', (data) => {
+      const d = data as Track[] | { tracks?: Track[] };
+      cachedTracks = Array.isArray(d) ? d : d.tracks ?? [];
+    }),
+    load('/api/spotify/albums', (data) => {
+      const d = data as Album[] | { albums?: Album[] };
+      cachedAlbums = Array.isArray(d) ? d : d.albums ?? [];
+    }),
+  ])
+    .then(() => {
+      // 任一接口成功拿到数据即视为已授权并刷新缓存时间戳
+      if (cachedTracks || cachedAlbums) {
+        if (cachedAuthed !== false) cachedAuthed = true;
+        cacheTimestamp = Date.now();
+      }
+    })
+    .catch(() => {
+      // 预热失败不影响后续正常加载
+    })
+    .finally(() => {
+      warming = false;
+    });
+}
+
 // ── 组件 ──
 
 /**
@@ -378,6 +422,13 @@ export default function MusicModule() {
                 )}
               </div>
             ))}
+
+            {/* 占位元素 — 表示更多 */}
+            <div className="mm-card mm-card-placeholder">
+              <div className="mm-card-img mm-card-placeholder-img">
+                <span className="mm-dots">···</span>
+              </div>
+            </div>
           </div>
         )}
       </div>

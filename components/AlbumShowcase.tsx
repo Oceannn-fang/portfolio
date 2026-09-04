@@ -66,8 +66,8 @@ export default function AlbumShowcase({ onOpenOverlay }: Props) {
     const container = containerRef.current;
     if (!container) return;
 
-    // 与原版一致的参数
-    const coverSize = 72;
+    // 与原版一致的参数（封面增大 30%：72 → 94，需与 CSS .as-cover 尺寸一致）
+    const coverSize = 94;
     const slotWidth = coverSize * 0.9;
     const topCount = topAlbums.length;
     const bottomCount = bottomAlbums.length;

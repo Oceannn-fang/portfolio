@@ -24,81 +24,120 @@
   opacity: 0.6;
 }
 
-/* ── 歌单头部 ── */
-.pm-header {
+/* ── 顶部播放器 ── */
+.pm-player {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 16px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 14px 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
   flex-shrink: 0;
+  min-height: 72px;
+  background: rgba(255, 255, 255, 0.02);
 }
 
-.pm-header-cover {
-  width: 56px;
-  height: 56px;
-  border-radius: 8px;
+.pm-player-cover {
+  width: 48px;
+  height: 48px;
+  border-radius: 6px;
   object-fit: cover;
   flex-shrink: 0;
 }
 
-.pm-header-info {
+.pm-player-info {
   flex: 1;
   min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
 }
 
-.pm-header-name {
-  font-size: 14px;
+.pm-player-name {
+  font-size: 13px;
   font-weight: 500;
-  letter-spacing: 0.3px;
-  margin: 0;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-.pm-header-count {
+.pm-player-artist {
   font-size: 11px;
   opacity: 0.5;
-  margin: 4px 0 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pm-player-empty {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  opacity: 0.4;
+}
+
+/* 播放控件条（audio / iframe 二选一） */
+.pm-player-bar {
+  flex-shrink: 0;
+  padding: 8px 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.pm-audio {
+  display: block;
+  width: 100%;
+  height: 32px;
+}
+
+.pm-player-iframe {
+  display: block;
+  border-radius: 6px;
+}
+
+.pm-audio-hidden {
+  display: none;
 }
 
 /* ── 曲目列表（可滚动） ── */
 .pm-list {
   flex: 1;
   overflow-y: auto;
-  padding: 8px 0;
+  padding: 4px 0;
 }
 
 .pm-track-row {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 8px 16px;
+  padding: 7px 16px;
   cursor: pointer;
   transition: background 0.15s;
+  border-left: 2px solid transparent;
 }
 
 .pm-track-row:hover {
   background: rgba(255, 255, 255, 0.04);
 }
 
-/* 展开播放器的曲目行保持高亮 */
-.pm-track-row.expanded {
-  background: rgba(255, 255, 255, 0.06);
+/* 当前播放曲目高亮 */
+.pm-track-active {
+  background: rgba(132, 215, 255, 0.08);
+  border-left: 2px solid #84d7ff;
 }
 
 .pm-track-num {
-  font-size: 11px;
-  opacity: 0.4;
-  width: 20px;
+  font-size: 10px;
+  opacity: 0.35;
+  width: 18px;
   text-align: right;
   flex-shrink: 0;
 }
 
 .pm-track-cover {
-  width: 40px;
-  height: 40px;
+  width: 36px;
+  height: 36px;
   border-radius: 4px;
   object-fit: cover;
   flex-shrink: 0;
@@ -109,12 +148,11 @@
   min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 1px;
 }
 
 .pm-track-name {
   font-size: 12px;
-  font-weight: 500;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -122,7 +160,7 @@
 
 .pm-track-artist {
   font-size: 10px;
-  opacity: 0.5;
+  opacity: 0.45;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -130,23 +168,13 @@
 
 .pm-track-duration {
   font-size: 10px;
-  opacity: 0.4;
+  opacity: 0.35;
   flex-shrink: 0;
-}
-
-/* ── 网易云外链播放器 ── */
-.pm-player {
-  padding: 0 16px 8px 46px;
-}
-
-.pm-player iframe {
-  border-radius: 6px;
-  display: block;
 }
 
 /* ── 滚动条 ── */
 .pm-list::-webkit-scrollbar {
-  width: 4px;
+  width: 3px;
 }
 
 .pm-list::-webkit-scrollbar-track {
@@ -154,6 +182,6 @@
 }
 
 .pm-list::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.12);
   border-radius: 2px;
 }

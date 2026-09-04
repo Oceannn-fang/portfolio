@@ -139,6 +139,27 @@
   border-radius: 6px 6px 0 0;
 }
 
+/* 占位卡片 — 省略号样式 */
+.mm-card-placeholder {
+  cursor: default;
+  pointer-events: none;
+}
+
+.mm-card-placeholder-img {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 6px;
+}
+
+.mm-dots {
+  font-size: 24px;
+  letter-spacing: 4px;
+  opacity: 0.3;
+  color: var(--warm-white, #f5efe6);
+}
+
 .mm-card-info {
   padding: 8px 10px;
 }
