@@ -69,6 +69,11 @@ function isCacheValid(): boolean {
   return cacheTimestamp > 0 && Date.now() - cacheTimestamp < CACHE_DURATION;
 }
 
+/** 外部可调用的缓存有效性检查（供 LoadingScreen 判断是否跳过加载动画） */
+export function isMusicCacheValid(): boolean {
+  return (cachedTracks !== null || cachedAlbums !== null) && isCacheValid();
+}
+
 // 预热进行中标记，避免重复请求
 let warming = false;
 

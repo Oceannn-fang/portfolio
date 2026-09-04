@@ -1,12 +1,13 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import "./Gk3Clone.css";
 import Noise from "./Noise";
 import { setSharedNoisePhase } from "./noisePhase";
-import MusicModule, { warmMusicCache } from "./MusicModule";
+import MusicModule, { warmMusicCache, isMusicCacheValid } from "./MusicModule";
 import AlbumShowcase from "./AlbumShowcase";
-import PlaylistModule, { warmPlaylistCache } from "./PlaylistModule";
+import PlaylistModule, { warmPlaylistCache, isPlaylistCacheValid } from "./PlaylistModule";
+import LoadingScreen from "./LoadingScreen";
 
 type ViewerMode = "phone" | "video" | "social" | "pin" | "music" | "showcase" | "playlist";
 
@@ -264,6 +265,9 @@ export function Gk3Clone() {
   const [showcaseOpen, setShowcaseOpen] = useState(false);
   // 预加载 3D 页面（隐藏 iframe），避免点击打开浮层时加载卡顿
   const [preloadReady, setPreloadReady] = useState(false);
+  // ── 加载动画状态 ──
+  const [showLoading, setShowLoading] = useState(false);
+  const [loadingDone, setLoadingDone] = useState(false);
 
   useEffect(() => {
     // 延迟 3 秒后开始预加载，不影响首屏
@@ -271,16 +275,67 @@ export function Gk3Clone() {
     return () => clearTimeout(timer);
   }, []);
 
-  // 预加载音乐数据：页面加载 2 秒后提前拉取 Spotify 与网易云接口，
-  // 写入各模块的模块级缓存，hover 打开 viewer 时秒开
+  // ── 判断是否需要显示加载动画 ──
   useEffect(() => {
+    const hasVisited = localStorage.getItem('gk3-visited');
+    const cacheReady = isMusicCacheValid() && isPlaylistCacheValid();
+
+    if (!cacheReady && !hasVisited) {
+      // 首次访问且无缓存 → 显示加载动画
+      setShowLoading(true);
+    } else {
+      // 缓存有效或已访问过 → 跳过动画，直接显示
+      setLoadingDone(true);
+      // 恢复上次滚动位置
+      const lastScroll = localStorage.getItem('gk3-scroll');
+      if (lastScroll) {
+        requestAnimationFrame(() => {
+          window.scrollTo(0, parseInt(lastScroll, 10));
+        });
+      }
+    }
+  }, []);
+
+  // 加载完成回调：隐藏动画、标记已访问、恢复滚动位置
+  const handleLoaded = useCallback(() => {
+    setShowLoading(false);
+    setLoadingDone(true);
+    localStorage.setItem('gk3-visited', '1');
+    const lastScroll = localStorage.getItem('gk3-scroll');
+    if (lastScroll) {
+      requestAnimationFrame(() => {
+        window.scrollTo(0, parseInt(lastScroll, 10));
+      });
+    }
+  }, []);
+
+  // 预加载音乐数据：loadingDone 后拉取写入模块级缓存，hover 打开 viewer 时秒开
+  useEffect(() => {
+    if (!loadingDone) return;
     const preload = () => {
       warmMusicCache();
       warmPlaylistCache();
     };
-    const timer = setTimeout(preload, 2000);
+    // 加载动画刚完成时 HTTP 缓存已热，短延迟即可；跳过动画时同样快速预热
+    const timer = setTimeout(preload, 300);
     return () => clearTimeout(timer);
-  }, []);
+  }, [loadingDone]);
+
+  // 记录滚动位置（节流：每 500ms 最多写一次 localStorage）
+  useEffect(() => {
+    if (!loadingDone) return;
+    let ticking = false;
+    const handleScroll = () => {
+      if (ticking) return;
+      ticking = true;
+      setTimeout(() => {
+        localStorage.setItem('gk3-scroll', String(window.scrollY));
+        ticking = false;
+      }, 500);
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [loadingDone]);
 
   useEffect(() => {
     document.body.classList.add("gk3-page");
@@ -813,6 +868,7 @@ export function Gk3Clone() {
 
   return (
     <>
+      {showLoading && <LoadingScreen onLoaded={handleLoaded} />}
       <div id="pointer" ref={pointerRef} />
       <div id="main">
         <div id="hero">

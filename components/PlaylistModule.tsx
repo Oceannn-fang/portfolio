@@ -16,6 +16,11 @@ interface Track {
 let cachedData: { name: string; tracks: Track[] } | null = null;
 let cacheTime = 0;
 const CACHE_TTL = 60 * 60 * 1000; // 缓存有效期 1 小时
+
+/** 外部可调用的缓存有效性检查（供 LoadingScreen 判断是否跳过加载动画） */
+export function isPlaylistCacheValid(): boolean {
+  return cachedData !== null && Date.now() - cacheTime < CACHE_TTL;
+}
 // 预热进行中标记，避免重复请求
 let warming = false;
 

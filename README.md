@@ -88,6 +88,76 @@ public/
 
 极简组件：在 viewer 面板中 iframe 嵌入 `/music-cover-3d/index.html`（原版弧形黑胶动画）。iframe 独立视口使其中的 `position: fixed` 与 window 尺寸引用自动适配。静态资源完整位于 `public/music-cover-3d/`（index.html / script.js / styles.css / album_covers/）。
 
+## Viewer 尺寸规格
+
+以下参数均以 `components/Gk3Clone.css` 为准，断点判定使用 `@media (max-aspect-ratio: 16/12)`（窄屏时 viewer 从左侧移到右侧）。
+
+### 桌面端（viewer 在左侧）
+
+| Viewer | 宽度 | 高度 | 定位 |
+|--------|------|------|------|
+| `music` | 34% | 65vh | `top: 50%`, `translateY(-50%)` |
+| `showcase` | 34% | 65vh | `top: 50%`, `translateY(-50%)` |
+| `playlist` | 34% | 65vh | `top: 50%`, `translateY(-50%)` |
+
+**桌面端边框样式**（内容面板 `#musicViewer` / `#showcaseViewer` / `#playlistViewer` 撑满 viewer，`inset: 0`）：
+
+```css
+border-radius: 12px;
+border: 1px solid rgba(244, 239, 226, 0.1);
+box-shadow: 0 8px 40px rgba(0, 0, 0, 0.5);
+```
+
+桌面端**不**使用手机边框素材：`#viewer.music/showcase/playlist #videoFrame:after { background-image: none; }`。
+
+### 窄屏（`@media (max-aspect-ratio: 16/12)`，viewer 在右侧）
+
+| 参数 | 值 | 说明 |
+|------|-----|------|
+| viewer `width` | `100%` | 占满可用宽度 |
+| viewer `height` / `max-height` | `70vh` | 三个 viewer 统一高度 |
+| viewer `top` | `15vh` | 垂直居中，`(100vh - 70vh) / 2` |
+| `#videoFrame` `width` | `calc(70vh * 1304 / 2866)` | 按手机边框素材比例约束，防止内容横向溢出 |
+| `#videoFrame` `margin` | `0 24px 0 auto` | 右侧对齐（viewer 从右滑入）并留出边距 |
+| 内容面板 `inset` | `5% 5%` | 上下左右留给 bezel |
+| 内容面板 `border-radius` | `12% / 5%` | 匹配手机屏幕圆角（水平 12% / 垂直 5%） |
+| `#videoFrame` `border-radius` | `12% / 5%` | 与面板协调，构成裁切链 |
+| `#videoFrame` `overflow` | `hidden` | 最终裁切防线 |
+| 内容面板 `overflow` | `hidden` | 面板级裁切 |
+| 内容面板 `border` / `box-shadow` | `none` | 去掉桌面端普通边框样式 |
+| `#musicViewer` `padding-top` | `5%` | 顶部 tab 避开刘海（showcase / playlist 无顶部 tab，不受影响） |
+
+### 手机边框素材
+
+- **文件**：`public/gk3-assets/img/phone-frame-2.png`
+- **比例**：1304 : 2866
+- **生效范围**：仅在窄屏断点下显示（桌面端用普通圆角边框）
+- **叠加方式**：`#videoFrame::after` 伪元素，`background: url(...) center / contain no-repeat`，`inset: 0`（因 videoFrame 已开启 `overflow: hidden`，外扩 `inset: -2%` 会被裁掉），`pointer-events: none`（仅作装饰，不拦截交互），`z-index: 100`
+
+### 背景色（窄屏不透明，避免透出页面背景）
+
+| Viewer | 背景色 | 备注 |
+|--------|--------|------|
+| `music` / `playlist` | `#0b0b09` | 纯黑，同时关闭 `backdrop-filter` |
+| `showcase` | `#f4f1e9` | 暖纸色，与 AlbumShowcase 背景一致 |
+
+## 模块组件对应关系
+
+| 行标题 | ViewerMode | 组件 | API |
+|--------|-----------|------|-----|
+| recently played | `music` | `components/MusicModule.tsx` | `/api/spotify/recently-played`、`/api/spotify/albums` |
+| arc vinyl | `showcase` | `components/AlbumShowcase.tsx` | 本地静态资源（`public/music-cover-3d/`） |
+| playlist | `playlist` | `components/PlaylistModule.tsx` | `/api/netease/playlist` |
+
+## 缓存策略
+
+| 数据源 | 缓存层次 |
+|--------|---------|
+| Spotify | 三层缓存：Next.js ISR 1h + 服务端内存 `Map` 1h（`lib/spotify.ts` 的 `apiCache`）+ 客户端模块级缓存 1h（`MusicModule.tsx`） |
+| 网易云歌单 | Next.js `revalidate` 1h + 客户端模块级缓存 1h（`PlaylistModule.tsx`） |
+
+**预加载**：页面加载 2s 后调用 `warmMusicCache()` / `warmPlaylistCache()`，在用户 hover 触发 viewer 前提前写入客户端模块级缓存，避免首次打开出现 loading 态。
+
 ## 开发环境
 
 ### 启动
