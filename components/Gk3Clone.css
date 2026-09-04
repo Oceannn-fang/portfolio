@@ -1445,13 +1445,28 @@ span.comma {
   #musicViewer,
   #showcaseViewer,
   #playlistViewer {
-    /* 上8% 右3% 下6% 左3% — 顶部预留刘海空间，底部防溢出，内容整体上移并被压缩 */
-    inset: 8% 3% 6% 3%;
+    /* 面板铺满整个 videoFrame，让背景色（黑/暖纸色）完全盖住页面背景，不再从边缘漏出 */
+    inset: 0;
     /* 比例圆角模拟手机屏幕圆角 */
-    border-radius: 8% / 3.5%;
+    border-radius: 9% / 4%;
     border: none;
     box-shadow: none;
     /* 强制裁切，防止内部内容溢出边框 */
     overflow: hidden;
+    /* 内部用 padding 留安全区：顶部避开刘海，底部防溢出（内容整体上移，music tab 更贴近顶部） */
+    padding: 6% 2% 4% 2%;
+  }
+
+  /* music / playlist：改为不透明纯黑，去掉半透明与模糊，彻底遮住页面背景 */
+  #musicViewer,
+  #playlistViewer {
+    background: #0b0b09;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+
+  /* showcase：不透明暖纸色，与 AlbumShowcase 背景一致 */
+  #showcaseViewer {
+    background: #f4f1e9;
   }
 }
