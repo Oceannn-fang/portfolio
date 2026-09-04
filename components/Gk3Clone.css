@@ -1457,7 +1457,7 @@ span.comma {
   #showcaseViewer,
   #playlistViewer {
     /* 加大 inset 匹配手机边框 bezel 厚度：上下 8%、左右 5%，内容完全收进屏幕可视区域 */
-    inset: 8% 5%;
+    inset: 5% 5%;
     /* 比例圆角匹配手机屏幕的大圆角（与 videoFrame 同档） */
     border-radius: 12% / 5%;
     border: none;
