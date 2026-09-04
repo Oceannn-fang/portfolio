@@ -1254,6 +1254,8 @@ span.comma {
   /* 暖纸色底，与 AlbumShowcase 的 paper 背景一致，避免圆角外透出深色 */
   background: #f4f1e9;
   overflow: hidden;
+  /* 四周圆角，配合 overflow: hidden 确保内容不溢出 */
+  border-radius: 24px;
 }
 /* 修复：#viewer img { display: none } 会误伤封面图片 */
 #showcaseViewer img {
@@ -1268,10 +1270,10 @@ span.comma {
 @media (max-aspect-ratio: 16/12) {
   #viewer.showcase {
     width: 100%;
-    /* 限制高度，不占满整个视口，并用 top 偏移实现视觉垂直居中 */
-    height: 70vh;
-    max-height: 70vh;
-    top: 15vh;
+    /* 竖向长度缩短（70vh → 58vh），top 保持垂直居中：(100 - 58) / 2 = 21vh */
+    height: 58vh;
+    max-height: 58vh;
+    top: 21vh;
     transform: translateX(70vw); /* 继承移动端隐藏行为 */
   }
   /* 修复：#viewer.showcase 的隐藏 transform 在源序上晚于 .viewing #viewer，
@@ -1279,6 +1281,30 @@ span.comma {
   .viewing #viewer.showcase {
     transform: translateX(0);
     opacity: 1;
+  }
+  /* 窄屏下 videoFrame 撑满 viewer，作为手机边框的定位基准 */
+  #viewer.showcase #videoFrame {
+    flex-basis: auto;
+    /* 按手机边框素材比例（1304:2866）约束宽度，使边框与内容对齐 */
+    width: calc(58vh * 1304 / 2866);
+    height: 100%;
+    padding: 0;
+    /* 右侧对齐（viewer 从右滑入）并留出边距 */
+    margin: 0 24px 0 auto;
+    transform: none;
+    position: relative;
+  }
+  /* 恢复原项目的手机边框素材（#videoFrame:after），白底 PNG 与暖纸色内容自然融合 */
+  #viewer.showcase #videoFrame:after {
+    background-image: url(/gk3-assets/img/phone-frame-2.png) !important;
+    pointer-events: none; /* 边框仅作装饰，不拦截交互 */
+  }
+  /* 内容收窄至边框屏幕区域：素材比例 1304:2866，屏幕内缩约 2.5% 宽、4% 高，
+     用比例圆角模拟屏幕圆角，刘海由边框图自然覆盖 */
+  #viewer.showcase #showcaseViewer {
+    inset: 4% 2.5%;
+    /* 横向 9%、纵向 4% 的椭圆圆角，接近真机屏幕圆角观感 */
+    border-radius: 9% / 4%;
   }
 }
 
