@@ -408,16 +408,16 @@ body.expanded {
 @media (max-aspect-ratio: 16/12) {
   #viewer.music {
     width: 100%;
-    /* 窄屏高度与 showcase/playlist 统一为 55vh，top 取 (100vh - 55vh) / 2 实现视觉垂直居中 */
-    height: 55vh;
-    max-height: 55vh;
-    top: 22.5vh;
+    /* 窄屏高度恢复为 70vh，top 取 (100vh - 70vh) / 2 = 15vh 实现视觉垂直居中 */
+    height: 70vh;
+    max-height: 70vh;
+    top: 15vh;
     transform: translateX(70vw); /* 继承移动端隐藏行为 */
   }
   /* 窄屏下 videoFrame 按手机边框素材比例（1304:2866）约束宽度，防止内容溢出边框 */
   #viewer.music #videoFrame {
     flex-basis: auto;
-    width: calc(55vh * 1304 / 2866);
+    width: calc(70vh * 1304 / 2866);
     height: 100%;
     padding: 0;
     margin: 0 24px 0 auto;
@@ -482,16 +482,16 @@ body.expanded {
 @media (max-aspect-ratio: 16/12) {
   #viewer.playlist {
     width: 100%;
-    /* 窄屏高度与 showcase/music 统一为 55vh，修复 70vh 时内容底部溢出手机边框 */
-    height: 55vh;
-    max-height: 55vh;
-    top: 22.5vh;
+    /* 窄屏高度恢复为 70vh，与 music/showcase 统一 */
+    height: 70vh;
+    max-height: 70vh;
+    top: 15vh;
     transform: translateX(70vw); /* 继承移动端隐藏行为 */
   }
   /* 窄屏下 videoFrame 按手机边框素材比例约束宽度，防止内容溢出边框 */
   #viewer.playlist #videoFrame {
     flex-basis: auto;
-    width: calc(55vh * 1304 / 2866);
+    width: calc(70vh * 1304 / 2866);
     height: 100%;
     padding: 0;
     margin: 0 24px 0 auto;
@@ -1365,10 +1365,10 @@ span.comma {
 @media (max-aspect-ratio: 16/12) {
   #viewer.showcase {
     width: 100%;
-    /* 竖向长度缩短（58vh → 55vh），避免 arc vinyl 底部溢出手机边框 */
-    height: 55vh;
-    max-height: 55vh;
-    top: 22.5vh;
+    /* 窄屏高度恢复为 70vh，与 music/playlist 统一 */
+    height: 70vh;
+    max-height: 70vh;
+    top: 15vh;
     transform: translateX(70vw); /* 继承移动端隐藏行为 */
   }
   /* 修复：#viewer.showcase 的隐藏 transform 在源序上晚于 .viewing #viewer，
@@ -1381,7 +1381,7 @@ span.comma {
   #viewer.showcase #videoFrame {
     flex-basis: auto;
     /* 按手机边框素材比例（1304:2866）约束宽度，使边框与内容对齐 */
-    width: calc(55vh * 1304 / 2866);
+    width: calc(70vh * 1304 / 2866);
     height: 100%;
     padding: 0;
     /* 右侧对齐（viewer 从右滑入）并留出边距 */

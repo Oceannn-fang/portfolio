@@ -189,7 +189,7 @@
   aspect-ratio: 1;
   object-fit: cover;
   display: block;
-  border-radius: 6px 6px 0 0;
+  border-radius: 4px 4px 0 0;
 }
 
 /* 占位卡片已移除 */
@@ -368,6 +368,6 @@
 
   /* 去掉封面下方圆角，与卡片圆角对齐 */
   .mm-card-img {
-    border-radius: 6px;
+    border-radius: 4px;
   }
 }
