@@ -77,23 +77,23 @@
   opacity: 0.4;
 }
 
-/* 播放控件条（audio / iframe 二选一） */
-.pm-player-bar {
+/* 播放失败提示（外链 403/版权限制） */
+.pm-player-error {
   flex-shrink: 0;
-  padding: 8px 16px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-  background: rgba(255, 255, 255, 0.02);
+  max-width: 45%;
+  font-size: 11px;
+  color: #ff8f7a;
+  opacity: 0.85;
+  text-align: right;
 }
 
+/* 原生 audio 控件：内联在播放器右侧，宽度自适应、高度紧凑 */
 .pm-audio {
   display: block;
-  width: 100%;
+  flex: 1;
+  min-width: 140px;
+  max-width: 260px;
   height: 32px;
-}
-
-.pm-player-iframe {
-  display: block;
-  border-radius: 6px;
 }
 
 .pm-audio-hidden {

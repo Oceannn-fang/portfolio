@@ -43,16 +43,20 @@ export function warmPlaylistCache() {
 
 /**
  * 网易云精选歌单模块
- * 顶部固定播放器，点击曲目即播（外链直连，失败时回退网易云 iframe 播放器）
+ * 顶部固定原生 audio 播放器，点击曲目即播（外链直连，失败时仅提示，不用 iframe）
+ * 曲目列表分批加载：先渲染前 30 首，滚动到底部自动加载更多，避免 500+ 首一次性渲染卡顿
  */
 export default function PlaylistModule() {
   const [tracks, setTracks] = useState<Track[]>(cachedData?.tracks || []);
   const [currentTrack, setCurrentTrack] = useState<Track | null>(null);
   const [loading, setLoading] = useState(!cachedData);
   const [error, setError] = useState<string | null>(null);
-  // 外链播放失败（VIP/版权 403）时回退 iframe 播放器
-  const [useIframe, setUseIframe] = useState(false);
+  // 外链播放失败（VIP/版权 403）时显示提示
+  const [playError, setPlayError] = useState(false);
+  // 分批加载：当前已渲染的曲目数量
+  const [visibleCount, setVisibleCount] = useState(30);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const listRef = useRef<HTMLDivElement>(null);
 
   // 加载歌单数据 + 定时刷新
   useEffect(() => {
@@ -93,24 +97,43 @@ export default function PlaylistModule() {
     return () => clearInterval(interval);
   }, []);
 
+  // 滚动到底部（距离 < 100px）时加载更多曲目
+  useEffect(() => {
+    const el = listRef.current;
+    if (!el) return;
+
+    const handleScroll = () => {
+      if (el.scrollTop + el.clientHeight >= el.scrollHeight - 100) {
+        setVisibleCount((prev) => {
+          if (prev >= tracks.length) return prev;
+          return Math.min(prev + 30, tracks.length);
+        });
+      }
+    };
+
+    el.addEventListener('scroll', handleScroll);
+    return () => el.removeEventListener('scroll', handleScroll);
+  }, [tracks.length]);
+
   // 点击歌曲 → 顶部播放器播放（实际播放在 useEffect 中执行，确保 audio 元素已渲染）
   const playTrack = (track: Track) => {
     setCurrentTrack(track);
-    setUseIframe(false);
+    setPlayError(false);
   };
 
-  // 当前曲目变化 → 设置外链并播放
+  // 当前曲目变化 → 设置外链并播放；部分歌曲可能 403，play() 失败或流加载出错时显示提示
   useEffect(() => {
-    if (!currentTrack || useIframe || !audioRef.current) return;
-    // 网易云外链直连，部分歌曲可能 403（触发 error 后回退 iframe）
+    if (!currentTrack || !audioRef.current) return;
     audioRef.current.src = `https://music.163.com/song/media/outer/url?id=${currentTrack.id}.mp3`;
-    audioRef.current.play().catch(() => {});
-  }, [currentTrack, useIframe]);
+    audioRef.current.play().catch(() => {
+      setPlayError(true);
+    });
+  }, [currentTrack]);
 
-  // 外链加载失败（403/版权限制）→ 回退网易云 iframe 播放器
+  // 外链流加载失败（403/版权限制）→ 显示“暂不支持播放”提示
   const handleAudioError = () => {
     // 无 src 时浏览器也会触发 error 事件，需排除
-    if (currentTrack && audioRef.current?.src) setUseIframe(true);
+    if (currentTrack && audioRef.current?.src) setPlayError(true);
   };
 
   // 毫秒 → m:ss
@@ -136,7 +159,7 @@ export default function PlaylistModule() {
 
   return (
     <div className="pm-root">
-      {/* 顶部播放器 */}
+      {/* 顶部播放器：封面 + 曲目信息 + 原生 audio 控件（播放失败时显示提示） */}
       <div className="pm-player">
         {currentTrack ? (
           <>
@@ -145,6 +168,16 @@ export default function PlaylistModule() {
               <span className="pm-player-name">{currentTrack.name}</span>
               <span className="pm-player-artist">{currentTrack.artists}</span>
             </div>
+            {playError ? (
+              <span className="pm-player-error">该歌曲暂不支持在线播放</span>
+            ) : (
+              <audio
+                ref={audioRef}
+                controls
+                className="pm-audio"
+                onError={handleAudioError}
+              />
+            )}
           </>
         ) : (
           <div className="pm-player-empty">
@@ -152,36 +185,14 @@ export default function PlaylistModule() {
           </div>
         )}
       </div>
-
-      {/* 播放控件：优先原生 audio，外链失败时回退网易云 iframe */}
-      {currentTrack && (
-        <div className="pm-player-bar">
-          {useIframe ? (
-            <iframe
-              className="pm-player-iframe"
-              src={`https://music.163.com/outchain/player?type=2&id=${currentTrack.id}&auto=1&height=66`}
-              width="100%"
-              height="66"
-              frameBorder="no"
-              allow="autoplay"
-              title={`${currentTrack.name} - 网易云播放器`}
-            />
-          ) : (
-            <audio
-              ref={audioRef}
-              controls
-              className="pm-audio"
-              onError={handleAudioError}
-            />
-          )}
-        </div>
+      {/* 未选中歌曲或播放失败时也挂载 audio 元素，保证 ref 可用 */}
+      {(!currentTrack || playError) && (
+        <audio ref={audioRef} className="pm-audio-hidden" onError={handleAudioError} />
       )}
-      {/* 未选中歌曲时也挂载 audio 元素，保证 ref 可用 */}
-      {!currentTrack && <audio ref={audioRef} className="pm-audio-hidden" onError={handleAudioError} />}
 
-      {/* 曲目列表 */}
-      <div className="pm-list">
-        {tracks.map((track, index) => (
+      {/* 曲目列表：分批渲染，滚动到底部自动加载更多 */}
+      <div className="pm-list" ref={listRef}>
+        {tracks.slice(0, visibleCount).map((track, index) => (
           <div
             key={track.id}
             className={`pm-track-row${currentTrack?.id === track.id ? ' pm-track-active' : ''}`}

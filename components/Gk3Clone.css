@@ -414,6 +414,16 @@ body.expanded {
     top: 15vh;
     transform: translateX(70vw); /* 继承移动端隐藏行为 */
   }
+  /* 窄屏下 videoFrame 按手机边框素材比例（1304:2866）约束宽度，防止内容溢出边框 */
+  #viewer.music #videoFrame {
+    flex-basis: auto;
+    width: calc(70vh * 1304 / 2866);
+    height: 100%;
+    padding: 0;
+    margin: 0 24px 0 auto;
+    transform: none;
+    position: relative;
+  }
 }
 
 /* music 模式的手机边框仅在窄屏显示，由文件末尾"窄屏恢复手机边框"统一规则提供 */
@@ -477,6 +487,16 @@ body.expanded {
     max-height: 70vh;
     top: 15vh;
     transform: translateX(70vw); /* 继承移动端隐藏行为 */
+  }
+  /* 窄屏下 videoFrame 按手机边框素材比例约束宽度，防止内容溢出边框 */
+  #viewer.playlist #videoFrame {
+    flex-basis: auto;
+    width: calc(70vh * 1304 / 2866);
+    height: 100%;
+    padding: 0;
+    margin: 0 24px 0 auto;
+    transform: none;
+    position: relative;
   }
   /* 修复：隐藏 transform 在源序上晚于 .viewing #viewer，同特异性下会覆盖滑入行为，这里显式补回 */
   .viewing #viewer.playlist {
@@ -1345,10 +1365,10 @@ span.comma {
 @media (max-aspect-ratio: 16/12) {
   #viewer.showcase {
     width: 100%;
-    /* 竖向长度缩短（70vh → 58vh），top 保持垂直居中：(100 - 58) / 2 = 21vh */
-    height: 58vh;
-    max-height: 58vh;
-    top: 21vh;
+    /* 竖向长度缩短（58vh → 55vh），避免 arc vinyl 底部溢出手机边框 */
+    height: 55vh;
+    max-height: 55vh;
+    top: 22.5vh;
     transform: translateX(70vw); /* 继承移动端隐藏行为 */
   }
   /* 修复：#viewer.showcase 的隐藏 transform 在源序上晚于 .viewing #viewer，
@@ -1361,7 +1381,7 @@ span.comma {
   #viewer.showcase #videoFrame {
     flex-basis: auto;
     /* 按手机边框素材比例（1304:2866）约束宽度，使边框与内容对齐 */
-    width: calc(58vh * 1304 / 2866);
+    width: calc(55vh * 1304 / 2866);
     height: 100%;
     padding: 0;
     /* 右侧对齐（viewer 从右滑入）并留出边距 */
@@ -1425,11 +1445,13 @@ span.comma {
   #musicViewer,
   #showcaseViewer,
   #playlistViewer {
-    /* 内容收进手机边框屏幕区域 */
-    inset: 4% 2.5%;
-    /* 比例圆角模拟手机屏幕圆角，装饰性边框/阴影交由手机边框素材呈现 */
-    border-radius: 9% / 4%;
+    /* 内容收进手机边框屏幕区域（边框素材上下约 4%、左右约 2.5% 为 bezel） */
+    inset: 5% 3%;
+    /* 比例圆角模拟手机屏幕圆角 */
+    border-radius: 8% / 3.5%;
     border: none;
     box-shadow: none;
+    /* 强制裁切，防止内部内容溢出边框 */
+    overflow: hidden;
   }
 }
