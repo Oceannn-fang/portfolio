@@ -1457,6 +1457,12 @@ span.comma {
     padding: 6% 2% 4% 2%;
   }
 
+  /* music viewer 顶部有 tab（"最近"/"专辑"），需更大的顶部黑色填充避开手机刘海，
+     其余 padding 继承上方共享规则；showcase/playlist 无顶部 tab，不受影响 */
+  #musicViewer {
+    padding-top: 12%;
+  }
+
   /* music / playlist：改为不透明纯黑，去掉半透明与模糊，彻底遮住页面背景 */
   #musicViewer,
   #playlistViewer {
