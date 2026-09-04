@@ -370,8 +370,8 @@ body.expanded {
 
 #musicViewer {
   position: absolute;
-  /* 内容收进手机边框屏幕区域（与窄屏 showcase 方案一致） */
-  inset: 4% 2.5%;
+  /* 桌面端：内容面板撑满 viewer，普通边框样式（圆角 + 细线边框 + 阴影） */
+  inset: 0;
   width: auto;
   height: auto;
   pointer-events: auto;
@@ -379,8 +379,9 @@ body.expanded {
   background: rgba(11, 11, 9, 0.95);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  /* 比例圆角模拟手机屏幕圆角，装饰性边框/阴影交由手机边框素材呈现 */
-  border-radius: 9% / 4%;
+  border-radius: 12px;
+  border: 1px solid rgba(244, 239, 226, 0.1);
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(244, 239, 226, 0.06);
   overflow: hidden;
 }
 
@@ -415,7 +416,7 @@ body.expanded {
   }
 }
 
-/* music 模式的手机边框由文件末尾"三个自定义 viewer 统一手机边框"规则提供 */
+/* music 模式的手机边框仅在窄屏显示，由文件末尾"窄屏恢复手机边框"统一规则提供 */
 
 /* ── 精选歌单 viewer（网易云）：布局与 music viewer 一致 ── */
 #viewer.playlist {
@@ -441,8 +442,8 @@ body.expanded {
 
 #playlistViewer {
   position: absolute;
-  /* 内容收进手机边框屏幕区域（与 music viewer 一致） */
-  inset: 4% 2.5%;
+  /* 桌面端：内容面板撑满 viewer，普通边框样式（圆角 + 细线边框 + 阴影） */
+  inset: 0;
   width: auto;
   height: auto;
   pointer-events: auto;
@@ -450,8 +451,9 @@ body.expanded {
   background: rgba(11, 11, 9, 0.95);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  /* 比例圆角模拟手机屏幕圆角，装饰性边框/阴影交由手机边框素材呈现 */
-  border-radius: 9% / 4%;
+  border-radius: 12px;
+  border: 1px solid rgba(244, 239, 226, 0.1);
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(244, 239, 226, 0.06);
   overflow: hidden;
 }
 
@@ -465,7 +467,7 @@ body.expanded {
   opacity: 0;
 }
 
-/* playlist 模式的手机边框由文件末尾"三个自定义 viewer 统一手机边框"规则提供 */
+/* playlist 模式的手机边框仅在窄屏显示，由文件末尾"窄屏恢复手机边框"统一规则提供 */
 
 @media (max-aspect-ratio: 16/12) {
   #viewer.playlist {
@@ -1309,8 +1311,8 @@ span.comma {
 }
 #showcaseViewer {
   position: absolute;
-  /* 内容收进手机边框屏幕区域（与窄屏方案一致） */
-  inset: 4% 2.5%;
+  /* 桌面端：内容面板撑满 viewer，普通边框样式（圆角 + 细线边框 + 阴影） */
+  inset: 0;
   width: auto;
   height: auto;
   pointer-events: auto;
@@ -1318,8 +1320,9 @@ span.comma {
   /* 暖纸色底，与 AlbumShowcase 的 paper 背景一致，避免圆角外透出深色 */
   background: #f4f1e9;
   overflow: hidden;
-  /* 横向 9%、纵向 4% 的椭圆圆角，接近真机屏幕圆角观感 */
-  border-radius: 9% / 4%;
+  border-radius: 12px;
+  border: 1px solid rgba(244, 239, 226, 0.1);
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(244, 239, 226, 0.06);
 }
 /* 修复：#viewer img { display: none } 会误伤封面图片 */
 #showcaseViewer img {
@@ -1328,19 +1331,16 @@ span.comma {
 .viewing #viewer.showcase h4 {
   opacity: 0;
 }
-/* showcase 模式的手机边框由下方"三个自定义 viewer 统一手机边框"规则提供 */
+/* showcase 模式的手机边框仅在窄屏显示，由文件末尾"窄屏恢复手机边框"统一规则提供 */
 
-/* ── 三个自定义 viewer（music / showcase / playlist）统一手机边框 ──
-   基础规则 #videoFrame:after 已提供 phone-frame-2.png 素材；
-   这里补充定位（inset 基于已定位的 #viewer），桌面端与窄屏一致呈现。
-   内容面板通过 inset: 4% 2.5% 收进边框屏幕区域，随 viewer 尺寸自适应。 */
+/* ── 三个自定义 viewer（music / showcase / playlist）边框显示逻辑 ──
+   桌面端（viewer 在左侧）：不使用手机边框素材，隐藏 #videoFrame:after 的边框图，
+   面板改用普通边框样式（见 #musicViewer / #showcaseViewer / #playlistViewer 规则）。
+   窄屏（viewer 在右侧）：在文件末尾 max-aspect-ratio 断点内恢复手机边框素材。 */
 #viewer.music #videoFrame:after,
 #viewer.showcase #videoFrame:after,
 #viewer.playlist #videoFrame:after {
-  inset: -2%;
-  background: url(/gk3-assets/img/phone-frame-2.png) center / contain no-repeat;
-  pointer-events: none; /* 边框仅作装饰，不拦截交互 */
-  z-index: 100;
+  background-image: none;
 }
 @media (max-aspect-ratio: 16/12) {
   #viewer.showcase {
@@ -1369,18 +1369,7 @@ span.comma {
     transform: none;
     position: relative;
   }
-  /* 恢复原项目的手机边框素材（#videoFrame:after），白底 PNG 与暖纸色内容自然融合 */
-  #viewer.showcase #videoFrame:after {
-    background-image: url(/gk3-assets/img/phone-frame-2.png) !important;
-    /* 窄屏下 videoFrame 已按边框素材比例约束尺寸，inset 归零即可对齐 */
-    inset: 0;
-    pointer-events: none; /* 边框仅作装饰，不拦截交互 */
-  }
-  /* 内容收窄至边框屏幕区域：桌面端基础样式已统一 inset: 4% 2.5%，
-     窄屏下 videoFrame 为定位基准，这里显式归零 inset 保持一致 */
-  #viewer.showcase #showcaseViewer {
-    inset: 4% 2.5%;
-  }
+  /* 手机边框素材由文件末尾"窄屏恢复手机边框"统一规则提供 */
 }
 
 /* ── 精选推荐全屏浮层 ── */
@@ -1416,4 +1405,31 @@ span.comma {
   width: 100%;
   height: 100%;
   border: none;
+}
+
+/* ── 窄屏（viewer 在右侧）：恢复三个自定义 viewer 的手机边框素材 ──
+   桌面端已隐藏边框图（background-image: none），这里重新启用 phone-frame-2.png；
+   内容面板改为比例圆角并收进边框屏幕区域，去掉桌面端的普通边框/阴影。 */
+@media (max-aspect-ratio: 16/12) {
+  #viewer.music #videoFrame:after,
+  #viewer.showcase #videoFrame:after,
+  #viewer.playlist #videoFrame:after {
+    content: '';
+    position: absolute;
+    inset: -2%;
+    background: url('/gk3-assets/img/phone-frame-2.png') center / contain no-repeat;
+    pointer-events: none; /* 边框仅作装饰，不拦截交互 */
+    z-index: 100;
+  }
+
+  #musicViewer,
+  #showcaseViewer,
+  #playlistViewer {
+    /* 内容收进手机边框屏幕区域 */
+    inset: 4% 2.5%;
+    /* 比例圆角模拟手机屏幕圆角，装饰性边框/阴影交由手机边框素材呈现 */
+    border-radius: 9% / 4%;
+    border: none;
+    box-shadow: none;
+  }
 }
