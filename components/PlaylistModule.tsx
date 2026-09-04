@@ -192,13 +192,12 @@ export default function PlaylistModule() {
 
       {/* 曲目列表：分批渲染，滚动到底部自动加载更多 */}
       <div className="pm-list" ref={listRef}>
-        {tracks.slice(0, visibleCount).map((track, index) => (
+        {tracks.slice(0, visibleCount).map((track) => (
           <div
             key={track.id}
             className={`pm-track-row${currentTrack?.id === track.id ? ' pm-track-active' : ''}`}
             onClick={() => playTrack(track)}
           >
-            <span className="pm-track-num">{(index + 1).toString().padStart(2, '0')}</span>
             <img className="pm-track-cover" src={track.cover} alt="" loading="lazy" />
             <div className="pm-track-info">
               <span className="pm-track-name">{track.name}</span>

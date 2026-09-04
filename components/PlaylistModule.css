@@ -127,14 +127,6 @@
   border-left: 2px solid #84d7ff;
 }
 
-.pm-track-num {
-  font-size: 10px;
-  opacity: 0.35;
-  width: 18px;
-  text-align: right;
-  flex-shrink: 0;
-}
-
 .pm-track-cover {
   width: 36px;
   height: 36px;

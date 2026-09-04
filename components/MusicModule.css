@@ -361,6 +361,37 @@
     display: none;
   }
 
+  /* 顶部 tab 栏：高度增大约 50%，并整体下移避开刘海屏遮挡 */
+  .mm-tabs {
+    padding-top: 8px;
+  }
+
+  .mm-tab {
+    /* padding 由 12px 增大到 18px，tab 栏更高更易点按 */
+    padding: 18px 0;
+    font-size: 11px;
+  }
+
+  /* 曲目行尺寸缩小，与 playlist 的 .pm-track-row 保持一致 */
+  .mm-track-item {
+    gap: 10px;
+    padding: 6px 10px 6px 4px;
+  }
+
+  .mm-track-img {
+    width: 36px;
+    height: 36px;
+    border-radius: 4px;
+  }
+
+  .mm-track-name {
+    font-size: 12px;
+  }
+
+  .mm-track-artist {
+    font-size: 10px;
+  }
+
   /* 专辑网格只呈现封面，隐藏文字信息 */
   .mm-card-info {
     display: none;

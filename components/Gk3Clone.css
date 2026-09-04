@@ -1467,10 +1467,10 @@ span.comma {
     padding: 0;
   }
 
-  /* music viewer 顶部有 tab（"最近"/"专辑"），inset 顶部已给 8% 空间，
-     这里仅保留少量 padding 作刘海余量；showcase/playlist 无顶部 tab，不受影响 */
+  /* music viewer 顶部有 tab（"最近"/"专辑"），窄屏下 tab 栏加高并整体下移，
+     这里同步增大 padding-top 作刘海余量；showcase/playlist 无顶部 tab，不受影响 */
   #musicViewer {
-    padding-top: 2%;
+    padding-top: 5%;
   }
 
   /* music / playlist：改为不透明纯黑，去掉半透明与模糊，彻底遮住页面背景 */
