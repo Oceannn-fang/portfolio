@@ -370,8 +370,8 @@ body.expanded {
 
 #musicViewer {
   position: absolute;
-  /* 桌面端：内容面板撑满 viewer，普通边框样式（圆角 + 细线边框 + 阴影） */
-  inset: 0;
+  /* 桌面端：内容面板占 80% 宽度（左右各留 10%），普通边框样式 */
+  inset: 0 10%;
   width: auto;
   height: auto;
   pointer-events: auto;
@@ -452,8 +452,8 @@ body.expanded {
 
 #playlistViewer {
   position: absolute;
-  /* 桌面端：内容面板撑满 viewer，普通边框样式（圆角 + 细线边框 + 阴影） */
-  inset: 0;
+  /* 桌面端：内容面板占 80% 宽度（左右各留 10%），普通边框样式 */
+  inset: 0 10%;
   width: auto;
   height: auto;
   pointer-events: auto;
@@ -1331,8 +1331,8 @@ span.comma {
 }
 #showcaseViewer {
   position: absolute;
-  /* 桌面端：内容面板撑满 viewer，普通边框样式（圆角 + 细线边框 + 阴影） */
-  inset: 0;
+  /* 桌面端：内容面板占 80% 宽度（左右各留 10%），普通边框样式 */
+  inset: 0 10%;
   width: auto;
   height: auto;
   pointer-events: auto;
