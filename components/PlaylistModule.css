@@ -1,0 +1,159 @@
+/* ── PlaylistModule：嵌入 Gk3Clone viewer 面板的网易云精选歌单模块 ── */
+/* 类名统一 pm- 前缀，避免污染全局样式 */
+/* 字体与色系沿用 Gk3Clone / MusicModule：Quincy CF / Ellograph CF，--warm-white 暖白 */
+
+.pm-root {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  pointer-events: auto;
+  font-family: 'Ellograph Light', 'Quincy Light', Georgia, serif;
+  color: var(--warm-white, #f5efe6);
+}
+
+.pm-loading,
+.pm-error {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  font-size: 13px;
+  opacity: 0.6;
+}
+
+/* ── 歌单头部 ── */
+.pm-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  flex-shrink: 0;
+}
+
+.pm-header-cover {
+  width: 56px;
+  height: 56px;
+  border-radius: 8px;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.pm-header-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.pm-header-name {
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.3px;
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pm-header-count {
+  font-size: 11px;
+  opacity: 0.5;
+  margin: 4px 0 0;
+}
+
+/* ── 曲目列表（可滚动） ── */
+.pm-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px 0;
+}
+
+.pm-track-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 16px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.pm-track-row:hover {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+/* 展开播放器的曲目行保持高亮 */
+.pm-track-row.expanded {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.pm-track-num {
+  font-size: 11px;
+  opacity: 0.4;
+  width: 20px;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.pm-track-cover {
+  width: 40px;
+  height: 40px;
+  border-radius: 4px;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.pm-track-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.pm-track-name {
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pm-track-artist {
+  font-size: 10px;
+  opacity: 0.5;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pm-track-duration {
+  font-size: 10px;
+  opacity: 0.4;
+  flex-shrink: 0;
+}
+
+/* ── 网易云外链播放器 ── */
+.pm-player {
+  padding: 0 16px 8px 46px;
+}
+
+.pm-player iframe {
+  border-radius: 6px;
+  display: block;
+}
+
+/* ── 滚动条 ── */
+.pm-list::-webkit-scrollbar {
+  width: 4px;
+}
+
+.pm-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.pm-list::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 2px;
+}

@@ -6,8 +6,9 @@ import Noise from "./Noise";
 import { setSharedNoisePhase } from "./noisePhase";
 import MusicModule from "./MusicModule";
 import AlbumShowcase from "./AlbumShowcase";
+import PlaylistModule from "./PlaylistModule";
 
-type ViewerMode = "phone" | "video" | "social" | "pin" | "music" | "showcase";
+type ViewerMode = "phone" | "video" | "social" | "pin" | "music" | "showcase" | "playlist";
 
 type WorkItem = {
   text: React.ReactNode;
@@ -84,6 +85,22 @@ const rows: Row[] = [
         text: "enter the archive",
         viewer: "showcase" as ViewerMode,
         rowId: "showcase",
+      },
+    ],
+  },
+  {
+    id: "playlist",
+    title: (
+      <>
+        <i>my picks</i>精选歌单
+      </>
+    ),
+    h3: <>netease</>,
+    items: [
+      {
+        text: "my picks",
+        viewer: "playlist" as ViewerMode,
+        rowId: "playlist",
       },
     ],
   },
@@ -342,7 +359,7 @@ export function Gk3Clone() {
     const video = videoRef.current;
     const videoFrame = videoFrameRef.current;
     if (!video) return;
-    if (viewing && currentMedia && viewerClass !== "social" && viewerClass !== "pin" && viewerClass !== "music" && viewerClass !== "showcase") {
+    if (viewing && currentMedia && viewerClass !== "social" && viewerClass !== "pin" && viewerClass !== "music" && viewerClass !== "showcase" && viewerClass !== "playlist") {
       if (clearVideoTimerRef.current) {
         clearTimeout(clearVideoTimerRef.current);
         clearVideoTimerRef.current = null;
@@ -852,6 +869,15 @@ export function Gk3Clone() {
               onMouseLeave={() => { cancelEndViewerTimer(); endViewerTimerRef.current = setTimeout(endViewer, 150); }}
             >
               <AlbumShowcase onOpenOverlay={() => setShowcaseOpen(true)} />
+            </div>
+          )}
+          {viewing && viewerClass === "playlist" && (
+            <div
+              id="playlistViewer"
+              onMouseEnter={cancelEndViewerTimer}
+              onMouseLeave={() => { cancelEndViewerTimer(); endViewerTimerRef.current = setTimeout(endViewer, 150); }}
+            >
+              <PlaylistModule />
             </div>
           )}
         </div>

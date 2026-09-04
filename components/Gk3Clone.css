@@ -420,6 +420,77 @@ body.expanded {
 .music #videoFrame:after {
   background-image: none !important;
 }
+
+/* ── 精选歌单 viewer（网易云）：布局与 music viewer 一致 ── */
+#viewer.playlist {
+  /* 手机比例：宽度 34%、高度 65vh，并垂直居中 */
+  width: 34%;
+  height: 65vh;
+  top: 50%;
+  transform: translateY(-50%);
+  /* 提升层级，避免 .viewing .row.active 的行文字盖在面板上 */
+  z-index: 20;
+}
+
+#viewer.playlist #videoWrapper {
+  display: none;
+}
+
+#viewer.playlist #videoFrame {
+  transform: scale(1);
+  opacity: 1;
+  align-items: stretch;
+  justify-content: stretch;
+}
+
+#playlistViewer {
+  position: absolute;
+  inset: 24px;
+  width: auto;
+  height: auto;
+  pointer-events: auto;
+  z-index: 10;
+  background: rgba(11, 11, 9, 0.95);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-radius: 12px;
+  /* 与原网站 viewer 风格一致的边框 */
+  border: 1px solid rgba(244, 239, 226, 0.1);
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(244, 239, 226, 0.06);
+  overflow: hidden;
+}
+
+/* 修复：#viewer video, #viewer img { display: none } 会误伤歌单封面图片 */
+#playlistViewer img {
+  display: block !important;
+}
+
+/* playlist 模式下隐藏占位文字 */
+.viewing #viewer.playlist h4 {
+  opacity: 0;
+}
+
+/* playlist 模式下去掉手机框装饰 */
+.playlist #videoFrame:after {
+  background-image: none !important;
+}
+
+@media (max-aspect-ratio: 16/12) {
+  #viewer.playlist {
+    width: 100%;
+    /* 限制高度，不占满整个视口，并用 top 偏移实现视觉垂直居中 */
+    height: 70vh;
+    max-height: 70vh;
+    top: 15vh;
+    transform: translateX(70vw); /* 继承移动端隐藏行为 */
+  }
+  /* 修复：隐藏 transform 在源序上晚于 .viewing #viewer，同特异性下会覆盖滑入行为，这里显式补回 */
+  .viewing #viewer.playlist {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
 #viewer.social .ratio {
   display: none;
 }
