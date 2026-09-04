@@ -1436,31 +1436,41 @@ span.comma {
   #viewer.playlist #videoFrame:after {
     content: '';
     position: absolute;
-    inset: -2%;
+    /* videoFrame 开启 overflow:hidden 后，inset:-2% 的外扩部分会被裁掉，
+       故收回到 inset:0 —— videoFrame 宽高比即素材比例（1304:2866），contain 正好铺满 */
+    inset: 0;
     background: url('/gk3-assets/img/phone-frame-2.png') center / contain no-repeat;
     pointer-events: none; /* 边框仅作装饰，不拦截交互 */
     z-index: 100;
   }
 
+  /* 最终防线：无论内部元素如何定位/transform，都在 videoFrame（手机边框物理边界）层强制裁切 */
+  #viewer.music #videoFrame,
+  #viewer.showcase #videoFrame,
+  #viewer.playlist #videoFrame {
+    overflow: hidden;
+    /* 与手机屏幕圆角匹配 */
+    border-radius: 9% / 4%;
+  }
+
   #musicViewer,
   #showcaseViewer,
   #playlistViewer {
-    /* 面板铺满整个 videoFrame，让背景色（黑/暖纸色）完全盖住页面背景，不再从边缘漏出 */
-    inset: 0;
-    /* 比例圆角模拟手机屏幕圆角 */
-    border-radius: 9% / 4%;
+    /* 面板收进边框屏幕区域：上下留 3%、左右留 2% 的 bezel 空间（放弃 inset:0 + padding 方案） */
+    inset: 3% 2%;
+    /* 比例圆角模拟手机屏幕圆角（比 videoFrame 小一圈） */
+    border-radius: 7% / 3%;
     border: none;
     box-shadow: none;
-    /* 强制裁切，防止内部内容溢出边框 */
+    /* 强制裁切，防止内部内容溢出面板 */
     overflow: hidden;
-    /* 内部用 padding 留安全区：顶部避开刘海，底部防溢出（内容整体上移，music tab 更贴近顶部） */
-    padding: 6% 2% 4% 2%;
+    padding: 0;
   }
 
-  /* music viewer 顶部有 tab（"最近"/"专辑"），需更大的顶部黑色填充避开手机刘海，
-     其余 padding 继承上方共享规则；showcase/playlist 无顶部 tab，不受影响 */
+  /* music viewer 顶部有 tab（"最近"/"专辑"），单独加顶部 padding 避开手机刘海；
+     showcase/playlist 无顶部 tab，不受影响 */
   #musicViewer {
-    padding-top: 12%;
+    padding-top: 8%;
   }
 
   /* music / playlist：改为不透明纯黑，去掉半透明与模糊，彻底遮住页面背景 */
