@@ -76,7 +76,7 @@ const rows: Row[] = [
     id: "showcase",
     title: (
       <>
-        <i>精选推荐</i>arc vinyl
+        <i>enter the archive</i>arc vinyl
       </>
     ),
     h3: <>3d shelf</>,
@@ -92,7 +92,7 @@ const rows: Row[] = [
     id: "playlist",
     title: (
       <>
-        <i>my picks</i>精选歌单
+        <i>my picks</i>playlist
       </>
     ),
     h3: <>netease</>,
