@@ -1,0 +1,37 @@
+/* PortfolioModule — 作品集 viewer 模块样式
+ * pom- 前缀命名，避免与项目现有类名冲突。
+ * 背景使用纯色 #0b0b09（项目规范：viewer 面板禁止半透明）。
+ */
+
+.pom-root {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: #0b0b09;
+}
+
+/* 单张作品全图模式 */
+.pom-single {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 12px;
+  box-sizing: border-box;
+}
+
+.pom-single-img {
+  max-width: 100%;
+  max-height: 85%;
+  object-fit: contain;
+  border-radius: 6px;
+}
+
+.pom-single-title {
+  margin-top: 8px;
+  font-size: 11px;
+  color: rgba(244, 239, 226, 0.6);
+  text-align: center;
+  font-family: 'Satoshi', sans-serif;
+}

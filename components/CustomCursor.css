@@ -1,0 +1,62 @@
+/* ── 自定义光标 ─────────────────────────────────────────────
+ * 说明：居中采用负 margin 而非 translate(-50%, -50%)，
+ * 避免与 GSAP 写入的 x/y transform 冲突；
+ * 尺寸过渡时同步过渡 margin，保证圆环始终以指针为中心缩放。
+ */
+
+/* 全局隐藏默认光标（仅桌面宽屏下由 JS 添加该类） */
+.custom-cursor-active,
+.custom-cursor-active * {
+  cursor: none !important;
+}
+
+.cc-ring {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 36px;
+  height: 36px;
+  margin: -18px 0 0 -18px;
+  border: 1.5px solid #fff;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 99999;
+  mix-blend-mode: difference;
+  transition: width 0.3s cubic-bezier(0.25, 1, 0.5, 1),
+              height 0.3s cubic-bezier(0.25, 1, 0.5, 1),
+              margin 0.3s cubic-bezier(0.25, 1, 0.5, 1),
+              border-width 0.3s,
+              background-color 0.3s;
+  will-change: transform;
+}
+
+.cc-ring-hover {
+  width: 56px;
+  height: 56px;
+  margin: -28px 0 0 -28px;
+  border-width: 1px;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.cc-dot {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 5px;
+  height: 5px;
+  margin: -2.5px 0 0 -2.5px;
+  background: #fff;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 99999;
+  mix-blend-mode: difference;
+  will-change: transform;
+}
+
+/* 窄屏兜底：即使 JS 判定失效也强制隐藏 */
+@media (max-aspect-ratio: 16/12) {
+  .cc-ring,
+  .cc-dot {
+    display: none;
+  }
+}

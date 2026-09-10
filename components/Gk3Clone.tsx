@@ -7,9 +7,11 @@ import { setSharedNoisePhase } from "./noisePhase";
 import MusicModule, { warmMusicCache, isMusicCacheValid } from "./MusicModule";
 import AlbumShowcase from "./AlbumShowcase";
 import PlaylistModule, { warmPlaylistCache, isPlaylistCacheValid } from "./PlaylistModule";
+import PortfolioModule from "./PortfolioModule";
+import { portfolioWorks } from "../lib/portfolio-images";
 import LoadingScreen from "./LoadingScreen";
 
-type ViewerMode = "phone" | "video" | "social" | "pin" | "music" | "showcase" | "playlist";
+type ViewerMode = "phone" | "video" | "social" | "pin" | "music" | "showcase" | "playlist" | "portfolio";
 
 type WorkItem = {
   text: React.ReactNode;
@@ -18,6 +20,8 @@ type WorkItem = {
   viewer?: ViewerMode;
   media?: string;
   rowId: string;
+  /** portfolio 行条目对应的作品 ID，选中后 viewer 展示单张全图 */
+  workId?: string;
 };
 
 type Row = {
@@ -104,6 +108,18 @@ const rows: Row[] = [
         rowId: "playlist",
       },
     ],
+  },
+  {
+    id: "portfolio",
+    title: <>works</>,
+    h3: <>portfolio</>,
+    // 只取最新 10 个作品，避免列表过长
+    items: portfolioWorks.slice(0, 10).map((work) => ({
+      text: work.title,
+      viewer: "portfolio" as ViewerMode,
+      rowId: "portfolio",
+      workId: work.id,
+    })),
   },
   {
     id: "elsewhere",
@@ -263,6 +279,8 @@ export function Gk3Clone() {
   const [noiseTunerOpen, setNoiseTunerOpen] = useState(false);
   // 精选推荐全屏浮层状态
   const [showcaseOpen, setShowcaseOpen] = useState(false);
+  // 作品集 viewer 当前选中的作品 ID（null 表示显示 DriftWall 总览）
+  const [selectedPortfolioWork, setSelectedPortfolioWork] = useState<string | null>(null);
   // 预加载 3D 页面（隐藏 iframe），避免点击打开浮层时加载卡顿
   const [preloadReady, setPreloadReady] = useState(false);
   // ── 加载动画状态 ──
@@ -425,7 +443,7 @@ export function Gk3Clone() {
     const video = videoRef.current;
     const videoFrame = videoFrameRef.current;
     if (!video) return;
-    if (viewing && currentMedia && viewerClass !== "social" && viewerClass !== "pin" && viewerClass !== "music" && viewerClass !== "showcase" && viewerClass !== "playlist") {
+    if (viewing && currentMedia && viewerClass !== "social" && viewerClass !== "pin" && viewerClass !== "music" && viewerClass !== "showcase" && viewerClass !== "playlist" && viewerClass !== "portfolio") {
       if (clearVideoTimerRef.current) {
         clearTimeout(clearVideoTimerRef.current);
         clearVideoTimerRef.current = null;
@@ -727,6 +745,8 @@ export function Gk3Clone() {
     setViewerClass(item.viewer ?? "phone");
     setActiveRow(rowId);
     setViewing(true);
+    // portfolio 行：选中条目对应的作品，viewer 展示单张全图
+    setSelectedPortfolioWork(item.workId ?? null);
     setPlaceholder(placeholders[Math.floor(Math.random() * placeholders.length)]);
     setActiveItem(`${rowId}-${index}`);
     setCurrentMedia(item.media ?? null);
@@ -742,12 +762,30 @@ export function Gk3Clone() {
     document.body.classList.toggle("link", Boolean(item.href));
   };
 
+  // portfolio 行：hover 行标题（h2）时打开 DriftWall 总览（不选中任何作品）
+  const prepPortfolioOverview = () => {
+    cancelEndViewerTimer();
+    setViewerClass("portfolio");
+    setActiveRow("portfolio");
+    setViewing(true);
+    setSelectedPortfolioWork(null);
+    setPlaceholder(placeholders[Math.floor(Math.random() * placeholders.length)]);
+    setActiveItem(null);
+    setCurrentMedia(null);
+    if (!window.matchMedia("(max-aspect-ratio: 16/12)").matches) {
+      flipRef.current = -1;
+    }
+    document.body.classList.add("cursor");
+    document.body.classList.remove("link");
+  };
+
   const endViewer = () => {
     cancelEndViewerTimer();
     setViewing(false);
     setActiveRow(null);
     setActiveItem(null);
     setCurrentMedia(null);
+    setSelectedPortfolioWork(null);
     setPlaceholder(placeholders[Math.floor(Math.random() * placeholders.length)]);
     document.body.classList.remove("cursor", "link", "expanded");
     setExpanded(false);
@@ -825,7 +863,28 @@ export function Gk3Clone() {
         className={`row${activeRow === row.id && viewing ? " active" : ""}`}
         key={row.id}
       >
-        {row.title ? <h2 className={row.solo ? "solo" : undefined}>{row.title}</h2> : null}
+        {row.title ? (
+          row.id === "portfolio" ? (
+            // portfolio 行：hover 标题打开 DriftWall 总览，移出后延迟关闭（与条目/viewer 面板共用计时器）
+            <h2
+              onMouseEnter={() => {
+                if (!window.matchMedia("(hover: none) and (pointer: coarse)").matches) {
+                  prepPortfolioOverview();
+                }
+              }}
+              onMouseLeave={() => {
+                if (!window.matchMedia("(hover: none) and (pointer: coarse)").matches) {
+                  cancelEndViewerTimer();
+                  endViewerTimerRef.current = setTimeout(endViewer, 150);
+                }
+              }}
+            >
+              {row.title}
+            </h2>
+          ) : (
+            <h2 className={row.solo ? "solo" : undefined}>{row.title}</h2>
+          )
+        ) : null}
         {row.h3 ? <h3>{row.h3}</h3> : null}
         <div className="work-wrapper" onMouseLeave={() => { if (!window.matchMedia("(hover: none) and (pointer: coarse)").matches) { cancelEndViewerTimer(); endViewerTimerRef.current = setTimeout(endViewer, 150); } }}>
           <ul className={row.id === "elsewhere" ? undefined : "work"}>
@@ -945,6 +1004,15 @@ export function Gk3Clone() {
               onMouseLeave={() => { cancelEndViewerTimer(); endViewerTimerRef.current = setTimeout(endViewer, 150); }}
             >
               <PlaylistModule />
+            </div>
+          )}
+          {viewing && viewerClass === "portfolio" && (
+            <div
+              id="portfolioViewer"
+              onMouseEnter={cancelEndViewerTimer}
+              onMouseLeave={() => { cancelEndViewerTimer(); endViewerTimerRef.current = setTimeout(endViewer, 150); }}
+            >
+              <PortfolioModule selectedWork={selectedPortfolioWork} />
             </div>
           )}
         </div>

@@ -1,0 +1,96 @@
+/* ── 无缝跑马灯（技能标签条） ── */
+
+.sm-root {
+  width: 100%;
+  padding: 40px 0;
+  position: relative;
+  /* 位于普通文档流，不设置 z-index，避免盖住 viewer 面板 */
+}
+
+/* 每行独立视口：负责裁切与左右渐隐遮罩 */
+.sm-viewport {
+  width: 100%;
+  overflow: hidden;
+  mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+  -webkit-mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+}
+
+.sm-row {
+  display: flex;
+  width: max-content;
+  white-space: nowrap;
+  will-change: transform;
+}
+
+/* 纯 CSS 动画兜底（JS 未接管 / 降级环境使用） */
+.sm-row-left {
+  animation: sm-scroll-left var(--sm-duration, 30s) linear infinite;
+}
+
+.sm-row-right {
+  animation: sm-scroll-right var(--sm-duration, 36s) linear infinite;
+}
+
+/* JS 接管后停用 CSS 动画，由 rAF 写 transform 实现滚动速度联动 */
+.sm-row-left.sm-js-driven,
+.sm-row-right.sm-js-driven {
+  animation: none;
+}
+
+.sm-root:hover .sm-row {
+  animation-play-state: paused;
+}
+
+.sm-item {
+  font-family: "Ellograph Light", "Satoshi", sans-serif;
+  font-size: clamp(14px, 1.8vw, 22px);
+  font-weight: 400;
+  letter-spacing: 0.05em;
+  color: rgba(244, 239, 226, 0.5);
+  padding: 8px 0;
+  text-transform: uppercase;
+  flex-shrink: 0;
+}
+
+/* 第二行使用斜体 Quincy，制造字体层次对比 */
+.sm-item-alt {
+  font-family: "Quincy Text Italic", "Satoshi", sans-serif;
+  text-transform: none;
+  letter-spacing: 0.02em;
+  color: rgba(244, 239, 226, 0.32);
+}
+
+.sm-sep {
+  margin: 0 24px;
+  font-size: 0.6em;
+  opacity: 0.4;
+  vertical-align: middle;
+}
+
+@keyframes sm-scroll-left {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+@keyframes sm-scroll-right {
+  0% { transform: translateX(-50%); }
+  100% { transform: translateX(0); }
+}
+
+/* 尊重系统「减少动态效果」偏好 */
+@media (prefers-reduced-motion: reduce) {
+  .sm-row-left,
+  .sm-row-right {
+    animation: none;
+  }
+}
+
+/* 窄屏适配 */
+@media (max-aspect-ratio: 16/12) {
+  .sm-root {
+    padding: 24px 0;
+  }
+  .sm-sep {
+    margin: 0 16px;
+  }
+}

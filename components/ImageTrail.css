@@ -1,0 +1,27 @@
+/* ── 悬停图片拖尾 ── */
+
+.it-img {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 200px;
+  height: 140px;
+  object-fit: cover;
+  border-radius: 8px;
+  pointer-events: none;
+  z-index: 9999;
+  opacity: 0;
+  will-change: transform, opacity;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+}
+
+/* viewer 打开期间强制隐藏拖尾（CSS 动画优先级高于 GSAP 的内联样式） */
+body.viewing .it-img {
+  animation: it-hide 0.2s forwards;
+}
+
+@keyframes it-hide {
+  to {
+    opacity: 0;
+  }
+}

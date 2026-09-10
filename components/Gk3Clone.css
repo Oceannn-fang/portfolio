@@ -1353,13 +1353,14 @@ span.comma {
 }
 /* showcase 模式的手机边框仅在窄屏显示，由文件末尾"窄屏恢复手机边框"统一规则提供 */
 
-/* ── 三个自定义 viewer（music / showcase / playlist）边框显示逻辑 ──
+/* ── 四个自定义 viewer（music / showcase / playlist / portfolio）边框显示逻辑 ──
    桌面端（viewer 在左侧）：不使用手机边框素材，隐藏 #videoFrame:after 的边框图，
-   面板改用普通边框样式（见 #musicViewer / #showcaseViewer / #playlistViewer 规则）。
+   面板改用普通边框样式（见 #musicViewer / #showcaseViewer / #playlistViewer / #portfolioViewer 规则）。
    窄屏（viewer 在右侧）：在文件末尾 max-aspect-ratio 断点内恢复手机边框素材。 */
 #viewer.music #videoFrame:after,
 #viewer.showcase #videoFrame:after,
-#viewer.playlist #videoFrame:after {
+#viewer.playlist #videoFrame:after,
+#viewer.portfolio #videoFrame:after {
   background-image: none;
 }
 @media (max-aspect-ratio: 16/12) {
@@ -1427,13 +1428,83 @@ span.comma {
   border: none;
 }
 
-/* ── 窄屏（viewer 在右侧）：恢复三个自定义 viewer 的手机边框素材 ──
+/* ── 作品集 viewer 面板（DriftWall）：布局与 music/showcase/playlist viewer 一致 ── */
+#viewer.portfolio {
+  /* 手机比例：宽度 34%、高度 65vh，并垂直居中 */
+  width: 34%;
+  height: 65vh;
+  top: 50%;
+  transform: translateY(-50%);
+  /* 提升层级，避免 .viewing .row.active 的行文字盖在面板上 */
+  z-index: 20;
+}
+#viewer.portfolio #videoWrapper {
+  display: none;
+}
+#viewer.portfolio #videoFrame {
+  transform: scale(1);
+  opacity: 1;
+  align-items: stretch;
+  justify-content: stretch;
+}
+#portfolioViewer {
+  position: absolute;
+  /* 桌面端：内容面板占 80% 宽度（左右各留 10%），普通边框样式 */
+  inset: 0 10%;
+  width: auto;
+  height: auto;
+  pointer-events: auto;
+  z-index: 10;
+  /* 项目规范：viewer 面板背景必须纯色，禁止半透明 */
+  background: #0b0b09;
+  border-radius: 12px;
+  border: 1px solid rgba(244, 239, 226, 0.1);
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(244, 239, 226, 0.06);
+  overflow: hidden;
+}
+/* 修复：#viewer video, #viewer img { display: none } 会误伤作品集图片 */
+#portfolioViewer img {
+  display: block !important;
+}
+/* portfolio 模式下隐藏占位文字 */
+.viewing #viewer.portfolio h4 {
+  opacity: 0;
+}
+@media (max-aspect-ratio: 16/12) {
+  #viewer.portfolio {
+    width: 100%;
+    /* 窄屏高度恢复为 70vh，与 music/showcase/playlist 统一 */
+    height: 70vh;
+    max-height: 70vh;
+    top: 15vh;
+    transform: translateX(70vw); /* 继承移动端隐藏行为 */
+  }
+  /* 修复：隐藏 transform 在源序上晚于 .viewing #viewer，同特异性下会覆盖滑入行为，这里显式补回 */
+  .viewing #viewer.portfolio {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  /* 窄屏下 videoFrame 按手机边框素材比例（1304:2866）约束宽度，防止内容溢出边框 */
+  #viewer.portfolio #videoFrame {
+    flex-basis: auto;
+    width: calc(70vh * 1304 / 2866);
+    height: 100%;
+    padding: 0;
+    margin: 0 24px 0 auto;
+    transform: none;
+    position: relative;
+  }
+  /* 手机边框素材由文件末尾“窄屏恢复手机边框”统一规则提供 */
+}
+
+/* ── 窄屏（viewer 在右侧）：恢复四个自定义 viewer 的手机边框素材 ──
    桌面端已隐藏边框图（background-image: none），这里重新启用 phone-frame-2.png；
    内容面板改为比例圆角并收进边框屏幕区域，去掉桌面端的普通边框/阴影。 */
 @media (max-aspect-ratio: 16/12) {
   #viewer.music #videoFrame:after,
   #viewer.showcase #videoFrame:after,
-  #viewer.playlist #videoFrame:after {
+  #viewer.playlist #videoFrame:after,
+  #viewer.portfolio #videoFrame:after {
     content: '';
     position: absolute;
     /* videoFrame 开启 overflow:hidden 后，inset:-2% 的外扩部分会被裁掉，
@@ -1447,7 +1518,8 @@ span.comma {
   /* 最终防线：无论内部元素如何定位/transform，都在 videoFrame（手机边框物理边界）层强制裁切 */
   #viewer.music #videoFrame,
   #viewer.showcase #videoFrame,
-  #viewer.playlist #videoFrame {
+  #viewer.playlist #videoFrame,
+  #viewer.portfolio #videoFrame {
     overflow: hidden;
     /* 与手机屏幕圆角匹配（>= 内容面板圆角，保证裁切链协调） */
     border-radius: 12% / 5%;
@@ -1455,7 +1527,8 @@ span.comma {
 
   #musicViewer,
   #showcaseViewer,
-  #playlistViewer {
+  #playlistViewer,
+  #portfolioViewer {
     /* 加大 inset 匹配手机边框 bezel 厚度：上下 8%、左右 5%，内容完全收进屏幕可视区域 */
     inset: 5% 5%;
     /* 比例圆角匹配手机屏幕的大圆角（与 videoFrame 同档） */
@@ -1479,6 +1552,11 @@ span.comma {
     background: #0b0b09;
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
+  }
+
+  /* portfolio：不透明纯黑（桌面端已是纯色，这里确保窄屏一致） */
+  #portfolioViewer {
+    background: #0b0b09;
   }
 
   /* showcase：不透明暖纸色，与 AlbumShowcase 背景一致 */
