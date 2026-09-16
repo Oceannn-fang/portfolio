@@ -1,0 +1,81 @@
+/* TiltedCard — React Bits 同款鼠标跟随 3D 倾斜卡片
+ * tc- 语义类名（tilted-card-），结构：figure(perspective 800px) > inner(preserve-3d) > img + overlay + figcaption(tooltip)
+ * 手感参数由组件内 spring 提供（damping 30 / stiffness 100 / mass 2），本文件只管静态外观。
+ */
+
+.tilted-card-figure {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  perspective: 800px;
+}
+
+/* 3D 内容层：rotateX/rotateY/scale 由 motion style 驱动 */
+.tilted-card-inner {
+  position: relative;
+  overflow: hidden;
+  will-change: transform;
+  transform-style: preserve-3d;
+}
+
+/* 图片铺满 inner；圆角与 will-change 与 React Bits 标准一致 */
+.tilted-card-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 15px;
+  will-change: transform;
+  transform: translateZ(0);
+}
+
+/* 可选内容浮层（displayOverlayContent）：抬升到图片上方 */
+.tilted-card-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  transform: translateZ(30px);
+}
+
+/* tooltip：跟随鼠标（x/y 为 motion 值），轻微随纵向速度旋转，translateZ 抬升防穿模 */
+.tilted-card-caption {
+  pointer-events: none;
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 10;
+  max-width: 260px;
+  padding: 8px 14px;
+  border-radius: 8px;
+  background: #222;
+  color: #fff;
+  font-size: 14px;
+  line-height: 1.4;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transform: translateZ(30px);
+}
+
+/* 移动端提示（showMobileWarning 才渲染） */
+.tilted-card-mobile-alert {
+  display: none;
+  padding: 8px 14px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 8px;
+  color: #fff;
+  font-size: 13px;
+  text-align: center;
+}
+
+@media (max-width: 768px) {
+  .tilted-card-mobile-alert {
+    display: block;
+  }
+}

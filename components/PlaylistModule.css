@@ -1,6 +1,7 @@
 /* ── PlaylistModule：嵌入 Gk3Clone viewer 面板的网易云精选歌单模块 ── */
 /* 类名统一 pm- 前缀，避免污染全局样式 */
-/* 字体与色系沿用 Gk3Clone / MusicModule：Quincy CF / Ellograph CF，--warm-white 暖白 */
+/* 字体与色系对齐 listening（MusicModule / mm-）：歌名 Quincy Light 衬线、
+   作者名继承根节点 Ellograph Light，--warm-white 暖白 */
 
 .pm-root {
   position: relative;
@@ -53,16 +54,19 @@
 }
 
 .pm-player-name {
-  font-size: 13px;
-  font-weight: 500;
+  font-family: "Quincy Light", Georgia, serif; /* 对齐 listening .mm-track-name */
+  font-size: 15px; /* 对齐 listening 15px */
+  font-weight: normal; /* Quincy Light 仅 normal 字重，避免浏览器合成加粗 */
+  text-align: left; /* #viewer 的 text-align:center 会继承污染，歌曲信息强制左对齐 */
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
 .pm-player-artist {
-  font-size: 11px;
+  font-size: 12px; /* 对齐 listening .mm-track-artist 12px */
   opacity: 0.5;
+  text-align: left; /* 歌曲信息作者名左对齐（硬要求） */
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -144,24 +148,52 @@
 }
 
 .pm-track-name {
-  font-size: 12px;
+  font-family: "Quincy Light", Georgia, serif; /* 对齐 listening .mm-track-name */
+  font-size: 15px; /* 对齐 listening 15px */
+  font-weight: normal;
+  text-align: left; /* #viewer 的 text-align:center 会继承污染，列表歌名强制左对齐（任务#37） */
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
 .pm-track-artist {
-  font-size: 10px;
+  font-size: 12px; /* 对齐 listening .mm-track-artist 12px */
   opacity: 0.45;
+  text-align: left; /* 列表作者名左对齐（任务#37） */
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
 .pm-track-duration {
-  font-size: 10px;
+  font-size: 11px; /* 对齐 listening .mm-track-time 11px */
   opacity: 0.35;
   flex-shrink: 0;
+}
+
+/* ── 窄屏（viewer 在右侧手机边框内）：与 Gk3Clone / MusicModule 断点一致 ──
+   桌面字号对齐 listening 后，窄屏回退到紧凑字号，保持面板行密度与几何约束 */
+@media (max-aspect-ratio: 16/12) {
+  .pm-player-name {
+    font-size: 13px;
+  }
+
+  .pm-player-artist {
+    font-size: 11px;
+  }
+
+  .pm-track-name {
+    font-size: 12px; /* 对齐 mm 窄屏 .mm-track-name 12px */
+  }
+
+  .pm-track-artist {
+    font-size: 10px; /* 对齐 mm 窄屏 .mm-track-artist 10px */
+  }
+
+  .pm-track-duration {
+    font-size: 10px;
+  }
 }
 
 /* ── 滚动条 ── */

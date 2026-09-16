@@ -6,7 +6,10 @@ import { noisePhase } from "./noisePhase";
 
 const DENSITY_MIN = 30;
 const DENSITY_MAX = 70;
-const INTERVAL_MIN = 1;
+// 最低刷新间隔 2 帧：noisePhase 激活时段实际生效的频率区间变为 [2,5]，
+// 峰值重绘从 60fps 降到 30fps。噪点是随机颗粒刷新（非连续动画），肉眼无差异，
+// hover/交互高负载期的噪点重绘峰值开销减半
+const INTERVAL_MIN = 2;
 const INTERVAL_MAX = 5;
 
 const easePhase = (value: number) => {
@@ -21,15 +24,20 @@ type NoiseProps = {
   patternRefreshInterval?: number;
   patternAlpha?: number;
   patternDensity?: number;
+  /** 外部暂停开关：true 时完全不启动重绘循环（用于被 LoadingScreen 全覆盖等不可见阶段，避免白耗主线程） */
+  paused?: boolean;
 };
 
 const Noise = ({
   patternSize = 250,
   patternScaleX = 1,
   patternScaleY = 1,
-  patternRefreshInterval = 2,
+  // 默认 4：重绘 60/4 = 15fps（原 2 = 30fps）。噪点是随机颗粒刷新，
+  // 15fps 下（alpha 0.06）肉眼几乎无感，主线程逐像素随机 + putImageData 频率减半
+  patternRefreshInterval = 4,
   patternAlpha = 15,
   patternDensity = 100,
+  paused = false,
 }: NoiseProps) => {
   const grainRef = useRef<HTMLCanvasElement>(null);
 
@@ -122,13 +130,16 @@ const Noise = ({
 
     window.addEventListener("resize", resize);
     prepare();
-    loop();
+    // paused 时完全不启动 rAF 循环（零主线程开销）；恢复时由 effect 重建并启动
+    if (!paused) {
+      loop();
+    }
 
     return () => {
       window.removeEventListener("resize", resize);
       window.cancelAnimationFrame(animationId);
     };
-  }, [patternSize, patternScaleX, patternScaleY, patternRefreshInterval, patternAlpha, patternDensity]);
+  }, [paused, patternSize, patternScaleX, patternScaleY, patternRefreshInterval, patternAlpha, patternDensity]);
 
   return (
     <canvas className="noise-overlay" ref={grainRef} aria-hidden="true" />

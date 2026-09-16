@@ -41,3 +41,11 @@ test_output.ps1
 # .env.local 已由上方 .env*.local 规则覆盖，此处显式重申以防规则被改动
 .env.local
 lib/spotify-token.json
+.env*
+
+# Vercel CLI 临时目录（含部署用 token，严禁入库）
+.vercel-tmp/
+
+# 验证过程截图与临时脚本
+scripts/*.png
+scripts/verify-*.cjs

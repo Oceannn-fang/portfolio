@@ -11,27 +11,74 @@
   background: #0b0b09;
 }
 
-/* 单张作品全图模式 */
+/* 单张作品全图模式：作为裁剪容器（overflow:hidden），尺寸 = 手机屏幕区域 */
 .pom-single {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 12px;
-  box-sizing: border-box;
+  display: block;
+  padding: 0;
+  position: relative;
+  overflow: hidden;
 }
 
 .pom-single-img {
-  max-width: 100%;
-  max-height: 85%;
-  object-fit: contain;
-  border-radius: 6px;
+  /*
+   * “放大 + 偏移 + 父容器裁切”实现真正裁剪，而非溢出：
+   * 原图 1080×1920，目标显示区 x∈[3,1077]（宽 1074）、y∈[192,1728]（高 1536）。
+   * - width  = 容器宽 × 1080/1074 ≈ 100.5587%（多出的宽度用于裁掉左右各 3px）
+   * - height = 容器高 ÷ 0.8 = 125%（多出的高度用于裁掉上下各 10%）
+   * - left   = -(容器宽 × 3/1074) ≈ -0.2793%（使原图 x=3 对齐容器左边）
+   * - top    = -12.5%（= -(容器高 × 10%/0.8)，使原图 y=192 对齐容器顶边）
+   * object-fit:cover 做等比最终适配：竖向恰好展示 y∈[192,1728]，
+   * 横向按屏幕较窄的比例居中裁切，既不变形也不溢出屏幕区域。
+   */
+  position: absolute;
+  width: 100.5587%;
+  height: 125%;
+  left: -0.2793%;
+  top: -12.5%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+  /* 单图淡入：decode 完成前隐藏，完成后过渡显示，避免大图解码期间出现半渲染突变 */
+  opacity: 0;
+  transition: opacity 0.25s ease;
 }
 
-.pom-single-title {
-  margin-top: 8px;
-  font-size: 11px;
-  color: rgba(244, 239, 226, 0.6);
-  text-align: center;
-  font-family: 'Satoshi', sans-serif;
+.pom-single-img.is-ready {
+  opacity: 1;
+}
+
+/* 单图可点击打开大图浮层 */
+.pom-single-img.is-ready {
+  cursor: zoom-in;
+}
+
+/* ── 作品大图浮层（TiltedCard）：由 Gk3Clone 渲染在根级，
+ *    但样式归属 portfolio 域（浮层打开时 PortfolioModule 必然已挂载，本文件已加载）。
+ *    背景纯色 #0b0b09（项目规范：浮层禁止半透明），z-index 与 showcase-overlay 同级盖全页。 */
+.pom-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: #0b0b09;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pom-overlay-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  z-index: 10000;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(0, 0, 0, 0.6);
+  color: #fff;
+  font-size: 20px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }

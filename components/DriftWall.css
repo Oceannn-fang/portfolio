@@ -41,6 +41,8 @@
   transform-style: preserve-3d;
   cursor: pointer;
   transform-origin: 50% 50%;
+  /* 层提升设计：仅对每帧变换的 plane/track 用 will-change（rAF 直改 style），
+     tile 内层靠 translateZ(0) 已提升；不给 100+ tile 常驻 will-change，防合成层爆炸 */
   will-change: transform;
 }
 

@@ -5,6 +5,8 @@ import './AlbumShowcase.css';
 
 interface Props {
   onOpenOverlay?: () => void;
+  /** 加载动画未结束时置 true：不渲染封面（零请求零解码）且不启动 rAF，动画在 loadingDone 后再起跑 */
+  paused?: boolean;
 }
 
 // 专辑封面文件列表（位于 public/music-cover-3d/album_covers/）
@@ -45,12 +47,49 @@ const albumFiles = [
 const topAlbums = albumFiles.slice(0, 15);
 const bottomAlbums = albumFiles.slice(15);
 
+// 已预解码的封面集合（模块级，viewer 反复开关/多次访问会话内只解一次）
+const warmedCovers = new Set<string>();
+let warmingCovers = false;
+
+/**
+ * 空闲预解码专辑封面：由 Gk3Clone 在 loadingDone 后调用。
+ * viewer 挂载时 30 张封面同帧解码是加载动画结束后 hover arc vinyl 卡顿的主因
+ * （trace 实测 decode 19-23 次 / 195-307ms），提前用 img.decode() 把解码摊到空闲期。
+ * 串行 + 间隔执行，避免预解码自身形成长任务。
+ */
+export function warmAlbumCovers() {
+  if (warmingCovers) return;
+  const pending = albumFiles.filter((file) => !warmedCovers.has(file));
+  if (pending.length === 0) return;
+  warmingCovers = true;
+  const decodeNext = (index: number) => {
+    if (index >= pending.length) {
+      warmingCovers = false;
+      return;
+    }
+    const file = pending[index];
+    const img = new Image();
+    img.src = `/music-cover-3d/album_covers/${file}`;
+    img.decode()
+      .then(() => {
+        warmedCovers.add(file);
+      })
+      .catch(() => {
+        // 解码失败（网络/加载错误）不重试，viewer 挂载时由浏览器正常加载
+      })
+      .finally(() => {
+        setTimeout(() => decodeNext(index + 1), 50);
+      });
+  };
+  decodeNext(0);
+}
+
 /**
  * 精选推荐 — viewer 面板内的 2D 弧形专辑循环
  * 使用 requestAnimationFrame + ref 直接操作 DOM style，避免 React re-render。
  * 弧形效果复刻原版 music-cover-3d 的 sin 曲线 Y 偏移。
  */
-export default function AlbumShowcase({ onOpenOverlay }: Props) {
+export default function AlbumShowcase({ onOpenOverlay, paused = false }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const coverRefs = useRef<(HTMLImageElement | null)[]>([]);
   const rafRef = useRef(0);
@@ -64,7 +103,8 @@ export default function AlbumShowcase({ onOpenOverlay }: Props) {
 
   useEffect(() => {
     const container = containerRef.current;
-    if (!container) return;
+    // 加载动画期间降级：不启动 rAF（面板壳可显示，动画 loadingDone 后再起跑）
+    if (!container || paused) return;
 
     // 与原版一致的参数（封面尺寸调回原版 72，需与 CSS .as-cover 尺寸一致）
     const coverSize = 72;
@@ -169,12 +209,12 @@ export default function AlbumShowcase({ onOpenOverlay }: Props) {
       cancelAnimationFrame(rafRef.current);
       lastTimeRef.current = 0;
     };
-  }, []);
+  }, [paused]);
 
   return (
     <div className="as-root" ref={containerRef}>
-      {/* 上行封面 */}
-      {topAlbums.map((file, i) => (
+      {/* 上行封面（加载动画期间不渲染，零请求零解码） */}
+      {!paused && topAlbums.map((file, i) => (
         <img
           key={`t-${file}`}
           ref={setCoverRef(i)}
@@ -182,10 +222,11 @@ export default function AlbumShowcase({ onOpenOverlay }: Props) {
           className="as-cover"
           alt=""
           loading="lazy"
+          decoding="async"
         />
       ))}
-      {/* 下行封面 */}
-      {bottomAlbums.map((file, i) => (
+      {/* 下行封面（方向相反） */}
+      {!paused && bottomAlbums.map((file, i) => (
         <img
           key={`b-${file}`}
           ref={setCoverRef(topAlbums.length + i)}
@@ -193,6 +234,7 @@ export default function AlbumShowcase({ onOpenOverlay }: Props) {
           className="as-cover"
           alt=""
           loading="lazy"
+          decoding="async"
         />
       ))}
       {/* 中央按钮 */}

@@ -97,6 +97,7 @@
   font-family: "Quincy Light", Georgia, serif; /* 与原页面标题字体一致 */
   font-size: 15px;
   font-weight: normal;
+  text-align: left; /* #viewer 的 text-align:center 继承污染，与 playlist（pm-）列表对齐方式一致（任务#38） */
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -106,6 +107,7 @@
   font-size: 12px;
   color: rgba(245, 239, 230, 0.55); /* 暖白半透明，与原页面副文本色调统一 */
   margin-top: 2px;
+  text-align: left; /* 列表作者名左对齐（任务#38）；mm-marquee 时元素变 inline-block + max-content，自身 text-align 不影响滚动动画 */
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -202,6 +204,7 @@
   font-family: "Quincy Light", Georgia, serif; /* 与原页面标题字体一致 */
   font-size: 12px;
   font-weight: normal;
+  text-align: left; /* 专辑名左对齐，与曲目列表（任务#38）一致（任务#39）；mm-marquee 时元素变 inline-block + max-content，自身 text-align 不影响滚动动画 */
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -211,6 +214,7 @@
   font-size: 10px;
   color: rgba(245, 239, 230, 0.55);
   margin-top: 2px;
+  text-align: left; /* 专辑作者左对齐，与曲目列表一致（任务#39） */
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -254,6 +258,7 @@
 
 .mm-album-track-name {
   flex: 1;
+  text-align: left; /* 专辑展开后的曲目名左对齐，与曲目列表/playlist 一致（任务#39）；否则继承 #viewer 的 center，曲目名会浮在行中间 */
 }
 
 .mm-album-track-dur {

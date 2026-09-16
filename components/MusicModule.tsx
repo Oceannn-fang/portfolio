@@ -77,6 +77,49 @@ export function isMusicCacheValid(): boolean {
 // 预热进行中标记，避免重复请求
 let warming = false;
 
+// 已预解码的封面集合（模块级，会话内只解一次）
+const warmedCovers = new Set<string>();
+let warmingCovers = false;
+
+/**
+ * 空闲串行预解码 Spotify 封面：由 warmMusicCache 在数据到达后调用。
+ * viewer 打开时首批封面同帧解码会带来打开瞬间掉帧，
+ * 提前用 img.decode() 把解码摊到空闲期（与 AlbumShowcase/PlaylistModule 同模式）。
+ */
+function warmMusicCovers() {
+  if (warmingCovers) return;
+  const urls: string[] = [];
+  for (const t of cachedTracks ?? []) {
+    if (t.album?.imageUrl && !warmedCovers.has(t.album.imageUrl)) urls.push(t.album.imageUrl);
+  }
+  for (const a of cachedAlbums ?? []) {
+    if (a.imageUrl && !warmedCovers.has(a.imageUrl)) urls.push(a.imageUrl);
+  }
+  if (urls.length === 0) return;
+  warmingCovers = true;
+  const pending = urls.slice(0, 30);
+  const decodeNext = (index: number) => {
+    if (index >= pending.length) {
+      warmingCovers = false;
+      return;
+    }
+    const url = pending[index];
+    const img = new Image();
+    img.src = url;
+    img.decode()
+      .then(() => {
+        warmedCovers.add(url);
+      })
+      .catch(() => {
+        // 外链封面可能失效/跨域失败，不重试，viewer 挂载时由浏览器正常加载
+      })
+      .finally(() => {
+        setTimeout(() => decodeNext(index + 1), 50);
+      });
+  };
+  decodeNext(0);
+}
+
 /** 预加载：由 Gk3Clone 在页面空闲时调用，提前写入模块缓存，hover 打开面板时秒开 */
 export function warmMusicCache() {
   if (warming) return;
@@ -108,6 +151,8 @@ export function warmMusicCache() {
       if (cachedTracks || cachedAlbums) {
         if (cachedAuthed !== false) cachedAuthed = true;
         cacheTimestamp = Date.now();
+        // 数据就绪后空闲预解码封面，降低 viewer 打开瞬间的解码压力
+        warmMusicCovers();
       }
     })
     .catch(() => {
@@ -361,6 +406,7 @@ export default function MusicModule() {
                   className="mm-track-img"
                   src={track.album.imageUrl}
                   alt={track.album.name}
+                  decoding="async"
                 />
                 <div className="mm-track-info">
                   {/* data-text 供 CSS ::after 复制文本，hover 时 JS 测量溢出后加 mm-marquee 滚动 */}
@@ -414,6 +460,7 @@ export default function MusicModule() {
                   className="mm-card-img"
                   src={album.imageUrl}
                   alt={album.name}
+                  decoding="async"
                 />
                 <div className="mm-card-info">
                   <div className="mm-text">

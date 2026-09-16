@@ -24,6 +24,45 @@ export function isPlaylistCacheValid(): boolean {
 // 预热进行中标记，避免重复请求
 let warming = false;
 
+// 已预解码的封面集合（模块级，会话内只解一次）
+const warmedCovers = new Set<string>();
+let warmingCovers = false;
+
+/**
+ * 空闲串行预解码歌单封面：由 warmPlaylistCache 在数据到达后调用。
+ * viewer 打开时首批 30 张封面同帧解码会造成打开瞬间掉帧，
+ * 提前用 img.decode() 把解码摊到空闲期（与 AlbumShowcase 预解码同模式）。
+ */
+function warmPlaylistCovers(tracks: Track[]) {
+  if (warmingCovers) return;
+  const pending = tracks
+    .slice(0, 30)
+    .map((t) => t.cover)
+    .filter((url) => url && !warmedCovers.has(url));
+  if (pending.length === 0) return;
+  warmingCovers = true;
+  const decodeNext = (index: number) => {
+    if (index >= pending.length) {
+      warmingCovers = false;
+      return;
+    }
+    const url = pending[index];
+    const img = new Image();
+    img.src = url;
+    img.decode()
+      .then(() => {
+        warmedCovers.add(url);
+      })
+      .catch(() => {
+        // 外链封面可能失效/跨域失败，不重试，viewer 挂载时由浏览器正常加载
+      })
+      .finally(() => {
+        setTimeout(() => decodeNext(index + 1), 50);
+      });
+  };
+  decodeNext(0);
+}
+
 /** 预加载：由 Gk3Clone 在页面空闲时调用，提前写入模块缓存，hover 打开面板时秒开 */
 export function warmPlaylistCache() {
   // 已有有效缓存或正在预热中则跳过
@@ -36,6 +75,8 @@ export function warmPlaylistCache() {
       if (json) {
         cachedData = { name: json.name, tracks: json.tracks };
         cacheTime = Date.now();
+        // 数据就绪后空闲预解码首批封面，降低 viewer 打开瞬间的解码压力
+        warmPlaylistCovers(json.tracks);
       }
     })
     .catch(() => {
@@ -168,7 +209,7 @@ export default function PlaylistModule() {
       <div className="pm-player">
         {currentTrack ? (
           <>
-            <img className="pm-player-cover" src={currentTrack.cover} alt="" />
+            <img className="pm-player-cover" src={currentTrack.cover} alt="" decoding="async" />
             <div className="pm-player-info">
               <span className="pm-player-name">{currentTrack.name}</span>
               <span className="pm-player-artist">{currentTrack.artists}</span>
@@ -203,7 +244,7 @@ export default function PlaylistModule() {
             className={`pm-track-row${currentTrack?.id === track.id ? ' pm-track-active' : ''}`}
             onClick={() => playTrack(track)}
           >
-            <img className="pm-track-cover" src={track.cover} alt="" loading="lazy" />
+            <img className="pm-track-cover" src={track.cover} alt="" loading="lazy" decoding="async" />
             <div className="pm-track-info">
               <span className="pm-track-name">{track.name}</span>
               <span className="pm-track-artist">{track.artists}</span>

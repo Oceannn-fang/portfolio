@@ -5,9 +5,10 @@ import "./Gk3Clone.css";
 import Noise from "./Noise";
 import { setSharedNoisePhase } from "./noisePhase";
 import MusicModule, { warmMusicCache, isMusicCacheValid } from "./MusicModule";
-import AlbumShowcase from "./AlbumShowcase";
+import AlbumShowcase, { warmAlbumCovers } from "./AlbumShowcase";
 import PlaylistModule, { warmPlaylistCache, isPlaylistCacheValid } from "./PlaylistModule";
 import PortfolioModule from "./PortfolioModule";
+import TiltedCard from "./TiltedCard";
 import { portfolioWorks } from "../lib/portfolio-images";
 import LoadingScreen from "./LoadingScreen";
 
@@ -241,12 +242,6 @@ function adjustLightness(rgb: [number, number, number], delta: number): [number,
   return hslToRgb(h, s, Math.min(1, Math.max(0, l + delta))) as [number, number, number];
 }
 
-const defaultNoiseSettings = {
-  enabled: true,
-};
-
-type NoiseSettings = typeof defaultNoiseSettings;
-
 export function Gk3Clone() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const pointerRef = useRef<HTMLDivElement>(null);
@@ -266,32 +261,38 @@ export function Gk3Clone() {
   const [activeItem, setActiveItem] = useState<string | null>(null);
   const [currentMedia, setCurrentMedia] = useState<string | null>(null);
   const [mediaCacheVersion, setMediaCacheVersion] = useState(0);
-  const [noiseSettings, setNoiseSettings] = useState<NoiseSettings>(() => {
-    if (typeof window === "undefined") return defaultNoiseSettings;
-    try {
-      const stored = window.localStorage.getItem("gk3-noise-settings-v7");
-      if (stored) return { ...defaultNoiseSettings, ...JSON.parse(stored) };
-    } catch {
-      // Ignore malformed local settings and use the defaults.
-    }
-    return defaultNoiseSettings;
-  });
-  const [noiseTunerOpen, setNoiseTunerOpen] = useState(false);
   // 精选推荐全屏浮层状态
   const [showcaseOpen, setShowcaseOpen] = useState(false);
   // 作品集 viewer 当前选中的作品 ID（null 表示显示 DriftWall 总览）
   const [selectedPortfolioWork, setSelectedPortfolioWork] = useState<string | null>(null);
+  // 作品大图浮层（TiltedCard）：点击单图打开；打开时 viewer 的 mouseleave 关闭计时全部跳过
+  const [portfolioOverlayId, setPortfolioOverlayId] = useState<string | null>(null);
   // 预加载 3D 页面（隐藏 iframe），避免点击打开浮层时加载卡顿
   const [preloadReady, setPreloadReady] = useState(false);
   // ── 加载动画状态 ──
   const [showLoading, setShowLoading] = useState(false);
   const [loadingDone, setLoadingDone] = useState(false);
+  // loadingDone 的 ref 镜像：供 rAF/interval 闭包读取，避免重建动画循环
+  const loadingDoneRef = useRef(false);
 
   useEffect(() => {
-    // 延迟 3 秒后开始预加载，不影响首屏
-    const timer = setTimeout(() => setPreloadReady(true), 3000);
-    return () => clearTimeout(timer);
-  }, []);
+    loadingDoneRef.current = loadingDone;
+  }, [loadingDone]);
+
+  useEffect(() => {
+    // 加载动画完成后再预加载 3D 页，避免 idle-motion 动画循环 + 78 个资源请求
+    // 与加载动画抢主线程/带宽。
+    // 实测（trace-load-scroll-perf）：固定 +3s 恰好撞上用户开始浏览/滚动的窗口，
+    // 3D 场景初始化 + 资源加载把主线程打成 fps 13.4、1.05~1.77s 停帧 ×6、持续 6s+；
+    // 故改为 requestIdleCallback 等浏览器空闲（最长等 10s 兜底）再挂载预加载 iframe。
+    if (!loadingDone) return;
+    if (typeof window.requestIdleCallback === "function") {
+      const idle = window.requestIdleCallback(() => setPreloadReady(true), { timeout: 10000 });
+      return () => window.cancelIdleCallback(idle);
+    }
+    const timer = window.setTimeout(() => setPreloadReady(true), 6000);
+    return () => window.clearTimeout(timer);
+  }, [loadingDone]);
 
   // ── 判断是否需要显示加载动画 ──
   useEffect(() => {
@@ -313,7 +314,6 @@ export function Gk3Clone() {
       }
     }
   }, []);
-
   // 加载完成回调：隐藏动画、标记已访问、恢复滚动位置
   const handleLoaded = useCallback(() => {
     setShowLoading(false);
@@ -333,6 +333,9 @@ export function Gk3Clone() {
     const preload = () => {
       warmMusicCache();
       warmPlaylistCache();
+      // 空闲预解码 30 张专辑封面：加载动画结束瞬间 hover arc vinyl 时
+      // 30 张封面同帧解码是卡顿主因（trace 实测 decode 195-307ms），提前摊到空闲期
+      warmAlbumCovers();
     };
     // 加载动画刚完成时 HTTP 缓存已热，短延迟即可；跳过动画时同样快速预热
     const timer = setTimeout(preload, 300);
@@ -370,23 +373,18 @@ export function Gk3Clone() {
     };
   }, []);
 
-  // Esc 键关闭精选推荐浮层
+  // Esc 键关闭精选推荐浮层 / 作品大图浮层
   useEffect(() => {
-    if (!showcaseOpen) return;
+    if (!showcaseOpen && !portfolioOverlayId) return;
     const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setShowcaseOpen(false);
+      if (e.key === 'Escape') {
+        setShowcaseOpen(false);
+        setPortfolioOverlayId(null);
+      }
     };
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
-  }, [showcaseOpen]);
-
-  useEffect(() => {
-    try {
-      window.localStorage.setItem("gk3-noise-settings-v7", JSON.stringify(noiseSettings));
-    } catch {
-      // localStorage can be unavailable in private browsing; the tuner still works for the session.
-    }
-  }, [noiseSettings]);
+  }, [showcaseOpen, portfolioOverlayId]);
 
   useEffect(() => {
     let disposed = false;
@@ -495,6 +493,7 @@ export function Gk3Clone() {
     let latestLight: [number, number, number] = [...baseIndigo];
     let colorDelta = 0;
     let colorDirection = 1;
+    let faviconTick = 0;
 
     const syncThemeColor = (color: [number, number, number]) => {
       let themeColor = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]');
@@ -538,9 +537,14 @@ export function Gk3Clone() {
       root.style.setProperty("--panel-color", `rgb(${panelColor[0]}, ${panelColor[1]}, ${panelColor[2]})`);
       root.style.setProperty("--scrim", "rgba(16, 34, 128, 0.34)");
       syncThemeColor(bgColor);
-      setFavicon(bgColor, fgColor);
+      // favicon 每次重建（btoa + head 内替换）开销重复且肉眼不可察：
+      // 首次立即创建，之后每 5 次主题色更新重建一次（10fps 下约 0.5s）
+      faviconTick += 1;
+      if (faviconTick % 5 === 1) {
+        setFavicon(bgColor, fgColor);
+      }
 
-      colorDelta += 0.45 * colorDirection;
+      colorDelta += 0.675 * colorDirection;
       if (colorDelta > 12) {
         colorDelta = 12;
         colorDirection = -1;
@@ -552,7 +556,13 @@ export function Gk3Clone() {
     };
 
     setGradient();
-    const gradientTimer = window.setInterval(setGradient, 1000 / 15);
+    const gradientTimer = window.setInterval(() => {
+      // LoadingScreen 不透明覆盖期间主题色/背景不可见：跳过 CSS 变量更新与 favicon 重建
+      if (!loadingDoneRef.current) return;
+      setGradient();
+      // 10fps 更新（原 15fps）：慢速漂移动画肉眼无差异；colorDelta 步长同比例
+      // 放大（0.45 * 15 == 0.675 * 10），保持每秒颜色变化率不变，视觉节奏一致
+    }, 1000 / 10);
 
     const canvas = canvasRef.current;
     let gl: WebGLRenderingContext | null = null;
@@ -560,7 +570,9 @@ export function Gk3Clone() {
     let raf = 0;
     let running = false;
     let seed = window.matchMedia("(max-width: 850px)").matches ? 10 : Math.random() * 100;
-    const visible = () => true;
+    // 加载动画期间被 LoadingScreen 不透明覆盖：跳过绘制但保活 rAF，
+    // loadingDone 置真后下一帧自动恢复（ref 动态读取，无需重建循环）
+    const visible = () => loadingDoneRef.current && document.visibilityState === "visible";
 
     const compileShader = (type: number, source: string) => {
       if (!gl) return null;
@@ -676,10 +688,21 @@ export function Gk3Clone() {
       }
     }
 
+    let bgFrame = 0;
     const render = (time: number) => {
       if (!canvas || !gl || !program) return;
+      // 保活：不可见（LoadingScreen 覆盖/标签页隐藏）时只续 rAF 不绘制，
+      // 避免 running=false 后循环死亡、恢复瞬间（scroll/resize 触发 start）
+      // 首帧整屏重绘造成明显卡顿尖刺（trace 实测恢复后 fps 崩到 25.7）
       if (!visible()) {
-        running = false;
+        raf = requestAnimationFrame(render);
+        return;
+      }
+      // 背景为慢速渐变动画：每 2 帧绘制一次（约 30fps），逐帧视觉无差异，
+      // 全屏 fragment shader 的 GPU/合成开销减半
+      bgFrame += 1;
+      if (bgFrame % 2 !== 1) {
+        raf = requestAnimationFrame(render);
         return;
       }
       const dpr = Math.min(window.devicePixelRatio || 1, 1);
@@ -886,7 +909,7 @@ export function Gk3Clone() {
           )
         ) : null}
         {row.h3 ? <h3>{row.h3}</h3> : null}
-        <div className="work-wrapper" onMouseLeave={() => { if (!window.matchMedia("(hover: none) and (pointer: coarse)").matches) { cancelEndViewerTimer(); endViewerTimerRef.current = setTimeout(endViewer, 150); } }}>
+        <div className="work-wrapper" onMouseLeave={() => { if (portfolioOverlayId) return; if (!window.matchMedia("(hover: none) and (pointer: coarse)").matches) { cancelEndViewerTimer(); endViewerTimerRef.current = setTimeout(endViewer, 150); } }}>
           <ul className={row.id === "elsewhere" ? undefined : "work"}>
             {(row.items ?? []).map((item, index) => (
               <li
@@ -903,6 +926,14 @@ export function Gk3Clone() {
                   // showcase 行：桌面端点击打开全屏浮层
                   if (row.id === 'showcase') {
                     setShowcaseOpen(true);
+                    return;
+                  }
+                  // portfolio 行：点击名称直接打开 TiltedCard 大图浮层（不依赖 viewer 是否已开）。
+                  // 先取消挂起的关闭计时，避免浮层打开后 endViewer 触发关掉 viewer、
+                  // 破坏“关闭浮层后恢复原状”；viewer 未开时点名称，关闭浮层后仍是无 viewer 状态。
+                  if (row.id === 'portfolio' && item.workId) {
+                    cancelEndViewerTimer();
+                    setPortfolioOverlayId(item.workId);
                     return;
                   }
                   if (item.viewer && !item.href && window.matchMedia("(hover: none) and (pointer: coarse)").matches) {
@@ -994,7 +1025,7 @@ export function Gk3Clone() {
               onMouseEnter={cancelEndViewerTimer}
               onMouseLeave={() => { cancelEndViewerTimer(); endViewerTimerRef.current = setTimeout(endViewer, 150); }}
             >
-              <AlbumShowcase onOpenOverlay={() => setShowcaseOpen(true)} />
+              <AlbumShowcase paused={!loadingDone} onOpenOverlay={() => setShowcaseOpen(true)} />
             </div>
           )}
           {viewing && viewerClass === "playlist" && (
@@ -1009,25 +1040,26 @@ export function Gk3Clone() {
           {viewing && viewerClass === "portfolio" && (
             <div
               id="portfolioViewer"
+              className={selectedPortfolioWork ? 'pom-frame-mode' : ''}
               onMouseEnter={cancelEndViewerTimer}
-              onMouseLeave={() => { cancelEndViewerTimer(); endViewerTimerRef.current = setTimeout(endViewer, 150); }}
+              onMouseLeave={() => { if (portfolioOverlayId) return; cancelEndViewerTimer(); endViewerTimerRef.current = setTimeout(endViewer, 150); }}
             >
-              <PortfolioModule selectedWork={selectedPortfolioWork} />
+              <PortfolioModule selectedWork={selectedPortfolioWork} onOpenOverlay={setPortfolioOverlayId} />
             </div>
           )}
         </div>
       </div>
       <canvas id="c" ref={canvasRef} />
-      {noiseSettings.enabled ? (
-        <Noise
-          patternSize={100}
-          patternScaleX={1}
-          patternScaleY={1}
-          patternRefreshInterval={2}
-          patternAlpha={10}
-          patternDensity={50}
-        />
-      ) : null}
+      <Noise
+        patternSize={100}
+        patternScaleX={1}
+        patternScaleY={1}
+        patternRefreshInterval={4}
+        patternAlpha={10}
+        patternDensity={50}
+        // LoadingScreen 覆盖期间噪点不可见：完全停用重绘循环
+        paused={!loadingDone}
+      />
       {/* 预加载 music-cover-3d 资源（隐藏 iframe，浮层打开后移除） */}
       {preloadReady && !showcaseOpen && (
         <iframe
@@ -1064,49 +1096,41 @@ export function Gk3Clone() {
           />
         </div>
       )}
-      <div id="noise-tuner" aria-label="Noise settings">
-        <button
-          id="noise-tuner-toggle"
-          type="button"
-          aria-expanded={noiseTunerOpen}
-          onClick={() => setNoiseTunerOpen((open) => !open)}
-        >
-          Noise
-        </button>
-        {noiseTunerOpen ? (
-          <div id="noise-tuner-panel">
-            <label>
-              <span>Size</span>
-              <output>1px</output>
-            </label>
-            <label>
-              <span>Density</span>
-              <output>auto 30-70%</output>
-            </label>
-            <label>
-              <span>Rate</span>
-              <output>auto 1-5f</output>
-            </label>
-            <label>
-              <span>Alpha</span>
-              <output>10</output>
-            </label>
-            <label id="noise-tuner-enabled">
-              <span>Enabled</span>
-              <input
-                type="checkbox"
-                checked={noiseSettings.enabled}
-                onChange={(event) =>
-                  setNoiseSettings((settings) => ({
-                    ...settings,
-                    enabled: event.target.checked,
-                  }))
-                }
-              />
-            </label>
-          </div>
-        ) : null}
-      </div>
+      {/* 作品大图浮层：TiltedCard 展示原图（点击遮罩空白/×/ESC 关闭，viewer 保持原状）。
+          卡片尺寸锁 9:16（原图 1080×1920）：高 min(88vh, 142.2222vw)、宽 min(49.5vh, 80vw)，
+          两表达式在任意视口下数学一致（88vh→49.5vh×16/9，142.2222vw→80vw），窄屏不溢出。 */}
+      {portfolioOverlayId && (
+        <div className="pom-overlay" onClick={() => setPortfolioOverlayId(null)}>
+          <button
+            className="pom-overlay-close"
+            aria-label="关闭大图浮层"
+            onClick={() => setPortfolioOverlayId(null)}
+          >
+            ×
+          </button>
+          {(() => {
+            const overlayWork = portfolioWorks.find((w) => w.id === portfolioOverlayId);
+            if (!overlayWork) return null;
+            return (
+              <div className="pom-overlay-card" onClick={(e) => e.stopPropagation()}>
+                <TiltedCard
+                  imageSrc={overlayWork.image}
+                  altText={overlayWork.title}
+                  captionText={overlayWork.title}
+                  containerHeight="min(88vh, 142.2222vw)"
+                  containerWidth="min(49.5vh, 80vw)"
+                  imageHeight="100%"
+                  imageWidth="100%"
+                  rotateAmplitude={10}
+                  scaleOnHover={1.04}
+                  showMobileWarning={false}
+                  showTooltip
+                />
+              </div>
+            );
+          })()}
+        </div>
+      )}
     </>
   );
 }

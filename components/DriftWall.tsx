@@ -85,6 +85,8 @@ const DriftWall = ({
   const planeRef = useRef<HTMLDivElement>(null);
   const trackRefs = useRef<(HTMLDivElement | null)[]>([]);
   const rafRef = useRef<number | null>(null);
+  // 分批渲染补齐的内层 rAF 取消器
+  const cancelRef = useRef<(() => void) | null>(null);
 
   const offsetsRef = useRef<number[]>([]);
   const velocitiesRef = useRef<number[]>([]);
@@ -93,11 +95,17 @@ const DriftWall = ({
   const pointerRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
   const pointerDampedRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
   const lastTsRef = useRef<number | null>(null);
+  // 可见性状态：页面隐藏（切 tab）或容器不在视口时暂停 rAF 计算，避免隐形烧主线程
+  const pageVisibleRef = useRef(true);
+  const inViewRef = useRef(true);
 
   const [containerHeight, setContainerHeight] = useState(600);
   const [activeId, setActiveId] = useState<string | null>(null);
   const activeIdRef = useRef<string | null>(null);
   const [reduced, setReduced] = useState(false);
+  // 分批渲染：首帧只渲染每列第一份副本（足以覆盖视口），下一帧补齐其余副本，
+  // 摊平一次性创建全部 tile DOM 的挂载长任务
+  const [renderedCopies, setRenderedCopies] = useState(1);
 
   // 监听系统的「减少动态效果」偏好变化
   useEffect(() => {
@@ -136,6 +144,25 @@ const DriftWall = ({
     return () => ro.disconnect();
   }, []);
 
+  // 容器离开视口（viewer 面板隐藏/收起）时暂停漂移计算
+  useEffect(() => {
+    if (!containerRef.current) return;
+    const io = new IntersectionObserver(([entry]) => {
+      inViewRef.current = entry.isIntersecting;
+    });
+    io.observe(containerRef.current);
+    return () => io.disconnect();
+  }, []);
+
+  // 页面切到后台（tab 隐藏）时暂停漂移计算
+  useEffect(() => {
+    const onVisibility = () => {
+      pageVisibleRef.current = document.visibilityState === 'visible';
+    };
+    document.addEventListener('visibilitychange', onVisibility);
+    return () => document.removeEventListener('visibilitychange', onVisibility);
+  }, []);
+
   // 每列的基础速度：奇偶列反向 + 黄金比例速度差异
   const baseVelocities = useMemo(() => {
     const dirSign = direction === 'up' ? 1 : -1;
@@ -144,6 +171,24 @@ const DriftWall = ({
       return speed * columnFactor(c, variance) * dirSign * altSign;
     });
   }, [columnItems, speed, direction, variance]);
+
+  // 最多副本数（各列可能不同）；首帧渲染一批，随后补齐
+  const totalCopies = Math.max(1, ...columnMeta.map((m) => m.copies));
+  useEffect(() => {
+    if (renderedCopies >= totalCopies) return;
+    const raf = requestAnimationFrame(() => {
+      const raf2 = requestAnimationFrame(() => setRenderedCopies(totalCopies));
+      // 外层取消时同步取消内层（闭包保存）
+      cancelRef.current = () => cancelAnimationFrame(raf2);
+    });
+    return () => {
+      cancelAnimationFrame(raf);
+      if (cancelRef.current) {
+        cancelRef.current();
+        cancelRef.current = null;
+      }
+    };
+  }, [totalCopies, renderedCopies]);
 
   // 初始化每列的滚动偏移量与速度
   useEffect(() => {
@@ -167,6 +212,13 @@ const DriftWall = ({
   // rAF 主循环：指针阻尼视差 + 各列漂移
   useEffect(() => {
     const animate = (ts: number) => {
+      // 页面隐藏或面板不在视口：跳过全部计算仅保活 rAF；
+      // 重置时钟避免恢复瞬间 dt 跳变（dt 本身也有 0.05s 钉扎兑底）
+      if (!pageVisibleRef.current || !inViewRef.current) {
+        lastTsRef.current = null;
+        rafRef.current = requestAnimationFrame(animate);
+        return;
+      }
       if (lastTsRef.current === null) lastTsRef.current = ts;
       const dt = Math.min(0.05, Math.max(0, ts - lastTsRef.current) / 1000);
       lastTsRef.current = ts;
@@ -338,7 +390,7 @@ const DriftWall = ({
                   trackRefs.current[c] = el;
                 }}
               >
-                {copies.map((_, copyIndex) =>
+                {copies.slice(0, renderedCopies).map((_, copyIndex) =>
                   col.map((item, itemIndex) => renderTile(item, `${c}-${copyIndex}-${itemIndex}`, c))
                 )}
               </div>

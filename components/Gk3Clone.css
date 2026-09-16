@@ -1219,96 +1219,6 @@ span.comma {
   }
 }
 
-#noise-tuner {
-  position: fixed;
-  left: 16px;
-  bottom: 16px;
-  z-index: 80;
-  display: flex;
-  flex-direction: column-reverse;
-  align-items: flex-start;
-  gap: 8px;
-  pointer-events: auto;
-  font-family: "Ellograph Demi", sans-serif;
-  font-size: 11px;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--warm-white);
-}
-
-#noise-tuner-toggle {
-  min-width: 68px;
-  height: 32px;
-  padding: 0 14px;
-  border: 1px solid rgba(var(--fg-rgb), 0.85);
-  background: rgba(var(--bg-rgb), 0.9);
-  color: var(--warm-white);
-  cursor: pointer;
-  font: inherit;
-  letter-spacing: inherit;
-  text-transform: inherit;
-}
-
-#noise-tuner-toggle:hover,
-#noise-tuner-toggle[aria-expanded="true"] {
-  background: var(--fg-color);
-  color: var(--bg-color);
-}
-
-#noise-tuner-panel {
-  display: grid;
-  gap: 10px;
-  width: 252px;
-  padding: 14px;
-  background: rgba(var(--bg-rgb), 0.94);
-  border: 1px solid rgba(var(--fg-rgb), 0.75);
-  backdrop-filter: blur(12px);
-}
-
-#noise-tuner-panel label {
-  display: grid;
-  grid-template-columns: 64px 1fr 44px;
-  align-items: center;
-  gap: 8px;
-  font-family: "Ellograph Light", sans-serif;
-  font-size: 11px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--warm-white);
-}
-
-#noise-tuner-panel input[type="range"] {
-  width: 100%;
-  accent-color: var(--fg-color);
-  background: transparent;
-}
-
-#noise-tuner-panel output {
-  text-align: right;
-  font-family: "Ellograph Demi", sans-serif;
-  color: var(--fg-color);
-}
-
-#noise-tuner-enabled {
-  grid-template-columns: 1fr auto;
-  padding-top: 10px;
-  border-top: 1px solid rgba(var(--fg-rgb), 0.35);
-}
-
-#noise-tuner-enabled input {
-  width: 16px;
-  height: 16px;
-  margin: 0;
-  accent-color: var(--fg-color);
-}
-
-@media (max-width: 720px) {
-  #noise-tuner {
-    right: 16px;
-    left: auto;
-    align-items: flex-end;
-  }
-}
 
 /* ── 精选推荐 viewer 面板 ── */
 /* 宽度与 music/playlist viewer 统一为 34%（此前缩小到 27% 导致三者不一致） */
@@ -1428,14 +1338,12 @@ span.comma {
   border: none;
 }
 
-/* ── 作品集 viewer 面板（DriftWall）：布局与 music/showcase/playlist viewer 一致 ── */
+/* ── 作品集 viewer 面板（DriftWall）：总览用普通边框，单图用手机边框 ── */
 #viewer.portfolio {
-  /* 手机比例：宽度 34%、高度 65vh，并垂直居中 */
   width: 34%;
-  height: 65vh;
+  height: 66vh; /* 85% 缩小：78vh × 0.85 ≈ 66.3 → 66vh（frame calc 基准同步） */
   top: 50%;
   transform: translateY(-50%);
-  /* 提升层级，避免 .viewing .row.active 的行文字盖在面板上 */
   z-index: 20;
 }
 #viewer.portfolio #videoWrapper {
@@ -1447,20 +1355,56 @@ span.comma {
   align-items: stretch;
   justify-content: stretch;
 }
+/* 默认（DriftWall 总览）：直接铺满预览区域 */
 #portfolioViewer {
   position: absolute;
-  /* 桌面端：内容面板占 80% 宽度（左右各留 10%），普通边框样式 */
-  inset: 0 10%;
+  inset: 0;
   width: auto;
   height: auto;
   pointer-events: auto;
   z-index: 10;
-  /* 项目规范：viewer 面板背景必须纯色，禁止半透明 */
   background: #0b0b09;
   border-radius: 12px;
-  border: 1px solid rgba(244, 239, 226, 0.1);
-  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(244, 239, 226, 0.06);
+  border: none;
+  box-shadow: none;
   overflow: hidden;
+}
+/* 单张作品模式：面板收进手机边框内（与 music/showcase/playlist 统一规则一致）
+   inset 5% 使面板顶部延伸到刘海区之后：刘海图形（素材 y 4.05%~9.46%）
+   叠在面板与作品图上方，刘海周围无页面背景空隙（此前顶部 9.49% 起于刘海底，
+   刘海两侧透明区与上方留白直接透出页面背景，导致刘海视觉上被淹没）；
+   左右/底部超出屏幕区的部分被不透明 bezel（::after 层级更高）遮盖。
+   圆角 12.8%/6% 按实测几何换算：屏幕圆角 R≈128 素材px、bezel 外轮廓圆角
+   R≈140 素材px（弧心约 (150,256)），bezel 外弧与 videoFrame 圆角（12%/5%
+   ≈156×143px）之间存在素材透明环带，面板直角会让图片四角从环带露出
+   （桌面实测四角漏灰色照片块）；面板椭圆 a≈150/b≈155 素材px 恰好整体
+   落在 bezel 外弧之内且不切入屏幕弧。面板 inset 桌面/窄屏一致（5% 5%），
+   本规则两端通用，窄屏无需另设覆盖。 */
+#portfolioViewer.pom-frame-mode {
+  inset: 5% 5%;
+  border: none;
+  box-shadow: none;
+  border-radius: 12.8% / 6%;
+  /* 裁切链：确保放大的 img 溢出部分在此层被裁掉 */
+  overflow: hidden;
+}
+/* 单张作品模式：videoFrame 按手机边框比例约束 + 显示边框素材 */
+#viewer.portfolio #videoFrame:has(.pom-frame-mode) {
+  width: calc(66vh * 1304 / 2866);
+  height: 100%;
+  margin: 0 auto;
+  position: relative;
+  overflow: hidden;
+  border-radius: 12% / 5%;
+  justify-content: center;
+}
+#viewer.portfolio #videoFrame:has(.pom-frame-mode):after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: url('/gk3-assets/img/phone-frame-2.png') center / contain no-repeat;
+  pointer-events: none;
+  z-index: 100;
 }
 /* 修复：#viewer video, #viewer img { display: none } 会误伤作品集图片 */
 #portfolioViewer img {
@@ -1563,4 +1507,16 @@ span.comma {
   #showcaseViewer {
     background: #f4f1e9;
   }
+
+  /* 修复：单图模式的桌面 :has 规则（特异性更高，0-2-2-0）会把窄屏
+     videoFrame 宽度覆盖为 66vh 基准并居中，导致边框图像 contain 失配
+     （frame 比例 0.507 ≠ 素材 0.455）。这里以同特异性在断点内
+     显式恢复 70vh 基准宽与右对齐，与 music/showcase/playlist 一致。 */
+  #viewer.portfolio #videoFrame:has(.pom-frame-mode) {
+    width: calc(70vh * 1304 / 2866);
+    margin: 0 24px 0 auto;
+  }
+
+  /* 面板圆角已由 .pom-frame-mode 桌面规则统一提供（12.8%/6%，两端通用），
+     此处无需再覆盖统一规则的 12%/5%（.pom-frame-mode 特异性更高）。 */
 }

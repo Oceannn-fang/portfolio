@@ -1096,6 +1096,14 @@ function tick(time) {
   lastTime = time;
   const width = window.innerWidth;
   const height = window.innerHeight;
+  // 0 尺寸守卫：本页被 Gk3Clone 以 0x0 隐藏 iframe 预加载，此时渲染与
+  // positionCard 全部无意义却照常消耗 CPU，实测（trace）挤占主线程造成
+  // 1~1.8s 停帧 ×6。跳过渲染与卡片定位但续 rAF；
+  // iframe 以正常尺寸展示（浮层内实例）时自动恢复完整循环。
+  if (width === 0 || height === 0) {
+    requestAnimationFrame(tick);
+    return;
+  }
   const pointedCard = document.elementFromPoint(pointer.clientX, pointer.clientY)?.closest?.(".album-card");
 
   lanes.forEach((lane) => {
