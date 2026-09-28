@@ -22,7 +22,12 @@ interface HeatEntry {
 
 const entries = new Map<string, HeatEntry>();
 
-function heatJson(key: string, url: string): Promise<unknown> {
+/**
+ * get-or-start 单例核心：同一 key 在 TTL 内只发一次真实请求。
+ * @param parse true 时解析 JSON（非 2xx 抛错）；false 时直接返回原始 Response，
+ *              由调用方自行处理状态码（如 MusicModule 需要区分 401 未授权）
+ */
+function heatRequest(key: string, url: string, parse: boolean): Promise<unknown> {
   const now = Date.now();
   const hit = entries.get(key);
   if (hit && now - hit.createdAt < TTL_MS) {
@@ -30,8 +35,12 @@ function heatJson(key: string, url: string): Promise<unknown> {
   }
 
   const promise = fetch(url).then((res) => {
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    return res.json();
+    if (parse) {
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      return res.json();
+    }
+    // Response 体只能消费一次：clone 给调用方，缓存里留原件供后续复用
+    return res.clone();
   });
   entries.set(key, { promise, createdAt: now });
 
@@ -44,17 +53,45 @@ function heatJson(key: string, url: string): Promise<unknown> {
   return promise;
 }
 
+function heatJson(key: string, url: string): Promise<unknown> {
+  return heatRequest(key, url, true);
+}
+
+/**
+ * 原始 Response 变体：与 heatJson 共享同一去重条目（同 key 同 URL），
+ * 供需要自行判断状态码的调用方（如 warmMusicCache 的 401 处理）使用。
+ * 注意：非 2xx 不会抛错也不会被剔除缓存（Response 本身是 fulfilled），
+ * TTL 内重复调用拿到的是同一响应的 clone。
+ */
+export function heatResponse(key: string, url: string): Promise<Response> {
+  return heatRequest(key, url, false) as Promise<Response>;
+}
+
 /** 网易云精选歌单：/api/netease/playlist（约 112KB JSON，1h HTTP 缓存） */
 export function getNeteasePlaylist<T = unknown>(): Promise<T> {
   return heatJson('netease-playlist', '/api/netease/playlist') as Promise<T>;
 }
 
-/** Spotify 最近播放：/api/spotify/recently-played */
-export function getSpotifyRecentlyPlayed<T = unknown>(): Promise<T> {
-  return heatJson('spotify-recently-played', '/api/spotify/recently-played') as Promise<T>;
+/** Spotify 最近播放：/api/spotify/recently-played（基于 raw 变体派生，与共享条目同模式） */
+export async function getSpotifyRecentlyPlayed<T = unknown>(): Promise<T> {
+  const res = await getSpotifyRecentlyPlayedRaw();
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  return res.json() as Promise<T>;
 }
 
-/** Spotify 收藏专辑：/api/spotify/albums */
-export function getSpotifyAlbums<T = unknown>(): Promise<T> {
-  return heatJson('spotify-albums', '/api/spotify/albums') as Promise<T>;
+/** Spotify 收藏专辑：/api/spotify/albums（基于 raw 变体派生，与共享条目同模式） */
+export async function getSpotifyAlbums<T = unknown>(): Promise<T> {
+  const res = await getSpotifyAlbumsRaw();
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  return res.json() as Promise<T>;
+}
+
+/** Spotify 最近播放（原始 Response，供 warmMusicCache 判断 401） */
+export function getSpotifyRecentlyPlayedRaw(): Promise<Response> {
+  return heatResponse('spotify-recently-played', '/api/spotify/recently-played');
+}
+
+/** Spotify 收藏专辑（原始 Response，供 warmMusicCache 判断 401） */
+export function getSpotifyAlbumsRaw(): Promise<Response> {
+  return heatResponse('spotify-albums', '/api/spotify/albums');
 }

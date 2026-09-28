@@ -587,7 +587,8 @@ body.expanded {
   font-size: 70px;
   font-weight: normal;
   letter-spacing: -2px;
-  max-width: 400px;
+  /* #72：400px→480px，让新标语换行为 "Works, Notes," / "and Unfinished." 两行，避免连接词 and 单独成行 */
+  max-width: 480px;
   line-height: 80%;
   margin: 24px 0 0 24px;
 }

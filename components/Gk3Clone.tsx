@@ -903,10 +903,10 @@ export function Gk3Clone() {
           <span>
             So instead, I'm just using this space to write you, my visitor, a little note. I hope you're having a great
             day! If you aren't, you can{" "}
-            <a href="https://instagram.com/24_beans" target="_blank">
+            <a href="https://xhslink.cn/o/6nYCOPZksMd" target="_blank" rel="noopener noreferrer">
               click here
             </a>{" "}
-            to visit my cat Bean's instagram. He always cheers me up, so maybe he will do the same for you? Okay, I'm
+            to visit my cat Bean's 小红书. He always cheers me up, so maybe he will do the same for you? Okay, I'm
             running out of space, so I'll just leave you with one last thought: be a good person. The world has enough
             jerks.
           </span>
@@ -998,7 +998,7 @@ export function Gk3Clone() {
       <div id="main">
         <div id="hero">
           <div id="hero-inner">
-            <h1>I contain multitudes</h1> {/* #63：Walt Whitman《Song of Myself》，替换 George Kedenburg III */}
+            <h1>Works, Notes, and Unfinished.</h1> {/* #72：用户确认换掉 #63 诗句为 hero 标语；layout.tsx pageTitle 由 Felix 同步，不碰 */}
           </div>
         </div>
         {rows.map(renderRow)}

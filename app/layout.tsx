@@ -1,12 +1,17 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3100";
-const pageTitle = "I contain multitudes"; // #63：hero 诗句同步 SEO/og/twitter title（description 不含旧名，不动）
+const pageTitle = "Works, Notes, and Unfinished."; // #73：hero 标题同步 SEO/og/twitter title（description 不含旧名，不动）
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: pageTitle,
   description: "Product Designer",
+  // #71 SEO：单页站点，canonical 固定指向根路径；相对 URL 由 metadataBase
+  // （NEXT_PUBLIC_SITE_URL，线上为 https://oceanfolio.vercel.app）解析为绝对地址
+  alternates: {
+    canonical: "/",
+  },
   openGraph: {
     title: pageTitle,
     description: "Product Designer",

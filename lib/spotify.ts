@@ -633,6 +633,25 @@ export function pickLargestImage(images?: SpotifyImage[]): string | null {
   return best?.url ?? null;
 }
 
+/**
+ * 按目标边长挑选最合适的图片变体（#71 封面缩图）。
+ * Spotify images 数组通常含 640/300/64 三档：列表缩略图、网格卡片用 300 足够，
+ * 比恒选 640 原图省 ~60% 传输量（i.scdn.co 封面占首屏总传输的一半）。
+ * 策略：选「不小于 target 的最小变体」（保清晰）；全都小于 target 时退而取最大一张。
+ * @param images Spotify 图片数组
+ * @param target 展示位目标边长（px，建议按 2x DPR 估算）
+ */
+export function pickImage(images: SpotifyImage[] | undefined, target: number): string | null {
+  if (!images || images.length === 0) return null;
+
+  const sized = images.filter((img) => typeof img.width === 'number' && img.width > 0);
+  if (sized.length === 0) return images[0]?.url ?? null;
+
+  const suitable = sized.filter((img) => (img.width as number) >= target);
+  const pool = suitable.length > 0 ? suitable : sized;
+  return pool.reduce((best, img) => ((img.width as number) < (best.width as number) ? img : best)).url ?? null;
+}
+
 /** 把艺术家数组拼接成展示用字符串 */
 export function joinArtists(artists?: SpotifyArtist[]): string {
   if (!artists || artists.length === 0) return '';

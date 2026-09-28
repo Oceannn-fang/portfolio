@@ -1,7 +1,7 @@
 import { gzipJson } from '../../_lib/compress';
 import {
   joinArtists,
-  pickLargestImage,
+  pickImage,
   spotifyFetch,
   toErrorResponse,
   upstreamError,
@@ -34,7 +34,9 @@ export async function GET(request: Request): Promise<Response> {
       id: item.album.id,
       name: item.album.name,
       artist: joinArtists(item.album.artists),
-      imageUrl: pickLargestImage(item.album.images),
+      // #71 封面缩图：网格卡片展示位 ~150px，300px 变体足够（2x DPR），
+      // 比 640 原图省 ~60% 传输量
+      imageUrl: pickImage(item.album.images, 300),
       releaseDate: item.album.release_date ?? '',
       totalTracks: item.album.total_tracks ?? 0,
     }));

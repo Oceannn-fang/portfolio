@@ -1,6 +1,10 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import {
+  getSpotifyAlbumsRaw,
+  getSpotifyRecentlyPlayedRaw,
+} from '@/lib/heat-requests';
 import './MusicModule.css';
 
 // ── 数据类型定义 ──
@@ -120,15 +124,17 @@ function warmMusicCovers() {
   decodeNext(0);
 }
 
-/** 预加载：由 Gk3Clone 在页面空闲时调用，提前写入模块缓存，hover 打开面板时秒开 */
+/** 预加载：由 Gk3Clone 在页面空闲时调用，提前写入模块级缓存，hover 打开面板时秒开 */
 export function warmMusicCache() {
   if (warming) return;
   // 已有有效缓存（或已知未授权）则跳过
   if (isCacheValid() || cachedAuthed === false) return;
   warming = true;
-  // 与组件内解析逻辑一致：兼容数组与包裹对象两种返回结构
-  const load = async (url: string, apply: (data: unknown) => void) => {
-    const res = await fetch(url);
+  // #71：改走 lib/heat-requests 共享层（raw 模式）——LoadingScreen 阶段已发出的
+  // Spotify 预热请求若仍在途，这里复用同一 Promise，不再像旧版那样另发裸 fetch
+  // 造成同时段重复下载；解析逻辑与组件内一致（兼容数组与包裹对象两种结构）
+  const load = async (fetcher: () => Promise<Response>, apply: (data: unknown) => void) => {
+    const res = await fetcher();
     if (res.status === 401) {
       cachedAuthed = false;
       return;
@@ -137,11 +143,11 @@ export function warmMusicCache() {
     apply(await res.json());
   };
   Promise.all([
-    load('/api/spotify/recently-played', (data) => {
+    load(getSpotifyRecentlyPlayedRaw, (data) => {
       const d = data as Track[] | { tracks?: Track[] };
       cachedTracks = Array.isArray(d) ? d : d.tracks ?? [];
     }),
-    load('/api/spotify/albums', (data) => {
+    load(getSpotifyAlbumsRaw, (data) => {
       const d = data as Album[] | { albums?: Album[] };
       cachedAlbums = Array.isArray(d) ? d : d.albums ?? [];
     }),
