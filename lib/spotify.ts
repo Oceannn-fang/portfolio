@@ -7,8 +7,11 @@ import nodePath from 'node:path';
  * 职责：
  * 1. Token 持久化（lib/spotify-token.json），文件缺失或损坏时返回 null
  * 2. access_token 的自动续期（refresh_token 轮换 + 并发去重）
- * 3. 带 Bearer 认证的 Spotify Web API GET 请求封装
- * 4. 统一的 JSON 错误响应，供各 route.ts 直接返回
+ * 3. Serverless 回退：只读文件系统（如 Vercel）上 token 文件不可用时，
+ *    用环境变量 SPOTIFY_REFRESH_TOKEN 走 refresh_token grant 换取 access_token，
+ *    让所有访客都能看到站主的 Spotify 数据（无需每个访客各自 OAuth）
+ * 4. 带 Bearer 认证的 Spotify Web API GET 请求封装
+ * 5. 统一的 JSON 错误响应，供各 route.ts 直接返回
  *
  * 仅可在服务端（Node.js runtime）使用，禁止被客户端组件引入。
  */
@@ -383,20 +386,24 @@ let refreshing: Promise<string | null> | null = null;
 
 /**
  * 获取可用的 access_token：未过期直接返回，已过期则自动刷新。
+ * 文件 token 不可用（serverless 只读文件系统 / 从未在本地授权）时，
+ * 回退到环境变量 SPOTIFY_REFRESH_TOKEN，见 getAccessTokenFromEnv。
  * @param forceRefresh 强制刷新（用于上游返回 401 后的重试）
  * @returns 有效的 access_token；从未授权或无法续期时返回 null
  */
 export async function getAccessToken(forceRefresh = false): Promise<string | null> {
   const token = await readToken();
-  if (!token) return null;
+  if (!token) {
+    return getAccessTokenFromEnv(forceRefresh);
+  }
 
   if (!forceRefresh && !isExpired(token)) {
     return token.access_token;
   }
 
   if (!token.refresh_token) {
-    // 没有 refresh_token 就无法续期，等同未授权
-    return null;
+    // 没有 refresh_token 就无法续期，尝试 env 回退，仍不可用则等同未授权
+    return getAccessTokenFromEnv(forceRefresh);
   }
 
   if (!refreshing) {
@@ -412,6 +419,125 @@ export async function getAccessToken(forceRefresh = false): Promise<string | nul
   }
 
   return refreshing;
+}
+
+// ---------------------------------------------------------------------------
+// Serverless 环境变量回退（SPOTIFY_REFRESH_TOKEN）
+// ---------------------------------------------------------------------------
+
+/**
+ * env 回退模式下的模块级 access_token 缓存。
+ * 未过期直接复用，避免每个请求都触发 refresh（降低 refresh token 轮换压力，
+ * 也减少 Spotify token 接口的调用次数）。
+ */
+let envTokenCache: { accessToken: string; expiresAt: number } | null = null;
+
+/** env 回退的刷新去重：与文件路径的 refreshing 同理，同一时刻只允许一个在途请求 */
+let envRefreshing: Promise<string | null> | null = null;
+
+/** 判断 token 文件是否存在（serverless bundle 里没有该文件，本地开发通常有） */
+async function tokenFileExists(): Promise<boolean> {
+  try {
+    await fs.access(TOKEN_FILE_PATH);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * 用环境变量里的 refresh token 换取 access_token（不经过 saveToken 写盘）。
+ *
+ * ⚠️ 运维注意（refresh token 轮换）：
+ * Spotify 刷新时可能返回新的 refresh_token（旧值随即作废）。Serverless 文件系统
+ * 只读，新值无法持久化——一旦轮换发生，下次 cold start 用 env 里的旧值刷新会得到
+ * invalid_grant，线上 Spotify 模块将全部 401。因此这里检测到轮换时只 console.warn
+ * 提示更新 Vercel 环境变量，不影响当前请求（本次拿到的 access_token 仍然有效）。
+ * 看到告警后应尽快：在 Vercel 项目设置中把 SPOTIFY_REFRESH_TOKEN 更新为新值并重新部署。
+ *
+ * @param refreshToken 来自 process.env.SPOTIFY_REFRESH_TOKEN 的刷新令牌
+ */
+async function refreshViaEnvToken(refreshToken: string): Promise<string | null> {
+  const data = await postTokenEndpoint(
+    new URLSearchParams({
+      grant_type: 'refresh_token',
+      refresh_token: refreshToken,
+    })
+  );
+
+  const accessToken = data.access_token;
+  const expiresIn = data.expires_in;
+
+  if (typeof accessToken !== 'string' || typeof expiresIn !== 'number') {
+    throw new SpotifyError('Spotify token 响应缺少 access_token / expires_in 字段', 502);
+  }
+
+  // 轮换检测：只告警、不中断（详见上方 JSDoc 的运维注意）
+  if (typeof data.refresh_token === 'string' && data.refresh_token !== refreshToken) {
+    console.warn(
+      '[spotify] refresh token 已轮换：Spotify 下发了新的 refresh_token，但 serverless 环境无法持久化。' +
+        '请尽快把 Vercel 环境变量 SPOTIFY_REFRESH_TOKEN 更新为新值并重新部署，' +
+        '否则下次 cold start 后线上 Spotify 数据将返回 401。'
+    );
+  }
+
+  envTokenCache = { accessToken, expiresAt: Date.now() + expiresIn * 1000 };
+  return accessToken;
+}
+
+/**
+ * 环境变量回退入口：
+ * - 仅当文件 token 不可用（文件不存在或没有 refresh_token）时才会被调用；
+ *   本地开发（存在 spotify-token.json）路径完全不受影响。
+ * - 未配置 SPOTIFY_REFRESH_TOKEN 时返回 null（由 spotifyFetch 转成明确的 401 未授权），
+ *   不抛未捕获异常。
+ * - 凭据缺失（CLIENT_ID/SECRET）时仍按配置错误抛 500，与文件路径行为一致。
+ */
+async function getAccessTokenFromEnv(forceRefresh = false): Promise<string | null> {
+  const refreshToken = process.env.SPOTIFY_REFRESH_TOKEN;
+  if (!refreshToken) {
+    // 本地文件不存在 + env 未配置：这是正常的「未授权」状态，前端会展示登录引导
+    console.warn(
+      '[spotify] 无可用 token：token 文件不存在且未配置环境变量 SPOTIFY_REFRESH_TOKEN（serverless 环境需要配置后者）'
+    );
+    return null;
+  }
+
+  if (!forceRefresh && envTokenCache && Date.now() + EXPIRY_BUFFER_MS < envTokenCache.expiresAt) {
+    return envTokenCache.accessToken;
+  }
+
+  if (!envRefreshing) {
+    envRefreshing = refreshViaEnvToken(refreshToken)
+      .catch((error) => {
+        console.error('[spotify] 通过 SPOTIFY_REFRESH_TOKEN 换取 access_token 失败：', error);
+        return null;
+      })
+      .finally(() => {
+        envRefreshing = null;
+      });
+  }
+
+  return envRefreshing;
+}
+
+/**
+ * 诊断辅助：报告当前 token 来源与可用性（不含任何密钥值）。
+ * 供排障脚本 / 健康检查使用。
+ */
+export async function getTokenStatus(): Promise<{
+  fileExists: boolean;
+  envRefreshTokenSet: boolean;
+  envCacheValid: boolean;
+}> {
+  const [fileExists] = await Promise.all([tokenFileExists()]);
+  return {
+    fileExists,
+    envRefreshTokenSet: Boolean(process.env.SPOTIFY_REFRESH_TOKEN),
+    envCacheValid: Boolean(
+      envTokenCache && Date.now() + EXPIRY_BUFFER_MS < envTokenCache.expiresAt
+    ),
+  };
 }
 
 // ---------------------------------------------------------------------------

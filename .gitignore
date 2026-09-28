@@ -8,7 +8,10 @@ node_modules/
 out/
 
 # production
-build/
+# 收窄为根目录锚定 /build/：无锚定的 build/ 会匹配任意深度路径段，
+# 曾误杀本地化的 public/music-cover-3d/vendor/three/build/three.module.js
+# （线上 404 → 3D 浮层无法加载，见任务 #67）
+/build/
 
 # misc
 .env

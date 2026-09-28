@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3100";
-const pageTitle = "George Kedenburg III";
+const pageTitle = "I contain multitudes"; // #63：hero 诗句同步 SEO/og/twitter title（description 不含旧名，不动）
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
