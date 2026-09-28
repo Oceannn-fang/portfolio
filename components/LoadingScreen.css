@@ -132,7 +132,8 @@
 
 /* ── 状态文字 ── */
 .ls-text {
-  font-family: 'Ellograph Light', 'Georgia', serif, var(--zh-font, serif);
+    /* #78：栈序修正——serif 通用族写在 var() 之前导致变量永不生效（加载屏中文变衬线的元凶）；对齐 Gk3Clone.css #77 修法 */
+    font-family: 'Ellograph Light', var(--zh-font, "Microsoft YaHei"), sans-serif;
   font-size: 10px;
   color: rgba(245, 239, 230, 0.25);
   letter-spacing: 3px;

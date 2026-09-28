@@ -56,8 +56,8 @@ const placeholders = [
   "mystery spot",
 ];
 
-// #66：社媒三项（小红书 / 抖音 / 公众号），label 需与 elsewhere items 的 text 完全一致以匹配 viewer 图标索引
-const socialItems = ["小红书", "抖音", "公众号 · 丨靛藍丨"];
+// #77：社媒三项 label 英文化（rednote / tiktok / weChat official account），label 需与 elsewhere items 的 text 完全一致以匹配 viewer 图标索引
+const socialItems = ["rednote", "tiktok", "weChat official account"];
 const socialSvgStrings = [
   '<path fill-rule="evenodd" clip-rule="evenodd" d="M46 30h54a16 16 0 0 1 16 16v54a16 16 0 0 1-16 16H46a16 16 0 0 1-16-16V46a16 16 0 0 1 16-16zm0 9a7 7 0 0 0-7 7v54a7 7 0 0 0 7 7h54a7 7 0 0 0 7-7V46a7 7 0 0 0-7-7z" fill="var(--fg-color)"/><path d="M60 54h26v54l-13-10-13 10z" fill="var(--fg-color)"/>',
   '<ellipse cx="60" cy="102" rx="20" ry="16" fill="var(--fg-color)"/><rect x="74" y="34" width="11" height="70" rx="2" fill="var(--fg-color)"/><path d="M85 34c14 4 24 12 30 24 0-18-12-30-30-34z" fill="var(--fg-color)"/>',
@@ -131,20 +131,20 @@ const rows: Row[] = [
     solo: true,
     items: [
       {
-        text: "小红书",
+        text: "rednote",
         href: "https://xhslink.cn/o/6nYCOPZksMd",
         viewer: "social",
         rowId: "elsewhere",
       },
       {
-        text: "抖音",
+        text: "tiktok",
         href: "https://v.douyin.com/J-XHqpOWdZg/",
         viewer: "social",
         rowId: "elsewhere",
       },
       {
-        // 公众号无对外分享链接，指向搜狗微信搜索账号「丨靛藍丨」（中文已 URL 编码）
-        text: "公众号 · 丨靛藍丨",
+        // 公众号无对外分享链接，指向搜狗微信搜索账号「丨靛藍丨」（中文已 URL 编码）；#77 label 英文化，账号名不再出现在 label
+        text: "weChat official account",
         href: "https://weixin.sogou.com/weixin?type=1&s_from=input&query=%E4%B8%A8%E9%9D%9B%E8%97%8D%E4%B8%A8",
         viewer: "social",
         rowId: "elsewhere",
@@ -543,7 +543,7 @@ export function Gk3Clone() {
         favicon.rel = "icon";
         document.head.appendChild(favicon);
       }
-      const svg = `<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="8" cy="8" r="8" fill="rgb(${circle[0]}, ${circle[1]}, ${circle[2]})"/><path d="M12.5 9.78547C12.4905 8.6081 11.1992 7.97193 9.39511 7.81052L11.56 6.81354C11.7404 6.72809 11.7878 6.60465 11.7878 6.41475V5.33232C11.7878 5.12343 11.6644 5 11.4555 5H4.22034C4.01145 5 3.88801 5.12343 3.88801 5.33232V6.04445C3.88801 6.25334 4.01145 6.37677 4.22034 6.37677H9.61349L7.14479 7.50668C6.98338 7.57314 6.90742 7.71557 6.90742 7.89597V8.65557C6.90742 8.86446 7.03085 8.9879 7.24924 8.9879C9.2147 8.9879 10.6864 9.3582 10.6959 9.7285C10.7054 9.96588 10.0977 10.2317 8.13227 10.2317C6.07186 10.2317 4.99892 9.84244 4.35327 9.65254C4.16337 9.60507 3.96397 9.62406 3.907 9.76648L3.56518 10.4311C3.47973 10.64 3.45124 10.7445 3.65064 10.8869C4.06842 11.1717 5.6161 11.7225 8.2652 11.7225C10.544 11.7225 12.5095 11.3237 12.5 9.78547Z" fill="rgb(${letter[0]}, ${letter[1]}, ${letter[2]})"/></svg>`;
+      const svg = `<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="8" cy="8" r="8" fill="rgb(${circle[0]}, ${circle[1]}, ${circle[2]})"/><text x="8" y="11.3" text-anchor="middle" font-family="Arial, sans-serif" font-size="8.5" font-weight="bold" fill="rgb(${letter[0]}, ${letter[1]}, ${letter[2]})">F</text></svg>`;
       favicon.href = `data:image/svg+xml;base64,${window.btoa(svg)}`;
       document.querySelectorAll('head > link[rel="icon"]').forEach((other) => {
         if (other !== favicon) other.remove();
@@ -877,15 +877,9 @@ export function Gk3Clone() {
     if (row.bar) {
       return (
         <div className="row bar" key={row.id}>
-          <svg width="70" height="24" viewBox="0 0 70 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <rect width="70" height="24" rx="12"></rect>
-            <path d="M24.83 11.338H19.135C18.761 11.338 18.54 11.559 18.54 11.933V13.633C18.54 14.007 18.761 14.228 19.135 14.228H22.195C22.297 14.228 22.365 14.296 22.365 14.398V14.959C21.345 15.163 19.968 15.299 17.741 15.35C12.59 15.486 11.264 14.262 11.264 12.154C11.264 10.046 12.59 8.958 17.741 8.958C21.005 8.958 22.484 9.281 23.606 9.672C23.946 9.791 24.269 9.859 24.439 9.57L25.238 8.142C25.442 7.785 25.442 7.598 25.085 7.343C24.371 6.833 22.11 6 17.52 6C11.077 6 8 7.649 8 12.154C8 16.659 11.077 18.308 17.52 18.308C22.144 18.308 24.405 17.475 25.119 16.965C25.306 16.812 25.425 16.676 25.425 16.557V11.933C25.425 11.559 25.204 11.338 24.83 11.338Z"></path>
-            <path d="M43.9194 17.407L35.8614 11.202L43.6304 6.901C44.1574 6.629 44.0554 6.204 43.4604 6.204H39.7714C39.4994 6.204 39.2274 6.238 38.9724 6.374L30.7614 10.862V6.799C30.7614 6.425 30.5234 6.204 30.1664 6.204H28.2114C27.8374 6.204 27.6164 6.425 27.6164 6.799V17.509C27.6164 17.883 27.8374 18.104 28.2114 18.104H30.1664C30.5234 18.104 30.7614 17.883 30.7614 17.509V14.041L33.2774 12.647L40.0604 17.866C40.2814 18.002 40.5024 18.104 40.7914 18.104H43.6814C44.2424 18.104 44.3784 17.747 43.9194 17.407Z"></path>
-            <path d="M61.7798 14.772C61.7628 12.664 59.4508 11.525 56.2208 11.236L60.0968 9.451C60.4198 9.298 60.5048 9.077 60.5048 8.737V6.799C60.5048 6.425 60.2838 6.204 59.9098 6.204H46.9558C46.5818 6.204 46.3608 6.425 46.3608 6.799V8.074C46.3608 8.448 46.5818 8.669 46.9558 8.669H56.6118L52.1918 10.692C51.9028 10.811 51.7668 11.066 51.7668 11.389V12.749C51.7668 13.123 51.9878 13.344 52.3788 13.344C55.8978 13.344 58.5328 14.007 58.5498 14.67C58.5668 15.095 57.4788 15.571 53.9598 15.571C50.2708 15.571 48.3498 14.874 47.1938 14.534C46.8538 14.449 46.4968 14.483 46.3948 14.738L45.7828 15.928C45.6298 16.302 45.5788 16.489 45.9358 16.744C46.6838 17.254 49.4548 18.24 54.1978 18.24C58.2778 18.24 61.7968 17.526 61.7798 14.772Z"></path>
-          </svg>
+          {/* #77：删除原作者 GK3 徽标 SVG（bar 行左侧红色椭圆 logo，纯图形无法被文本 grep 发现）；版权信息保留 */}
           <span className="copyright">
-            <em>&copy;</em>2026<span className="comma">,</span>
-            c/o&nbsp;George&nbsp;Kedenburg&nbsp;III
+            <em>&copy;</em>2026{/* #77：删除原作者署名（c/o George Kedenburg III）及悬空逗号 */}
           </span>
         </div>
       );
@@ -998,7 +992,7 @@ export function Gk3Clone() {
       <div id="main">
         <div id="hero">
           <div id="hero-inner">
-            <h1>Works, Notes, and Unfinished.</h1> {/* #72：用户确认换掉 #63 诗句为 hero 标语；layout.tsx pageTitle 由 Felix 同步，不碰 */}
+            <h1>Works, Notes,<br />and Unfinished.</h1> {/* #77：用户要求 and Unfinished. 独占第二行（<br/> 强制断行），字号维持原 70px；layout.tsx pageTitle 由 Felix 同步，不碰 */}
           </div>
         </div>
         {rows.map(renderRow)}

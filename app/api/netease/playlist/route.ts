@@ -84,7 +84,12 @@ export async function GET(request: Request) {
         duration: t.duration || t.dt || 0,
       }));
 
-    // gzip 压缩输出（尊重 Accept-Encoding），与 1 小时缓存头共存
+    // gzip 压缩输出（尊重 Accept-Encoding），与缓存头共存。
+    // #76 CDN 缓存分层：s-maxage=60 + SWR=300 作用于 Vercel 边缘缓存——
+    // 绝大多数访客命中边缘，lambda 冷启动只影响缓存过期后的那个请求
+    // （冷启动 5.5-7.3s 不再直接打到访客）；max-age=3600 保持浏览器私有缓存不变。
+    // 注意 SWR 是单一指令，浏览器与 CDN 共用 300s 的 stale 窗口；
+    // 与 export const revalidate = 3600 不冲突：显式 Cache-Control 优先于段配置
     return gzipJson(
       request,
       {
@@ -95,7 +100,7 @@ export async function GET(request: Request) {
         tracks,
       },
       {
-        'Cache-Control': 'public, max-age=3600, stale-while-revalidate=86400',
+        'Cache-Control': 'public, max-age=3600, s-maxage=60, stale-while-revalidate=300',
       }
     );
   } catch (error) {
