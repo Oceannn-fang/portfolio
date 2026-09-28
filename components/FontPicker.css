@@ -1,0 +1,277 @@
+/* FontPicker —— 中文字体挑选面板（任务 #55）
+   fp- 前缀，避免污染全局样式。
+   定位：fixed 右下角；z-index 9000 —— 低于 TiltedCard 作品浮层（9999）
+   与 LoadingScreen（9999）、PortfolioModule 浮层（10000）、
+   CustomCursor（99999），确保不遮挡任何作品浮层。
+   色系：与 mm-/pm- 面板一致 —— rgba(11,11,9,.95) 暗底 + #f5efe6 暖白。 */
+
+.fp-root {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  z-index: 9000;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 10px;
+}
+
+/* ── 圆形 A 字入口按钮 ── */
+.fp-toggle {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 1px solid rgba(245, 239, 230, 0.16);
+  background: rgba(11, 11, 9, 0.72);
+  color: rgba(245, 239, 230, 0.55);
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 15px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  transition: border-color 0.25s ease, color 0.25s ease;
+}
+
+.fp-toggle:hover,
+.fp-toggle-open {
+  border-color: rgba(245, 239, 230, 0.45);
+  color: #f5efe6;
+}
+
+/* ── 面板 ── */
+.fp-panel {
+  width: 264px;
+  max-height: min(540px, calc(100vh - 96px));
+  overflow-y: auto;
+  background: rgba(11, 11, 9, 0.95);
+  border: 1px solid rgba(245, 239, 230, 0.14);
+  border-radius: 10px;
+  padding: 6px;
+  color: #f5efe6;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  animation: fp-panel-in 0.22s ease;
+}
+
+@keyframes fp-panel-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fp-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 10px 8px;
+  border-bottom: 1px solid rgba(245, 239, 230, 0.1);
+}
+
+.fp-panel-title {
+  font-family: "Ellograph Light", "Quincy Light", Georgia, serif,
+    var(--zh-font, serif);
+  font-size: 11px;
+  letter-spacing: 3px;
+  opacity: 0.6;
+}
+
+.fp-close {
+  border: 0;
+  background: transparent;
+  color: rgba(245, 239, 230, 0.5);
+  font-size: 15px;
+  line-height: 1;
+  padding: 2px 4px;
+  transition: color 0.2s ease;
+}
+
+.fp-close:hover {
+  color: #f5efe6;
+}
+
+/* ── 候选列表 ── */
+.fp-list {
+  list-style: none;
+  margin: 4px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.fp-item {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 3px;
+  text-align: left;
+  background: transparent;
+  border: 0;
+  border-radius: 7px;
+  padding: 9px 10px;
+  color: inherit;
+  transition: background-color 0.2s ease, outline-color 0.2s ease;
+  outline: 1px solid transparent;
+}
+
+.fp-item:hover {
+  background: rgba(245, 239, 230, 0.07);
+}
+
+.fp-item-active,
+.fp-item-active:hover {
+  background: rgba(245, 239, 230, 0.1);
+  outline-color: rgba(245, 239, 230, 0.28);
+}
+
+.fp-item-sample {
+  font-size: 15px;
+  line-height: 1.4;
+}
+
+/* 每个候选的示例文本用该字体渲染；generic 兜底防加载失败时布局突变 */
+.fp-preview-source-han {
+  font-family: "Source Han Serif CN", serif;
+}
+
+.fp-preview-fz {
+  font-family: "FZXiaoBiaoSong", serif;
+}
+
+.fp-preview-yahei {
+  font-family: "Microsoft YaHei", sans-serif;
+}
+
+.fp-preview-simsun {
+  font-family: SimSun, serif;
+}
+
+.fp-preview-simhei {
+  font-family: SimHei, sans-serif;
+}
+
+.fp-preview-kaiti {
+  font-family: KaiTi, serif;
+}
+
+.fp-preview-fangsong {
+  font-family: FangSong, serif;
+}
+
+.fp-preview-dengxian {
+  font-family: DengXian, sans-serif;
+}
+
+/* ── 元信息行：名称 + 来源 ── */
+.fp-item-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: "Ellograph Light", "Quincy Light", Georgia, serif,
+    var(--zh-font, serif);
+  font-size: 10px;
+  letter-spacing: 1px;
+  opacity: 0.55;
+}
+
+.fp-item-active .fp-item-meta {
+  opacity: 0.8;
+}
+
+.fp-item-tag {
+  border: 1px solid rgba(245, 239, 230, 0.22);
+  border-radius: 3px;
+  padding: 1px 4px;
+  font-size: 9px;
+  letter-spacing: 1px;
+}
+
+/* ── 分组（任务 #59）：衬线 / 无衬线（黑体）/ 楷体 / 系统字体 ──
+   滚动容器为 .fp-panel（max-height + overflow-y:auto），
+   选项增多时面板整体滚动。 */
+.fp-group {
+  margin-top: 4px;
+}
+
+.fp-group-label {
+  padding: 6px 10px 4px;
+  margin-bottom: 2px;
+  border-bottom: 1px solid rgba(245, 239, 230, 0.07);
+  font-family: "Ellograph Light", "Quincy Light", Georgia, serif,
+    var(--zh-font, serif);
+  font-size: 9px;
+  letter-spacing: 2px;
+  opacity: 0.38;
+}
+
+.fp-group-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+/* ── 本地开源 webfont 预览（#59）：预览元素用到该 family 即触发对应
+   unicode-range 分片按需下载，仅面板打开时拉取几十 KB 级分片 */
+.fp-preview-lxgw {
+  font-family: "LXGW WenKai", serif;
+}
+
+.fp-preview-smiley {
+  font-family: "Smiley Sans Oblique", sans-serif;
+}
+
+.fp-preview-misans {
+  font-family: "MiSans VF", sans-serif;
+}
+
+.fp-preview-noto {
+  font-family: "Noto Sans SC", sans-serif;
+}
+
+/* ── Windows/Office 系统字体预览（#59）：候选经 canvas 量宽检测，
+   检测不到的项不渲染（组件里过滤），样式仅对存在的字体生效 */
+.fp-preview-nsimsun {
+  font-family: NSimSun, serif;
+}
+
+.fp-preview-stkaiti {
+  font-family: STKaiti, serif;
+}
+
+.fp-preview-stsong {
+  font-family: STSong, serif;
+}
+
+.fp-preview-stzhongsong {
+  font-family: STZhongsong, serif;
+}
+
+.fp-preview-stfangsong {
+  font-family: STFangsong, serif;
+}
+
+.fp-preview-stxihei {
+  font-family: STXihei, sans-serif;
+}
+
+.fp-preview-lisu {
+  font-family: LiSu, serif;
+}
+
+.fp-preview-youyuan {
+  font-family: YouYuan, serif;
+}

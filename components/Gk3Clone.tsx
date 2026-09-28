@@ -267,8 +267,14 @@ export function Gk3Clone() {
   const [selectedPortfolioWork, setSelectedPortfolioWork] = useState<string | null>(null);
   // 作品大图浮层（TiltedCard）：点击单图打开；打开时 viewer 的 mouseleave 关闭计时全部跳过
   const [portfolioOverlayId, setPortfolioOverlayId] = useState<string | null>(null);
-  // 预加载 3D 页面（隐藏 iframe），避免点击打开浮层时加载卡顿
-  const [preloadReady, setPreloadReady] = useState(false);
+  // #53/#54 init 前移：预载 iframe 先以 1×1 挂载 —— 0×0 时合成器不调度 BeginFrame，
+  // script.js 首帧 render（shader 编译 + 30 张纹理 GPU 上传）被推迟到用户点击
+  // 瞬间（实测停帧 6.4s）；1×1 放行零尺寸守卫，收到 arc-vinyl:ready（或 12s
+  // 超时兜底）后收回 0×0 零开销待命，打开时纯样式切换
+  const [iframeMountReady, setIframeMountReady] = useState(false);
+  const [arcInitDone, setArcInitDone] = useState(false);
+  // 持久化浮层 iframe 引用：关闭时向 iframe 内 postMessage 停掉预览音频
+  const showcaseIframeRef = useRef<HTMLIFrameElement>(null);
   // ── 加载动画状态 ──
   const [showLoading, setShowLoading] = useState(false);
   const [loadingDone, setLoadingDone] = useState(false);
@@ -279,20 +285,54 @@ export function Gk3Clone() {
     loadingDoneRef.current = loadingDone;
   }, [loadingDone]);
 
+  // 浮层关闭（含 Esc）：iframe 常驻不卸载，通知内部停掉预览音频，
+  // 避免音频在 0×0 隐藏 iframe 里继续播放。首次渲染（ref 初值 false）不发消息。
+  const showcaseOpenPrevRef = useRef(false);
   useEffect(() => {
-    // 加载动画完成后再预加载 3D 页，避免 idle-motion 动画循环 + 78 个资源请求
-    // 与加载动画抢主线程/带宽。
-    // 实测（trace-load-scroll-perf）：固定 +3s 恰好撞上用户开始浏览/滚动的窗口，
-    // 3D 场景初始化 + 资源加载把主线程打成 fps 13.4、1.05~1.77s 停帧 ×6、持续 6s+；
-    // 故改为 requestIdleCallback 等浏览器空闲（最长等 10s 兜底）再挂载预加载 iframe。
+    if (showcaseOpenPrevRef.current && !showcaseOpen) {
+      showcaseIframeRef.current?.contentWindow?.postMessage("arc-vinyl:pause-preview", "*");
+    }
+    showcaseOpenPrevRef.current = showcaseOpen;
+  }, [showcaseOpen]);
+
+  // #54 预载挂载回撤到真正空闲（双路径）：init 不再与用户 hover 期的 2D 弧形
+  // 动画抢主线程（#53 的 hover 后 1.5s 错峰实测导致 hover 期宿主 fps 27/
+  // maxDelta 600ms/longtask 115ms）。① 首访（有 LoadingScreen）：覆盖期内即挂
+  // 1×1——首帧 shader 编译的大停帧藏进 LoadingScreen；② 回访（跳过
+  // LoadingScreen）：loadingDone 后 requestIdleCallback 自动挂载（2s 兜底）。
+  // script.js 侧配合分帧（每帧最多 1 个 mesh 子任务，实测压平 244ms longtask）。
+  // 封面已 480×480 WebP（691KB/30 张），提前挂载成本极低且不在首屏关键路径；
+  // ready 收 0×0、12s 兜底、直接点开全屏兜底保持不变
+  useEffect(() => {
+    if (iframeMountReady) return;
+    if (showLoading) {
+      setIframeMountReady(true);
+      return;
+    }
     if (!loadingDone) return;
     if (typeof window.requestIdleCallback === "function") {
-      const idle = window.requestIdleCallback(() => setPreloadReady(true), { timeout: 10000 });
-      return () => window.cancelIdleCallback(idle);
+      const id = window.requestIdleCallback(() => setIframeMountReady(true), { timeout: 2000 });
+      return () => window.cancelIdleCallback(id);
     }
-    const timer = window.setTimeout(() => setPreloadReady(true), 6000);
-    return () => window.clearTimeout(timer);
-  }, [loadingDone]);
+    const t = window.setTimeout(() => setIframeMountReady(true), 300);
+    return () => window.clearTimeout(t);
+  }, [showLoading, loadingDone, iframeMountReady]);
+
+  // #53 init 完成监听：script.js 在空闲期完成全部 mesh 首帧渲染后 postMessage
+  // arc-vinyl:ready → 收回 0×0；12s 未收到（WebGL 不可用等）超时兜底收回 0×0，
+  // 打开浮层时若 init 未完成则全屏等待（现状行为，不阻塞用户）
+  useEffect(() => {
+    const onMessage = (event: MessageEvent) => {
+      if (event.data === "arc-vinyl:ready") setArcInitDone(true);
+    };
+    window.addEventListener("message", onMessage);
+    return () => window.removeEventListener("message", onMessage);
+  }, []);
+  useEffect(() => {
+    if (!iframeMountReady || arcInitDone) return;
+    const t = setTimeout(() => setArcInitDone(true), 12000);
+    return () => clearTimeout(t);
+  }, [iframeMountReady, arcInitDone]);
 
   // ── 判断是否需要显示加载动画 ──
   useEffect(() => {
@@ -327,7 +367,10 @@ export function Gk3Clone() {
     }
   }, []);
 
-  // 预加载音乐数据：loadingDone 后拉取写入模块级缓存，hover 打开 viewer 时秒开
+  // 预加载音乐数据：loadingDone 后拉取写入模块级缓存，hover 打开 viewer 时秒开。
+  // 两个 warm 均不重复下载：warmPlaylistCache 内部走 lib/heat-requests 共享请求层
+  // （与 LoadingScreen 复用同一 Promise）；warmMusicCache 的 spotify 请求在
+  // LoadingScreen 阶段已由共享层发出，此时命中浏览器 HTTP 缓存（max-age=3600）。
   useEffect(() => {
     if (!loadingDone) return;
     const preload = () => {
@@ -765,6 +808,8 @@ export function Gk3Clone() {
 
   const prepViewer = (rowId: string, item: WorkItem, index: number) => {
     cancelEndViewerTimer();
+    // #54：预载 iframe 已在 LoadingScreen 后空闲期自动挂载（幂等常驻），
+    // 浮层打开仅样式切换，关闭切回 0×0 隐藏（#51 常驻化）
     setViewerClass(item.viewer ?? "phone");
     setActiveRow(rowId);
     setViewing(true);
@@ -923,7 +968,9 @@ export function Gk3Clone() {
                   }
                 }}
                 onClick={() => {
-                  // showcase 行：桌面端点击打开全屏浮层
+                  // showcase 行：桌面端点击打开全屏浮层。showcaseOpen=true 直接
+                  // 满足渲染条件；iframe 万一未预载（idle 回调被极端阻塞）时
+                  // 立即以全屏态挂载（回退路径，init 全屏进行，不阻塞）
                   if (row.id === 'showcase') {
                     setShowcaseOpen(true);
                     return;
@@ -1060,40 +1107,48 @@ export function Gk3Clone() {
         // LoadingScreen 覆盖期间噪点不可见：完全停用重绘循环
         paused={!loadingDone}
       />
-      {/* 预加载 music-cover-3d 资源（隐藏 iframe，浮层打开后移除） */}
-      {preloadReady && !showcaseOpen && (
-        <iframe
-          src="/music-cover-3d/index.html"
-          style={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            width: 0,
-            height: 0,
-            border: "none",
-            opacity: 0,
-            pointerEvents: "none",
-          }}
-          title="preload"
-          aria-hidden="true"
-          tabIndex={-1}
-        />
-      )}
-      {/* 精选推荐全屏浮层 */}
-      {showcaseOpen && (
-        <div className="showcase-overlay">
-          <button
-            className="showcase-close"
-            onClick={() => setShowcaseOpen(false)}
-          >
-            ×
-          </button>
+      {/* ── 3D 浮层：单一 iframe 常驻化（#51）+ init 前移（#53/#54）──
+          #54：LoadingScreen 消失后 requestIdleCallback 自动挂载（2s 兜底），
+          init 不再与用户 hover 期的 2D 弧形动画抢主线程（same-origin iframe
+          与宿主共享渲染进程主线程，基线实测 hover 期宿主 fps 27/停帧 600ms）；
+          预载期先 1×1（fixed/opacity:0/pointer-events:none/z-index:-1，不产生
+          滚动条不遮挡）：0×0 时合成器不调度 BeginFrame，script.js 首帧 render
+          （shader 编译 + 30 张纹理上传）被推迟到点击瞬间（实测停帧 6.4s）；
+          1×1 放行空闲期完成 init，收到 arc-vinyl:ready 后收回 0×0（12s 超时兜底）。
+          打开浮层仅切换样式（fixed inset 0 全屏），关闭切回 0×0 隐藏，永不卸载重挂；
+          未预载时直接点击“点击进入交互”→ 立即以全屏态挂载（init 全屏进行，不阻塞）。 */}
+      {(iframeMountReady || showcaseOpen) && (
+        <div
+          className="showcase-overlay"
+          aria-hidden={!showcaseOpen}
+          style={
+            showcaseOpen
+              ? undefined
+              : { visibility: arcInitDone ? "hidden" : "visible", background: "transparent", pointerEvents: "none" }
+          }
+        >
           <iframe
+            ref={showcaseIframeRef}
             src="/music-cover-3d/index.html"
             className="showcase-iframe"
             title="Arc Vinyl Archive"
             allow="autoplay"
+            style={
+              showcaseOpen
+                ? undefined
+                : arcInitDone
+                  ? // ready/超时后：收回 0×0，script.js 零尺寸守卫接管，零渲染开销
+                    { width: 0, height: 0, opacity: 0, visibility: "hidden", pointerEvents: "none" }
+                  : // init 期：1×1 非零尺寸让合成器调度 BeginFrame，空闲期完成 init；
+                    // visibility 不可为 hidden（会暂停 BeginFrame），opacity:0 已不可见
+                    { position: "fixed", left: 0, top: 0, width: 1, height: 1, opacity: 0, pointerEvents: "none", zIndex: -1, border: "none", visibility: "visible" }
+            }
           />
+          {showcaseOpen && (
+            <button className="showcase-close" onClick={() => setShowcaseOpen(false)}>
+              ×
+            </button>
+          )}
         </div>
       )}
       {/* 作品大图浮层：TiltedCard 展示原图（点击遮罩空白/×/ESC 关闭，viewer 保持原状）。

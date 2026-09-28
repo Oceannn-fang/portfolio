@@ -132,7 +132,7 @@
 
 /* ── 状态文字 ── */
 .ls-text {
-  font-family: 'Ellograph Light', 'Georgia', serif;
+  font-family: 'Ellograph Light', 'Georgia', serif, var(--zh-font, serif);
   font-size: 10px;
   color: rgba(245, 239, 230, 0.25);
   letter-spacing: 3px;

@@ -24,7 +24,7 @@ export const projects: Project[] = [
   },
   {
     id: "25yongbutingxia",
-    title: "25岁永不停下",
+    title: "25歲永不停下",
     subtitle: "Poster / Editorial",
     description: "An editorial poster treating motion as a typographic force, with dense rhythm contained by clean margins.",
     image: "/images/portfolio/25yongbutingxia.png",
@@ -34,7 +34,7 @@ export const projects: Project[] = [
   },
   {
     id: "taijie",
-    title: "台阶",
+    title: "臺階",
     subtitle: "Artwork / Print",
     description: "A layered composition exploring hierarchy, repetition, and the visual tension between depth and flatness.",
     image: "/images/portfolio/taijie.png",
@@ -54,7 +54,7 @@ export const projects: Project[] = [
   },
   {
     id: "guoqi",
-    title: "过期",
+    title: "過期",
     subtitle: "Artwork / Narrative",
     description: "A visual note on expiration and memory, using grayscale tones to keep the story open and intimate.",
     image: "/images/portfolio/guoqi.png",
@@ -74,7 +74,7 @@ export const projects: Project[] = [
   },
   {
     id: "moonlight",
-    title: "月光 moonlight",
+    title: "月光 Moonlight", /* #62 Title Case */
     subtitle: "Artwork / Tone Study",
     description: "A tone study in light and shadow, kept deliberately quiet so the material itself can breathe.",
     image: "/images/portfolio/moonlight.png",
@@ -84,7 +84,7 @@ export const projects: Project[] = [
   },
   {
     id: "piano",
-    title: "piano",
+    title: "Piano", /* #62 Title Case */
     subtitle: "Artwork / Music Visual",
     description: "A visual response to piano music, rendered through rhythm, spacing, and restrained contrast.",
     image: "/images/portfolio/piano.png",
@@ -93,8 +93,8 @@ export const projects: Project[] = [
     year: 2025,
   },
   {
-    id: "zixingren",
-    title: "自行人",
+    id: "mercei", /* #62：id 随标题联动（无外部引用） */
+    title: "Mercei",
     subtitle: "Artwork / Experimental",
     description: "An experimental composition where movement is implied rather than shown, leaving room for interpretation.",
     image: "/images/portfolio/zixingren.png",
@@ -104,7 +104,7 @@ export const projects: Project[] = [
   },
   {
     id: "shaodance",
-    title: "烧起来、舞蹈、浇灭",
+    title: "燒起來、舞蹈、澆滅",
     subtitle: "Album Art / Sequence",
     description: "Album artwork built around a three-part emotional arc, compressed into one strong visual frame.",
     image: "/images/portfolio/shaodance.png",

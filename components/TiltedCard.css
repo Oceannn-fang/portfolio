@@ -21,7 +21,8 @@
   transform-style: preserve-3d;
 }
 
-/* 图片铺满 inner；圆角与 will-change 与 React Bits 标准一致 */
+/* 图片铺满 inner；圆角与 will-change 与 React Bits 标准一致。
+ * #58 淡入：decode 完成前 opacity 0（shimmer 占位垫底），完成后过渡显示。 */
 .tilted-card-img {
   position: absolute;
   inset: 0;
@@ -31,6 +32,46 @@
   border-radius: 15px;
   will-change: transform;
   transform: translateZ(0);
+  opacity: 1;
+  transition: opacity 0.35s ease;
+}
+
+.tilted-card-figure.img-loading .tilted-card-img {
+  opacity: 0;
+}
+
+/* 加载占位：暗底扫光（与全站暗色美学一致），原图淡入后隐藏；
+ * 纯色系占位不透底（项目浮层背景规范），border-radius 与 img 一致。 */
+.tilted-card-img-placeholder {
+  position: absolute;
+  inset: 0;
+  border-radius: 15px;
+  background: linear-gradient(110deg, #12110d 30%, #1d1b14 46%, #12110d 62%);
+  background-size: 220% 100%;
+  animation: tc-placeholder-shimmer 1.5s linear infinite;
+  opacity: 1;
+  transition: opacity 0.35s ease;
+  pointer-events: none;
+}
+
+.tilted-card-figure.img-loaded .tilted-card-img-placeholder {
+  opacity: 0;
+}
+
+@keyframes tc-placeholder-shimmer {
+  to {
+    background-position-x: -220%;
+  }
+}
+
+/* ── #58 放大态清晰度修复（核心）────────────────────
+ * 常驻 will-change: transform 会让 Chromium 对 img 合成层保持低分辨率
+ * 光栅化纹理，#56 的 scale 放大时被 GPU 直接拉伸 → 4x 下文字晕开发糊。
+ * 放大态移除 will-change，合成器在 spring 收敛后按实际 scale 重新光栅化
+ * （滚动过程中短暂软、停下后变清晰，与地图类应用体验一致）。
+ * 回 1x 后 tc-zoomed 摘除，will-change 恢复保障 hover/倾斜性能。 */
+.tilted-card-figure.tc-zoomed .tilted-card-img {
+  will-change: auto;
 }
 
 /* 可选内容浮层（displayOverlayContent）：抬升到图片上方 */
@@ -61,6 +102,52 @@
   overflow: hidden;
   text-overflow: ellipsis;
   transform: translateZ(30px);
+}
+
+/* ── #56 滚轮缩放（zoomable 浮层场景）──────────────────
+ * 缩放/平移由 motion 值驱动 img transform，这里只管光标与按钮外观。
+ * 1x 时 zoom-in 提示可滚；放大后 grab，拖拽中 grabbing。 */
+.tilted-card-figure.tc-zoomable .tilted-card-img {
+  cursor: zoom-in;
+}
+
+.tilted-card-figure.tc-zoomed .tilted-card-img {
+  cursor: grab;
+}
+
+.tilted-card-figure.tc-zoomed.is-dragging .tilted-card-img {
+  cursor: grabbing;
+}
+
+/* 重置按钮：放大后浮现，位于底部居中；纯色底不透明（浮层背景规范），不随图片缩放 */
+.tilted-card-reset {
+  position: absolute;
+  bottom: 18px;
+  left: 50%;
+  z-index: 12;
+  padding: 7px 18px;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  border-radius: 999px;
+  background: #0b0b09;
+  color: #f5f2ea;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  white-space: nowrap;
+  cursor: pointer;
+  opacity: 0;
+  pointer-events: none;
+  transform: translate(-50%, 6px);
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+.tilted-card-reset.is-visible {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translate(-50%, 0);
+}
+
+.tilted-card-reset:hover {
+  border-color: rgba(255, 255, 255, 0.55);
 }
 
 /* 移动端提示（showMobileWarning 才渲染） */

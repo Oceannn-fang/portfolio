@@ -369,3 +369,28 @@ template {
     --panel-color: rgb(3, 7, 38);
   }
 }
+
+/* ── 中文字体（FontPicker 设置面板用）─────────────────────────
+   项目内置字体 @font-face 注册；含中文文件名的 src url 必须 URL 编码。
+   本地开源 webfont（霞鹜文楷/得意黑/MiSans/思源黑体）的 @font-face
+   由 FontPicker 组件挂载时注入 <link>（css 在 public/fonts/<name>/）。
+   注意：--zh-font 变量不在 :root 预设初始值——衬线栈以
+   var(--zh-font, serif) 形式追加，未选择字体时回退 serif；
+   无衬线栈（.mm-tab）为 var(--zh-font, "Microsoft YaHei"), sans-serif
+   （任务 #59：无衬线默认微软雅黑，不影响衬线栈回退）。 */
+@font-face {
+  font-family: "Source Han Serif CN";
+  src: url("/fonts/SourceHanSerifCN-SemiBold.otf") format("opentype");
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "FZXiaoBiaoSong";
+  src: url("/fonts/%E6%96%B9%E6%AD%A3%E5%B0%8F%E6%A0%87%E5%AE%8B%E7%AE%80%E4%BD%93.ttf")
+    format("truetype");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}

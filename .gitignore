@@ -49,3 +49,9 @@ lib/spotify-token.json
 # 验证过程截图与临时脚本
 scripts/*.png
 scripts/verify-*.cjs
+
+# 验证截图与临时脚本不入库
+/task*.png
+scripts/task*.png
+scripts/task*.cjs
+scripts/task*.json

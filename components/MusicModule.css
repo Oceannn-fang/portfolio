@@ -10,7 +10,8 @@
   pointer-events: auto;
   /* 自带背景，与 viewer 面板底色一致，避免透明缝隙漏出页面背景 */
   background: rgba(11, 11, 9, 0.95);
-  font-family: "Ellograph Light", "Quincy Light", Georgia, serif;
+  font-family: "Ellograph Light", "Quincy Light", Georgia, serif,
+    var(--zh-font, serif);
   color: var(--warm-white, #f5efe6);
   display: flex;
   flex-direction: column;
@@ -31,7 +32,9 @@
   flex: 1; /* 均分宽度 */
   text-align: center;
   padding: 12px 0;
-  font-family: "Ellograph Light", sans-serif;
+  /* #59：无衬线栈默认微软雅黑 —— 未选字体时（--zh-font 未设）中文回退 "Microsoft YaHei"
+   （雅黑必须在 generic sans-serif 之前才会命中）；选字体后全站切换，不影响衬线栈 */
+font-family: "Ellograph Light", var(--zh-font, "Microsoft YaHei"), sans-serif;
   font-size: 11px; /* 缩小字号，与 viewer 面板比例协调 */
   letter-spacing: 0.5px; /* 与原页面标题的紧凑字距对齐 */
   text-transform: uppercase;
@@ -94,7 +97,8 @@
 }
 
 .mm-track-name {
-  font-family: "Quincy Light", Georgia, serif; /* 与原页面标题字体一致 */
+  font-family: "Quincy Light", Georgia, serif,
+    var(--zh-font, serif); /* 与原页面标题字体一致 */
   font-size: 15px;
   font-weight: normal;
   text-align: left; /* #viewer 的 text-align:center 继承污染，与 playlist（pm-）列表对齐方式一致（任务#38） */
@@ -201,7 +205,8 @@
 }
 
 .mm-card-name {
-  font-family: "Quincy Light", Georgia, serif; /* 与原页面标题字体一致 */
+  font-family: "Quincy Light", Georgia, serif,
+    var(--zh-font, serif); /* 与原页面标题字体一致 */
   font-size: 12px;
   font-weight: normal;
   text-align: left; /* 专辑名左对齐，与曲目列表（任务#38）一致（任务#39）；mm-marquee 时元素变 inline-block + max-content，自身 text-align 不影响滚动动画 */

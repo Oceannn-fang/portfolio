@@ -1,7 +1,9 @@
 /* ── PlaylistModule：嵌入 Gk3Clone viewer 面板的网易云精选歌单模块 ── */
 /* 类名统一 pm- 前缀，避免污染全局样式 */
-/* 字体与色系对齐 listening（MusicModule / mm-）：歌名 Quincy Light 衬线、
-   作者名继承根节点 Ellograph Light，--warm-white 暖白 */
+/* 字体与色系对齐 listening（MusicModule / mm-）：#60 Spotify 风格统一 ——
+   全面板（含歌名/艺人名/加载/错误文案）同一无衬线栈
+   "Ellograph Light", var(--zh-font, "Microsoft YaHei"), sans-serif：
+   默认态中文=微软雅黑，字体面板选字体后全站跟随；--warm-white 暖白 */
 
 .pm-root {
   position: relative;
@@ -11,7 +13,8 @@
   flex-direction: column;
   overflow: hidden;
   pointer-events: auto;
-  font-family: 'Ellograph Light', 'Quincy Light', Georgia, serif;
+  font-family: "Ellograph Light", var(--zh-font, "Microsoft YaHei"),
+    sans-serif; /* #60：Spotify 风格统一无衬线，中文元素全部同构此栈 */
   color: var(--warm-white, #f5efe6);
 }
 
@@ -54,7 +57,8 @@
 }
 
 .pm-player-name {
-  font-family: "Quincy Light", Georgia, serif; /* 对齐 listening .mm-track-name */
+  font-family: "Ellograph Light", var(--zh-font, "Microsoft YaHei"),
+    sans-serif; /* #60：Spotify 风格统一无衬线（原 Quincy Light 衬线栈） */
   font-size: 15px; /* 对齐 listening 15px */
   font-weight: normal; /* Quincy Light 仅 normal 字重，避免浏览器合成加粗 */
   text-align: left; /* #viewer 的 text-align:center 会继承污染，歌曲信息强制左对齐 */
@@ -148,7 +152,8 @@
 }
 
 .pm-track-name {
-  font-family: "Quincy Light", Georgia, serif; /* 对齐 listening .mm-track-name */
+  font-family: "Ellograph Light", var(--zh-font, "Microsoft YaHei"),
+    sans-serif; /* #60：Spotify 风格统一无衬线（原 Quincy Light 衬线栈） */
   font-size: 15px; /* 对齐 listening 15px */
   font-weight: normal;
   text-align: left; /* #viewer 的 text-align:center 会继承污染，列表歌名强制左对齐（任务#37） */

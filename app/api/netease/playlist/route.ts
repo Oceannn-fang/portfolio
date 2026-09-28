@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { gzipJson } from '../../_lib/compress';
 
 // 1 小时缓存
 export const revalidate = 3600;
@@ -15,7 +16,18 @@ const UPSTREAM_HEADERS = {
 // 网易云 CDN 有时返回 http:// 封面，HTTPS 部署下会被浏览器当作混合内容阻止，统一升级为 https://
 const toHttps = (url?: string) => (url ? url.replace(/^http:\/\//, 'https://') : '');
 
-export async function GET() {
+/**
+ * 曲目封面统一改走网易云缩略参数（服务器端缩放输出 JPEG）。
+ * 全尺寸外链图单张可达数 MB、30 张合计 26MB+，而页面里只显示为 40-80px 缩略图；
+ * ?param=350y350 后单张仅约 15-30KB，且支持已有 ?param 的 URL（取 ? 前主体重写）。
+ */
+const toThumb = (url?: string) => {
+  const httpsUrl = toHttps(url);
+  if (!httpsUrl) return '';
+  return `${httpsUrl.split('?')[0]}?param=350y350`;
+};
+
+export async function GET(request: Request) {
   try {
     // v6 接口支持 n 参数指定返回曲目数上限，拉取全部曲目
     const response = await fetch(
@@ -68,11 +80,13 @@ export async function GET() {
         name: t.name,
         artists: (t.artists || t.ar || []).map((a: any) => a.name).join(' / '),
         album: t.album?.name || t.al?.name || '',
-        cover: toHttps(t.album?.picUrl || t.al?.picUrl || ''),
+        cover: toThumb(t.album?.picUrl || t.al?.picUrl || ''),
         duration: t.duration || t.dt || 0,
       }));
 
-    return NextResponse.json(
+    // gzip 压缩输出（尊重 Accept-Encoding），与 1 小时缓存头共存
+    return gzipJson(
+      request,
       {
         name: playlist.name,
         coverImgUrl: toHttps(playlist.coverImgUrl),
@@ -81,9 +95,7 @@ export async function GET() {
         tracks,
       },
       {
-        headers: {
-          'Cache-Control': 'public, max-age=3600, stale-while-revalidate=86400',
-        },
+        'Cache-Control': 'public, max-age=3600, stale-while-revalidate=86400',
       }
     );
   } catch (error) {

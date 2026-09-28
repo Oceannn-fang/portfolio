@@ -9,38 +9,40 @@ interface Props {
   paused?: boolean;
 }
 
-// 专辑封面文件列表（位于 public/music-cover-3d/album_covers/）
+// 专辑封面文件列表（480×480 WebP，位于 public/music-cover-3d/album_covers_webp/，
+// 与 script.js albums[].file、album_previews.js key 三方共用同一 URL，
+// warm 预解码后 JSX img / iframe 内 three.js 纹理命中同一 HTTP 缓存）
 const albumFiles = [
-  '01_the_beatles_abbey_road_2019_mix.jpg',
-  '02_pink_floyd_the_dark_side_of_the_moon.jpg',
-  '03_nirvana_nevermind.jpg',
-  '04_michael_jackson_thriller.jpg',
-  '05_fleetwood_mac_rumours.jpg',
-  '06_david_bowie_the_rise_and_fall_of_ziggy_stardust_and_the_spiders_from_mars_2012_remaster.jpg',
-  '07_the_velvet_underground_and_nico_the_velvet_underground_and_nico_45th_anniversary_edition.jpg',
-  '08_radiohead_ok_computer.jpg',
-  '09_prince_and_the_revolution_purple_rain.jpg',
-  '10_kanye_west_my_beautiful_dark_twisted_fantasy.jpg',
-  '11_kendrick_lamar_good_kid_m_a_a_d_city.jpg',
-  '12_lauryn_hill_the_miseducation_of_lauryn_hill.jpg',
-  '13_miles_davis_kind_of_blue.jpg',
-  '14_john_coltrane_a_love_supreme.jpg',
-  '15_daft_punk_discovery.jpg',
-  '16_beyonc_lemonade.jpg',
-  '17_taylor_swift_1989.jpg',
-  '18_billie_eilish_when_we_all_fall_asleep_where_do_we_go.jpg',
-  '19_amy_winehouse_back_to_black.jpg',
-  '20_adele_21.jpg',
-  '21_arctic_monkeys_am.jpg',
-  '22_the_strokes_is_this_it.jpg',
-  '23_the_clash_london_calling_expanded_edition.jpg',
-  '24_joy_division_unknown_pleasures_2019_digital_master.jpg',
-  '25_metallica_master_of_puppets_expanded_edition.jpg',
-  '26_ac_dc_back_in_black.jpg',
-  '27_bob_dylan_highway_61_revisited.jpg',
-  '28_joni_mitchell_blue.jpg',
-  '29_marvin_gaye_what_s_going_on.jpg',
-  '30_stevie_wonder_songs_in_the_key_of_life.jpg',
+  '01_frank_ocean_blonde.webp',
+  '02_lu1_blue.webp',
+  '03_black_country_new_road_ants_from_up_there.webp',
+  '04_radiohead_in_rainbows.webp',
+  '05_sun_shengxi_chu_mo_di_dai.webp',
+  '06_zhang_xingchan_no_no.webp',
+  '07_cornelius_fantasma.webp',
+  '08_newjeans_supernatural.webp',
+  '09_tomcbumpz_comfortable_silence.webp',
+  '10_sweet_trip_velocity_design_comfort.webp',
+  '11_shiina_ringos_shouso_strip.webp',
+  '12_portishead_roseland_nyc_live.webp',
+  '13_waa_wei_you_ya_de_ci_wei.webp',
+  '14_toe_the_book_about_my_idle_plot_on_a_vague_anxiety.webp',
+  '15_sampha_lahai.webp',
+  '16_tyler_the_creator_igor.webp',
+  '17_stereolab_dots_and_loops.webp',
+  '18_aphex_twin_richard_d_james_album.webp',
+  '19_oh_yoko_i_love_you.webp',
+  '20_sunahara_yoshinori_the_sound_of_70s.webp',
+  '21_aco_absolute_ego.webp',
+  '22_fred_again_ten_days.webp',
+  '23_caroline_caroline_2.webp',
+  '24_fayzz_days_gone.webp',
+  '25_the_strokes_is_this_it.webp',
+  '26_biao_qing_yin_hang_hei_dao.webp',
+  '27_lu1_wu_ye_lie_che_shang_de_gao_bie.webp',
+  '28_frank_ocean_channel_orange.webp',
+  '29_cheer_chen_ji_ta_shou.webp',
+  '30_ciacia_ta_de_fa_guang_yao_bai.webp',
 ];
 
 // 上行取前 15，下行取后 15
@@ -69,7 +71,7 @@ export function warmAlbumCovers() {
     }
     const file = pending[index];
     const img = new Image();
-    img.src = `/music-cover-3d/album_covers/${file}`;
+    img.src = `/music-cover-3d/album_covers_webp/${file}`;
     img.decode()
       .then(() => {
         warmedCovers.add(file);
@@ -218,7 +220,7 @@ export default function AlbumShowcase({ onOpenOverlay, paused = false }: Props) 
         <img
           key={`t-${file}`}
           ref={setCoverRef(i)}
-          src={`/music-cover-3d/album_covers/${file}`}
+          src={`/music-cover-3d/album_covers_webp/${file}`}
           className="as-cover"
           alt=""
           loading="lazy"
@@ -230,7 +232,7 @@ export default function AlbumShowcase({ onOpenOverlay, paused = false }: Props) 
         <img
           key={`b-${file}`}
           ref={setCoverRef(topAlbums.length + i)}
-          src={`/music-cover-3d/album_covers/${file}`}
+          src={`/music-cover-3d/album_covers_webp/${file}`}
           className="as-cover"
           alt=""
           loading="lazy"

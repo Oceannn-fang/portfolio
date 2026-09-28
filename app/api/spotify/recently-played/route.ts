@@ -1,6 +1,6 @@
+import { gzipJson } from '../../_lib/compress';
 import {
   joinArtists,
-  jsonOk,
   pickLargestImage,
   spotifyFetch,
   toErrorResponse,
@@ -19,13 +19,13 @@ const CACHE_CONTROL = 'private, max-age=3600, stale-while-revalidate=86400';
  * 代理 Spotify /v1/me/player/recently-played，裁剪成前端需要的最小字段集。
  * 响应：{ tracks: [{ id, name, artist, album: { id, name, imageUrl }, playedAt }] }
  */
-export async function GET(): Promise<Response> {
+export async function GET(request: Request): Promise<Response> {
   try {
     const response = await spotifyFetch('/v1/me/player/recently-played?limit=20');
 
     // 用户没有任何播放历史时 Spotify 返回 204 No Content，属于正常空态
     if (response.status === 204) {
-      return jsonOk({ tracks: [] });
+      return gzipJson(request, { tracks: [] }, { 'Cache-Control': 'no-store' });
     }
 
     if (!response.ok) {
@@ -46,7 +46,8 @@ export async function GET(): Promise<Response> {
       playedAt: item.played_at,
     }));
 
-    return jsonOk({ tracks }, CACHE_CONTROL);
+    // gzip 压缩输出（尊重 Accept-Encoding），与 private 缓存头共存
+    return gzipJson(request, { tracks }, { 'Cache-Control': CACHE_CONTROL });
   } catch (error) {
     return toErrorResponse(error);
   }

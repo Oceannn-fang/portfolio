@@ -1,36 +1,48 @@
 import * as THREE from 'three';
 
+// #54 探针：iframe 侧 longtask 全程记录（含 init 期——此前由父页面在 ready 后
+// 注入，会漏掉 init 期的主线程占用）。供 CDP 验证脚本读取，量化 three.js init
+// （shader 编译 + 30 张纹理 GPU 上传）在共享渲染进程主线程上的真实成本。
+window.__lt = [];
+try {
+  new PerformanceObserver(function (list) {
+    for (let i = 0; i < list.getEntries().length; i++) {
+      window.__lt.push(Math.round(list.getEntries()[i].duration));
+    }
+  }).observe({ entryTypes: ["longtask"] });
+} catch (e) {}
+
 const albums = [
-  { artist: "The Beatles", title: "Abbey Road", file: "album_covers/01_the_beatles_abbey_road_2019_mix.jpg" },
-  { artist: "Pink Floyd", title: "The Dark Side of the Moon", file: "album_covers/02_pink_floyd_the_dark_side_of_the_moon.jpg" },
-  { artist: "Nirvana", title: "Nevermind", file: "album_covers/03_nirvana_nevermind.jpg" },
-  { artist: "Michael Jackson", title: "Thriller", file: "album_covers/04_michael_jackson_thriller.jpg" },
-  { artist: "Fleetwood Mac", title: "Rumours", file: "album_covers/05_fleetwood_mac_rumours.jpg" },
-  { artist: "David Bowie", title: "Ziggy Stardust", file: "album_covers/06_david_bowie_the_rise_and_fall_of_ziggy_stardust_and_the_spiders_from_mars_2012_remaster.jpg" },
-  { artist: "The Velvet Underground", title: "The Velvet Underground & Nico", file: "album_covers/07_the_velvet_underground_and_nico_the_velvet_underground_and_nico_45th_anniversary_edition.jpg" },
-  { artist: "Radiohead", title: "OK Computer", file: "album_covers/08_radiohead_ok_computer.jpg" },
-  { artist: "Prince & The Revolution", title: "Purple Rain", file: "album_covers/09_prince_and_the_revolution_purple_rain.jpg" },
-  { artist: "Kanye West", title: "My Beautiful Dark Twisted Fantasy", file: "album_covers/10_kanye_west_my_beautiful_dark_twisted_fantasy.jpg" },
-  { artist: "Kendrick Lamar", title: "good kid, m.A.A.d city", file: "album_covers/11_kendrick_lamar_good_kid_m_a_a_d_city.jpg" },
-  { artist: "Lauryn Hill", title: "The Miseducation of Lauryn Hill", file: "album_covers/12_lauryn_hill_the_miseducation_of_lauryn_hill.jpg" },
-  { artist: "Miles Davis", title: "Kind of Blue", file: "album_covers/13_miles_davis_kind_of_blue.jpg" },
-  { artist: "John Coltrane", title: "A Love Supreme", file: "album_covers/14_john_coltrane_a_love_supreme.jpg" },
-  { artist: "Daft Punk", title: "Discovery", file: "album_covers/15_daft_punk_discovery.jpg" },
-  { artist: "Beyonce", title: "Lemonade", file: "album_covers/16_beyonc_lemonade.jpg" },
-  { artist: "Taylor Swift", title: "1989", file: "album_covers/17_taylor_swift_1989.jpg" },
-  { artist: "Billie Eilish", title: "When We All Fall Asleep, Where Do We Go?", file: "album_covers/18_billie_eilish_when_we_all_fall_asleep_where_do_we_go.jpg" },
-  { artist: "Amy Winehouse", title: "Back to Black", file: "album_covers/19_amy_winehouse_back_to_black.jpg" },
-  { artist: "Adele", title: "21", file: "album_covers/20_adele_21.jpg" },
-  { artist: "Arctic Monkeys", title: "AM", file: "album_covers/21_arctic_monkeys_am.jpg" },
-  { artist: "The Strokes", title: "Is This It", file: "album_covers/22_the_strokes_is_this_it.jpg" },
-  { artist: "The Clash", title: "London Calling", file: "album_covers/23_the_clash_london_calling_expanded_edition.jpg" },
-  { artist: "Joy Division", title: "Unknown Pleasures", file: "album_covers/24_joy_division_unknown_pleasures_2019_digital_master.jpg" },
-  { artist: "Metallica", title: "Master of Puppets", file: "album_covers/25_metallica_master_of_puppets_expanded_edition.jpg" },
-  { artist: "AC/DC", title: "Back In Black", file: "album_covers/26_ac_dc_back_in_black.jpg" },
-  { artist: "Bob Dylan", title: "Highway 61 Revisited", file: "album_covers/27_bob_dylan_highway_61_revisited.jpg" },
-  { artist: "Joni Mitchell", title: "Blue", file: "album_covers/28_joni_mitchell_blue.jpg" },
-  { artist: "Marvin Gaye", title: "What's Going On", file: "album_covers/29_marvin_gaye_what_s_going_on.jpg" },
-  { artist: "Stevie Wonder", title: "Songs in the Key of Life", file: "album_covers/30_stevie_wonder_songs_in_the_key_of_life.jpg" },
+  { artist: "Frank Ocean", title: "Blonde", file: "album_covers_webp/01_frank_ocean_blonde.webp" },
+  { artist: "Lu1", title: "blue", file: "album_covers_webp/02_lu1_blue.webp" },
+  { artist: "Black Country, New Road", title: "Ants From Up There", file: "album_covers_webp/03_black_country_new_road_ants_from_up_there.webp" },
+  { artist: "Radiohead", title: "In Rainbows", file: "album_covers_webp/04_radiohead_in_rainbows.webp" },
+  { artist: "孙盛希", title: "出没地带", file: "album_covers_webp/05_sun_shengxi_chu_mo_di_dai.webp" },
+  { artist: "张醒婵", title: "No, no", file: "album_covers_webp/06_zhang_xingchan_no_no.webp" },
+  { artist: "Cornelius", title: "Fantasma", file: "album_covers_webp/07_cornelius_fantasma.webp" },
+  { artist: "NewJeans", title: "Supernatural", file: "album_covers_webp/08_newjeans_supernatural.webp" },
+  { artist: "tomcbumpz", title: "comfortable silence", file: "album_covers_webp/09_tomcbumpz_comfortable_silence.webp" },
+  { artist: "Sweet Trip", title: "Velocity : Design : Comfort.", file: "album_covers_webp/10_sweet_trip_velocity_design_comfort.webp" },
+  { artist: "椎名林檎", title: "胜诉的新宿舞娘", file: "album_covers_webp/11_shiina_ringos_shouso_strip.webp" },
+  { artist: "Portishead", title: "Roseland NYC Live", file: "album_covers_webp/12_portishead_roseland_nyc_live.webp" },
+  { artist: "魏如萱", title: "优雅的刺猬", file: "album_covers_webp/13_waa_wei_you_ya_de_ci_wei.webp" },
+  { artist: "toe", title: "the book about my idle plot on a vague anxiety.", file: "album_covers_webp/14_toe_the_book_about_my_idle_plot_on_a_vague_anxiety.webp" },
+  { artist: "Sampha", title: "Lahai", file: "album_covers_webp/15_sampha_lahai.webp" },
+  { artist: "Tyler, The Creator", title: "IGOR", file: "album_covers_webp/16_tyler_the_creator_igor.webp" },
+  { artist: "Stereolab", title: "Dots And Loops", file: "album_covers_webp/17_stereolab_dots_and_loops.webp" },
+  { artist: "Aphex Twin", title: "Richard D. James Album", file: "album_covers_webp/18_aphex_twin_richard_d_james_album.webp" },
+  { artist: "Oh, Yoko", title: "I Love You...", file: "album_covers_webp/19_oh_yoko_i_love_you.webp" },
+  { artist: "砂原良徳", title: "The Sound Of '70s", file: "album_covers_webp/20_sunahara_yoshinori_the_sound_of_70s.webp" },
+  { artist: "ACO", title: "absolute ego", file: "album_covers_webp/21_aco_absolute_ego.webp" },
+  { artist: "Fred again..", title: "Ten Days", file: "album_covers_webp/22_fred_again_ten_days.webp" },
+  { artist: "caroline", title: "caroline 2", file: "album_covers_webp/23_caroline_caroline_2.webp" },
+  { artist: "Fayzz", title: "Days Gone", file: "album_covers_webp/24_fayzz_days_gone.webp" },
+  { artist: "The Strokes", title: "Is This It", file: "album_covers_webp/25_the_strokes_is_this_it.webp" },
+  { artist: "表情银行", title: "嘿！岛", file: "album_covers_webp/26_biao_qing_yin_hang_hei_dao.webp" },
+  { artist: "Lu1", title: "午夜列车上的告别", file: "album_covers_webp/27_lu1_wu_ye_lie_che_shang_de_gao_bie.webp" },
+  { artist: "Frank Ocean", title: "channel ORANGE", file: "album_covers_webp/28_frank_ocean_channel_orange.webp" },
+  { artist: "陈绮贞", title: "吉他手", file: "album_covers_webp/29_cheer_chen_ji_ta_shou.webp" },
+  { artist: "ciacia", title: "她的。发光摇摆", file: "album_covers_webp/30_ciacia_ta_de_fa_guang_yao_bai.webp" },
 ];
 
 const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -50,6 +62,16 @@ let cdMeshes = new Map();
 let focusMesh = null;
 let selectedAlbum = albums[0];
 let lastTime = performance.now();
+// #53 init 前移信号：父页面（Gk3Clone）以 1×1 iframe 预载（非 0×0 —— 0×0 时合成器
+// 不调度 BeginFrame，首帧 render 连同 shader 编译 + 30 张纹理 GPU 上传会被推迟到
+// 用户点击瞬间，实测停帧 6.4s）。1×1 时守卫放行，空闲期逐帧完成 init；
+// 全部 mesh（30 卡片 + focus）就绪后的首帧渲染完成时向父页面发 arc-vinyl:ready，
+// 父页面收到后收回 0×0 零开销待命。__arcVinylReady 供 CDP 验证探针读取。
+let sceneReadyCount = 0;
+let readySent = false;
+// focus mesh 分帧构建代际号：防止上一轮未执行的构建任务在新一轮 setFocusAlbum
+// 后入场景（focusMesh 异步赋值前的 dispose 无法覆盖队列中的旧任务）
+let focusBuildToken = 0;
 let previewPlaying = false;
 let previewTransitioning = false;
 let audioFadeFrame = 0;
@@ -587,6 +609,29 @@ function isSameAlbum(first, second) {
   return first?.file === second?.file;
 }
 
+// #54 init 分帧调度器：mesh 创建（Canvas2D 颜色提取 / WebGL 几何 + 纹理上传）
+// 原本随 30 张 img 的 load 事件同帧集中执行，实测形成 244ms 宿主 longtask
+// （same-origin iframe 与宿主共享渲染进程主线程）→ init 窗口宿主 rAF 跌到
+// 13fps/400ms 停帧。改为每帧最多执行 1 个子任务，把 init 摊到多帧，
+// 保持宿主帧间隔 <50ms（无停帧感）。
+const meshBuildQueue = [];
+let meshBuildScheduled = false;
+function scheduleMeshBuild(task) {
+  meshBuildQueue.push(task);
+  if (meshBuildScheduled) return;
+  meshBuildScheduled = true;
+  requestAnimationFrame(function drain() {
+    meshBuildScheduled = false;
+    const next = meshBuildQueue.shift();
+    if (!next) return;
+    next();
+    if (meshBuildQueue.length > 0) {
+      meshBuildScheduled = true;
+      requestAnimationFrame(drain);
+    }
+  });
+}
+
 function createCard(album, index, lane) {
   const button = document.createElement("button");
   button.className = "album-card";
@@ -621,17 +666,30 @@ function createCard(album, index, lane) {
     mesh: null,
   };
 
-  const imgEl = new Image();
-  imgEl.crossOrigin = 'anonymous';
+  // 单次加载共享：DOM 封面 img 加载完成后直接用于颜色提取与 three.js 纹理，
+  // 不再 new Image() 二次拉取（此前每张封面在 iframe 内产生 2 次请求）。
   const token = Symbol(album.file);
   card.loadToken = token;
-  imgEl.onload = () => {
+  // 分帧：颜色提取（Canvas2D 像素读取）与 mesh 构建（geometry + 纹理上传）拆到
+  // 相邻两帧执行，单帧 init 开销 <10ms，避免同帧叠加成 >50ms 主线程长任务
+  const attachMesh = () => {
     if (card.loadToken !== token) return;
-    card.colors = extractColors(imgEl);
-    card.mesh = createCDCase(album, imgEl, 1, card.colors);
-    scene.add(card.mesh);
+    scheduleMeshBuild(() => {
+      if (card.loadToken !== token) return;
+      card.colors = extractColors(image);
+    });
+    scheduleMeshBuild(() => {
+      if (card.loadToken !== token) return;
+      card.mesh = createCDCase(album, image, 1, card.colors);
+      scene.add(card.mesh);
+      sceneReadyCount++;
+    });
   };
-  imgEl.src = album.file;
+  if (image.complete && image.naturalWidth) {
+    attachMesh();
+  } else {
+    image.addEventListener("load", attachMesh, { once: true });
+  }
 
   button.addEventListener("pointerenter", () => { card.pointerHover = true; });
   button.addEventListener("pointerleave", () => { card.pointerHover = false; });
@@ -659,14 +717,24 @@ function setFocusAlbum(album, { transitionPreview = false, coverImage = null, co
   focusImage.alt = `${album.title} album cover`;
   updatePreviewMeta();
 
+  const myFocusToken = ++focusBuildToken;
   if (focusMesh) {
     disposeCDCase(focusMesh);
     focusMesh = null;
   }
 
+  // 分帧：与卡片 mesh 同一调度器，颜色提取与 mesh 构建拆到相邻两帧
   const buildFocusMesh = (imgEl) => {
-    focusMesh = createCDCase(album, imgEl, 1, colors);
-    scene.add(focusMesh);
+    scheduleMeshBuild(() => {
+      if (myFocusToken !== focusBuildToken) return;
+      const extracted = colors || extractColors(imgEl);
+      scheduleMeshBuild(() => {
+        if (myFocusToken !== focusBuildToken) return;
+        focusMesh = createCDCase(album, imgEl, 1, extracted);
+        scene.add(focusMesh);
+        sceneReadyCount++;
+      });
+    });
   };
 
   if (coverImage?.complete && coverImage.naturalWidth) {
@@ -785,6 +853,12 @@ async function playCurrentPreview({ fromTransition = false } = {}) {
 playButton.addEventListener("click", () => {
   if (previewPlaying) { stopPreview(); return; }
   playCurrentPreview();
+});
+
+// Gk3Clone 持久化 iframe 常驻 DOM：浮层关闭时 iframe 仅切回 0x0 隐藏不卸载，
+// 外层通过 postMessage 通知停掉预览音频，避免音频在隐藏 iframe 内继续播放。
+window.addEventListener("message", (event) => {
+  if (event.data === "arc-vinyl:pause-preview") stopPreview();
 });
 
 previewAudio.addEventListener("ended", () => {
@@ -1127,6 +1201,13 @@ function tick(time) {
   updateFocus();
 
   renderer.render(scene, camera);
+  // #53 init 完成信号：全部 mesh（albums.length 张卡片 + 1 focus）就绪且已经过
+  // 至少一次真实渲染（shader 编译与纹理上传在此发生）→ 通知父页面收回 0×0
+  if (!readySent && sceneReadyCount >= albums.length + 1) {
+    readySent = true;
+    window.__arcVinylReady = true;
+    try { window.parent.postMessage("arc-vinyl:ready", "*"); } catch (e) { /* 无 parent / 跨域时忽略 */ }
+  }
   requestAnimationFrame(tick);
 }
 

@@ -1,6 +1,6 @@
+import { gzipJson } from '../../_lib/compress';
 import {
   joinArtists,
-  jsonOk,
   pickLargestImage,
   spotifyFetch,
   toErrorResponse,
@@ -19,7 +19,7 @@ const CACHE_CONTROL = 'private, max-age=3600, stale-while-revalidate=86400';
  * 代理 Spotify /v1/me/albums，返回当前账号「收藏的专辑」。
  * 响应：{ albums: [{ id, name, artist, imageUrl, releaseDate, totalTracks }] }
  */
-export async function GET(): Promise<Response> {
+export async function GET(request: Request): Promise<Response> {
   try {
     // limit=48：能被 3 和 4 整除，网格不会出现空缺行
     const response = await spotifyFetch('/v1/me/albums?limit=48');
@@ -39,7 +39,8 @@ export async function GET(): Promise<Response> {
       totalTracks: item.album.total_tracks ?? 0,
     }));
 
-    return jsonOk({ albums }, CACHE_CONTROL);
+    // gzip 压缩输出（尊重 Accept-Encoding），与 private 缓存头共存
+    return gzipJson(request, { albums }, { 'Cache-Control': CACHE_CONTROL });
   } catch (error) {
     return toErrorResponse(error);
   }

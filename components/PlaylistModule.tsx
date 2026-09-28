@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import { getNeteasePlaylist } from '@/lib/heat-requests';
 import './PlaylistModule.css';
 
 interface Track {
@@ -69,8 +70,8 @@ export function warmPlaylistCache() {
   if (warming) return;
   if (cachedData && Date.now() - cacheTime < CACHE_TTL) return;
   warming = true;
-  fetch('/api/netease/playlist')
-    .then((res) => (res.ok ? res.json() : null))
+  // 走 lib/heat-requests 共享请求层：与 LoadingScreen 复用同一 Promise，不重复下载
+  getNeteasePlaylist<{ name: string; tracks: Track[] }>()
     .then((json) => {
       if (json) {
         cachedData = { name: json.name, tracks: json.tracks };
@@ -107,11 +108,8 @@ export default function PlaylistModule() {
   // 加载歌单数据 + 定时刷新
   useEffect(() => {
     const fetchData = () => {
-      fetch('/api/netease/playlist')
-        .then((res) => {
-          if (!res.ok) throw new Error('加载失败');
-          return res.json();
-        })
+      // 走共享请求层：与 LoadingScreen/预热复用同一 Promise（in-flight 去重）
+      getNeteasePlaylist<{ name: string; tracks: Track[] }>()
         .then((json) => {
           cachedData = { name: json.name, tracks: json.tracks };
           cacheTime = Date.now();

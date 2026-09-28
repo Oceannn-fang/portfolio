@@ -607,7 +607,7 @@ body.expanded {
 .row ul {
   list-style: none;
   font-weight: normal;
-  font-family: "Ellograph Demi";
+  font-family: "Ellograph Demi", var(--zh-font, serif);
   font-size: 29px;
   padding: 0;
   margin: 0;
@@ -649,7 +649,7 @@ body.expanded {
 .row h2 {
   color: var(--fg-color);
   font-weight: normal;
-  font-family: "Quincy Text Italic";
+  font-family: "Quincy Text Italic", var(--zh-font, serif);
   font-size: 56px;
   letter-spacing: -1px;
   line-height: 100%;
@@ -668,7 +668,7 @@ body.expanded {
 .row h3 {
   color: var(--fg-color);
   font-weight: normal;
-  font-family: "Ellograph Light";
+  font-family: "Ellograph Light", var(--zh-font, serif);
   font-size: 21px;
   letter-spacing: -1px;
   line-height: 100%;
@@ -683,7 +683,7 @@ span.cursor {
   display: inline-block;
 }
 .row h2 i {
-  font-family: "Quincy Medium Italic";
+  font-family: "Quincy Medium Italic", var(--zh-font, serif);
   display: block;
   font-style: normal;
   font-size: 29px;
@@ -825,7 +825,7 @@ span.comma {
     line-height: 38px;
     opacity: 0;
     font-weight: normal;
-    font-family: "Ellograph Demi";
+    font-family: "Ellograph Demi", var(--zh-font, serif);
     font-size: 44px;
     -webkit-user-select: none;
     user-select: none;

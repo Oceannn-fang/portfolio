@@ -18,28 +18,28 @@
 export const portfolioImages = [
   { src: "/images/portfolio/mingming.png", title: "明明", category: "Album Art" },
   { src: "/images/portfolio/25yongbutingxia.png", title: "25歲永不停下", category: "Poster" },
-  { src: "/images/portfolio/taijie.png", title: "台阶", category: "Artwork" },
+  { src: "/images/portfolio/taijie.png", title: "臺階", category: "Artwork" },
   { src: "/images/portfolio/xiaobuwuqu.png", title: "小步舞曲", category: "Artwork" },
-  { src: "/images/portfolio/guoqi.png", title: "过期", category: "Artwork" },
+  { src: "/images/portfolio/guoqi.png", title: "過期", category: "Artwork" },
   { src: "/images/portfolio/yikehuichen.png", title: "一顆灰塵", category: "Artwork" },
-  { src: "/images/portfolio/moonlight.png", title: "月光 moonlight", category: "Artwork" },
-  { src: "/images/portfolio/piano.png", title: "piano", category: "Artwork" },
-  { src: "/images/portfolio/zixingren.png", title: "自行人", category: "Artwork" },
-  { src: "/images/portfolio/shaodance.png", title: "烧起来、舞蹈、浇灭", category: "Album Art" },
+  { src: "/images/portfolio/moonlight.png", title: "月光 Moonlight", category: "Artwork" }, /* #62 Title Case */
+  { src: "/images/portfolio/piano.png", title: "Piano", category: "Artwork" }, /* #62 Title Case */
+  { src: "/images/portfolio/zixingren.png", title: "Mercei", category: "Artwork" }, /* #62：用户拍板，与画面卡片一致 */
+  { src: "/images/portfolio/shaodance.png", title: "燒起來、舞蹈、澆滅", category: "Album Art" },
   { src: "/images/portfolio/yibaizhong.png", title: "一百種生活", category: "Poster" },
   { src: "/images/portfolio/yorokobi.png", title: "悦びに咲く花", category: "Artwork" },
   { src: "/images/portfolio/yeongwonhi.png", title: "지난 날은 영원히 혼수로 남아", category: "Artwork" },
 ];
 
 export const recentAlbums = [
-  { src: "/images/albums/Ant From Up There.png", name: "Ants From Up There", artist: "Black Country, New Road", spotifyUrl: "https://open.spotify.com/album/55PlRDoe0oGSbH6dy99Lr2", tracks: ["Intro", "Chaos Space Marine", "Concorde", "Bread Song", "Good Will Hunting", "Haldern", "The Place Where He Inserted the Blade", "Snow Globes", "Basketball Shoes"] },
+  { src: "/images/albums/Ant From Up There.png", name: "Concorde", /* #62：与作品标题同步（画面单曲） */ artist: "Black Country, New Road", spotifyUrl: "https://open.spotify.com/album/55PlRDoe0oGSbH6dy99Lr2", tracks: ["Intro", "Chaos Space Marine", "Concorde", "Bread Song", "Good Will Hunting", "Haldern", "The Place Where He Inserted the Blade", "Snow Globes", "Basketball Shoes"] },
   { src: "/images/albums/when i get home.png", name: "When I Get Home", artist: "Solange", spotifyUrl: "https://open.spotify.com/album/4WF4HvVT7VjGnVhwjo0GcM", tracks: ["Things I Imagined", "S McGregor (interlude)", "Down With the Clique", "Way to the Show", "Stay Flo", "Dreams", "Nothing Without Intention (interlude)", "Almeda", "Time (is)", "My Skin My Logo", "I'm a Witness", "Binz", "Beltway", "Exit Scott (interlude)", "Sound of Rain"] },
   { src: "/images/albums/Illegal.png", name: "Illegal", artist: "Caro", spotifyUrl: "", tracks: ["Intro", "Illegal", "Ride", "Make It Up", "Rose", "Dreaming", "Stay", "Night", "Gone", "Outro"] },
   { src: "/images/albums/tide.png", name: "Tide", artist: "Codeine", spotifyUrl: "", tracks: ["Tide", "Grain", "Dress Up", "Graves", "Slow", "Into", "Cold", "Down"] },
   { src: "/images/albums/Taurus.png", name: "Taurus", artist: "Kirinji", spotifyUrl: "", tracks: ["Taurus", "Flamingo", "Rainbow", "Crystal", "Venus", "Sunset", "Moonlight", "Stella", "Orion", "Nova"] },
   { src: "/images/albums/Racing Mount Pleasant.png", name: "Racing Mount Pleasant", artist: "Andy Shauf", spotifyUrl: "", tracks: ["Fool's Gold", "Sarah", "Clarity", "Everything Is Fine", "Dreaming", "Better", "Run", "End", "Wandering", "Home"] },
   { src: "/images/albums/just stand there.png", name: "Just Stand There", artist: "Freddie Joachim", spotifyUrl: "", tracks: ["Just Stand There", "Waves", "Coast", "Miles", "Vibe", "Glow", "Stay", "Drift", "Float", "Echo"] },
-  { src: "/images/albums/be.png", name: "be", artist: "Common", spotifyUrl: "https://open.spotify.com/album/2U3BZuvB9YzqkTv3dTfR1f", tracks: ["Be (Intro)", "The Corner", "Go!", "Faithful", "Testify", "Love Is...", "Chi-City", "The Food", "Real People", "The Game", "It's Your World"] },
+  { src: "/images/albums/be.png", name: "Be", /* #62 Title Case */ artist: "Common", spotifyUrl: "https://open.spotify.com/album/2U3BZuvB9YzqkTv3dTfR1f", tracks: ["Be (Intro)", "The Corner", "Go!", "Faithful", "Testify", "Love Is...", "Chi-City", "The Food", "Real People", "The Game", "It's Your World"] },
   { src: "/images/albums/driveslow intro.png", name: "Driveslow Intro", artist: "Mounika.", spotifyUrl: "", tracks: ["Driveslow Intro", "Sunshine", "Rain", "Clouds", "Dream", "Sleep", "Drift", "Home", "Flow", "Sky"] },
   { src: "/images/albums/braincells.png", name: "Braincells", artist: "Puma Blue", spotifyUrl: "", tracks: ["Braincells", "Want Me", "Moonlight", "Hounds", "Pretty", "Snow", "She's Just a Girl", "Sick", "Too Much", "Bruise"] },
   { src: "/images/albums/hair cut re make.png", name: "Hair Cut / Re:Make", artist: "YonYon", spotifyUrl: "", tracks: ["Hair Cut", "Re:Make", "Glow", "Night", "Day", "Dream", "Flow", "Light", "Shine", "Moon"] },

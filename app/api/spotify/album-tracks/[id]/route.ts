@@ -1,6 +1,6 @@
+import { gzipJson } from '../../../_lib/compress';
 import {
   jsonError,
-  jsonOk,
   spotifyFetch,
   toErrorResponse,
   upstreamError,
@@ -25,7 +25,7 @@ const CACHE_CONTROL = 'public, max-age=86400';
  * 响应：{ tracks: [{ id, name, durationMs, trackNumber, previewUrl }] }
  */
 export async function GET(
-  _request: Request,
+  request: Request,
   { params }: { params: Promise<{ id: string }> }
 ): Promise<Response> {
   try {
@@ -53,7 +53,8 @@ export async function GET(
       previewUrl: track.preview_url ?? null,
     }));
 
-    return jsonOk({ tracks }, CACHE_CONTROL);
+    // gzip 压缩输出（尊重 Accept-Encoding），与 public 缓存头共存
+    return gzipJson(request, { tracks }, { 'Cache-Control': CACHE_CONTROL });
   } catch (error) {
     return toErrorResponse(error);
   }

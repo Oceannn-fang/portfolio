@@ -1,6 +1,11 @@
 'use client';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
+import {
+  getNeteasePlaylist,
+  getSpotifyAlbums,
+  getSpotifyRecentlyPlayed,
+} from '@/lib/heat-requests';
 import './LoadingScreen.css';
 
 interface Props {
@@ -32,26 +37,27 @@ export default function LoadingScreen({ onLoaded }: Props) {
   }, [onLoaded, total]);
 
   useEffect(() => {
-    // 并行预加载三个数据源（与 warmMusicCache/warmPlaylistCache 请求相同接口，
-    // 浏览器 HTTP 缓存 + 模块级缓存保证不会重复网络请求）
-    fetch('/api/spotify/recently-played')
+    // 并行预加载三个数据源：走 lib/heat-requests 共享请求层（get-or-start 单例），
+    // 与后续 warmMusicCache/warmPlaylistCache 复用同一 Promise，同一会话只发一次网络请求；
+    // 兜底触发后数据由组件侧自有的 loading/error 态自行加载/重试，不会白屏
+    getSpotifyRecentlyPlayed()
       .then(() => checkDone())
       .catch(() => checkDone());
-    fetch('/api/spotify/albums')
+    getSpotifyAlbums()
       .then(() => checkDone())
       .catch(() => checkDone());
-    fetch('/api/netease/playlist')
+    getNeteasePlaylist()
       .then(() => checkDone())
       .catch(() => checkDone());
 
-    // 超时保底：最多等 8 秒，超时直接跳过加载动画
+    // 超时保底：最多等 3 秒，超时直接跳过加载动画进入页面
     const timeout = setTimeout(() => {
       if (!doneRef.current) {
         doneRef.current = true;
         setFading(true);
         setTimeout(onLoaded, 750);
       }
-    }, 8000);
+    }, 3000);
 
     return () => clearTimeout(timeout);
     // eslint-disable-next-line react-hooks/exhaustive-deps
