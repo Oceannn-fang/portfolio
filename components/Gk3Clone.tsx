@@ -95,12 +95,12 @@ const rows: Row[] = [
     id: "playlist",
     title: (
       <>
-        <i>my picks</i>playlist
+        <i>doofus picks</i>playlist
       </>
     ),
     items: [
       {
-        text: "my picks",
+        text: "doofus picks",
         viewer: "playlist" as ViewerMode,
         rowId: "playlist",
       },

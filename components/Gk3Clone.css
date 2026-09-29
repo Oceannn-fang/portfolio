@@ -597,14 +597,16 @@ body.expanded {
 
 /* #84：副标 "and Unfinished." 恢复主标 1/2（原 #80 为 1/4=17.5px，用户反馈太小）——
    字号 70/2=35px、字距 -2/2=-1px 同比；display:block 独占一行（<br/> 仍在兑底）；
-   行高 100%（35px 行框舒适）；margin-top 15px：间距/字高比 0.43 视觉协调（13px 在 35px 下偏紧），
-   且 ≥12.5px 保证主标 70px 字形盒（比 56px 行框下溢约 13.5px）与小字布局盒无度量交叠（余量 1.5px） */
+   行高 100%（35px 行框舒适）。
+   #90：margin-top 15px → 9px（用户要求 "and Unfinished." 与上一行更密）。
+   15px 时墨迹间隙实测 2px（主标 70px Quincy 字形盒比 56px 行框下溢约 13px），
+   9px 起步若墨迹重叠则向上微调至最小无重叠值，终值与实测见交付说明 */
 #hero h1 .hero-sub {
   display: block;
   font-size: 35px;
   letter-spacing: -1px;
   line-height: 100%;
-  margin-top: 15px;
+  margin-top: 9px;
 }
 
 .row {
