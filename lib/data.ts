@@ -69,6 +69,8 @@ export const extraAlbums = [
 
 export const allAlbums = [...recentAlbums, ...extraAlbums];
 
+// #87：works 占位数据已由 lib/portfolio-images.ts 的 portfolioWorks 取代（components/Work.tsx 已切换数据源）；
+// 按用户规则不删除，保留待清理。
 export const works = [
   {
     title: "Project Name",

@@ -68,7 +68,6 @@ const rows: Row[] = [
   {
     id: "music",
     title: <>listening</>,
-    h3: <>spotify</>,
     items: [
       {
         text: "recently played",
@@ -84,7 +83,6 @@ const rows: Row[] = [
         <i>enter the archive</i>arc vinyl
       </>
     ),
-    h3: <>3d shelf</>,
     items: [
       {
         text: "enter the archive",
@@ -100,7 +98,6 @@ const rows: Row[] = [
         <i>my picks</i>playlist
       </>
     ),
-    h3: <>netease</>,
     items: [
       {
         text: "my picks",
@@ -112,7 +109,6 @@ const rows: Row[] = [
   {
     id: "portfolio",
     title: <>works</>,
-    h3: <>portfolio</>,
     // 只取最新 10 个作品，避免列表过长
     items: portfolioWorks.slice(0, 10).map((work) => ({
       text: work.title,
@@ -157,12 +153,7 @@ const rows: Row[] = [
     bar: true,
     items: [],
   },
-  {
-    id: "legal",
-    title: null,
-    legal: true,
-    items: [],
-  },
+  /* #85：末尾 legal 散文区行对象已删（两段 note 含 cat Bean's 小红书 链接）；版权行在上方 bar 行独立保留 */
 ];
 
 const mediaNames = Array.from(
@@ -885,28 +876,7 @@ export function Gk3Clone() {
       );
     }
 
-    if (row.legal) {
-      return (
-        <div className="row legal" key={row.id}>
-          <span>
-            Hello! I'd like to personally thank you for stopping by my little corner of the internet. Whether you were
-            here for business or for pleasure, I hope you enjoyed your stay. I thought it would look cool if I had some
-            fine print here at the bottom of the page, but traditionally fine print like this is used for boring terms
-            and conditions&nbsp;&mdash;&nbsp;of which I have none.
-          </span>
-          <span>
-            So instead, I'm just using this space to write you, my visitor, a little note. I hope you're having a great
-            day! If you aren't, you can{" "}
-            <a href="https://xhslink.cn/o/6nYCOPZksMd" target="_blank" rel="noopener noreferrer">
-              click here
-            </a>{" "}
-            to visit my cat Bean's 小红书. He always cheers me up, so maybe he will do the same for you? Okay, I'm
-            running out of space, so I'll just leave you with one last thought: be a good person. The world has enough
-            jerks.
-          </span>
-        </div>
-      );
-    }
+    /* #85：末尾 legal 散文区已删（rows 数据中 legal 行对象同步移除）；版权行在 bar 行独立保留 */
 
     return (
       <div

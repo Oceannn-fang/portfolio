@@ -18,6 +18,7 @@ export interface PortfolioWork {
 }
 
 export const portfolioWorks: PortfolioWork[] = [
+  { id: 'life-and-space', title: 'Life & Space', image: '/images/portfolio/Life & space.png', thumb: '/images/portfolio-thumbs/life-and-space.webp', date: '2026-09-22' },
   { id: 'theres-something-here-for-us-both', title: 'There’s Something Here for Us Both', image: '/images/portfolio/There’s Something Here for Us Both.png', thumb: '/images/portfolio-thumbs/theres-something-here-for-us-both.webp', date: '2026-09-18' },
   { id: 'wish-it-was-easy', title: 'Wish it Was Easy', image: '/images/portfolio/wish it was easy.png', thumb: '/images/portfolio-thumbs/wish-it-was-easy.webp', date: '2026-09-09' },
   { id: 'i-did-this-i-did-that', title: 'I Did This, I Did That', image: '/images/portfolio/I did this, I did that.png', thumb: '/images/portfolio-thumbs/i-did-this-i-did-that.webp', date: '2026-08-25' },

@@ -1,7 +1,10 @@
 ﻿"use client";
 
 import { motion } from "motion/react";
-import { works } from "@/lib/data";
+import { portfolioWorks } from "@/lib/portfolio-images";
+
+// #87：数据源切换为 portfolioWorks（真实作品集），按 date 最新在前排序
+const sortedWorks = [...portfolioWorks].sort((a, b) => b.date.localeCompare(a.date));
 
 export function Work() {
   return (
@@ -32,10 +35,9 @@ export function Work() {
       </motion.h2>
 
       <div style={{ display: "flex", flexDirection: "column", gap: 0 }}>
-        {works.map((work, i) => (
-          <motion.a
-            key={work.title}
-            href={work.url}
+        {sortedWorks.map((work, i) => (
+          <motion.div
+            key={work.id}
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-50px" }}
@@ -90,34 +92,6 @@ export function Work() {
               >
                 {work.title}
               </span>
-              <span
-                style={{
-                  fontFamily: "var(--font-sans)",
-                  fontSize: "0.75rem",
-                  color: "var(--color-dim)",
-                }}
-              >
-                {work.subtitle}
-              </span>
-              <div style={{ display: "flex", gap: "0.5rem", marginTop: "0.25rem", flexWrap: "wrap" }}>
-                {work.tags.map((tag) => (
-                  <span
-                    key={tag}
-                    style={{
-                      fontFamily: "var(--font-sans)",
-                      fontSize: "0.6rem",
-                      letterSpacing: "0.12em",
-                      textTransform: "uppercase",
-                      color: "var(--color-dim)",
-                      border: "1px solid var(--color-border)",
-                      borderRadius: "2px",
-                      padding: "0.1rem 0.45rem",
-                    }}
-                  >
-                    {tag}
-                  </span>
-                ))}
-              </div>
             </div>
             <div
               style={{
@@ -135,7 +109,7 @@ export function Work() {
                   color: "var(--color-dim)",
                 }}
               >
-                {work.year}
+                {work.date.slice(0, 4)}
               </span>
               <motion.span
                 whileHover={{ x: 3, rotate: 90 }}
@@ -150,7 +124,7 @@ export function Work() {
                 &rarr;
               </motion.span>
             </div>
-          </motion.a>
+          </motion.div>
         ))}
       </div>
     </section>
