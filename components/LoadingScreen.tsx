@@ -1,5 +1,8 @@
 'use client';
 
+// #98：本组件已下线挂载（Gk3Clone 不再渲染首屏遮罩，主内容挂载即渲染）；
+// 文件与样式保留备用，后续若需重新引入启动动画可直接复用。
+
 import { useState, useEffect, useRef, useCallback } from 'react';
 import {
   getNeteasePlaylist,

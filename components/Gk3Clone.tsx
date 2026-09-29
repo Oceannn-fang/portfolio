@@ -4,13 +4,14 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import "./Gk3Clone.css";
 import Noise from "./Noise";
 import { setSharedNoisePhase } from "./noisePhase";
-import MusicModule, { warmMusicCache, isMusicCacheValid } from "./MusicModule";
+import MusicModule, { warmMusicCache } from "./MusicModule";
 import AlbumShowcase, { warmAlbumCovers } from "./AlbumShowcase";
-import PlaylistModule, { warmPlaylistCache, isPlaylistCacheValid } from "./PlaylistModule";
+import PlaylistModule, { warmPlaylistCache } from "./PlaylistModule";
 import PortfolioModule from "./PortfolioModule";
 import TiltedCard from "./TiltedCard";
 import { portfolioWorks } from "../lib/portfolio-images";
-import LoadingScreen from "./LoadingScreen";
+// #98：首屏启动遮罩已下线（LoadingScreen.tsx 文件保留备用，不再挂载）
+// —— 用户反馈资源慢时遮罩反而拖延首屏，改为内容挂载即渲染；原"回访跳过遮罩"路径成为唯一路径
 
 type ViewerMode = "phone" | "video" | "social" | "pin" | "music" | "showcase" | "playlist" | "portfolio";
 
@@ -254,8 +255,7 @@ export function Gk3Clone() {
   const [arcInitDone, setArcInitDone] = useState(false);
   // 持久化浮层 iframe 引用：关闭时向 iframe 内 postMessage 停掉预览音频
   const showcaseIframeRef = useRef<HTMLIFrameElement>(null);
-  // ── 加载动画状态 ──
-  const [showLoading, setShowLoading] = useState(false);
+  // ── 加载状态（#98：遮罩下线，仅保留 loadingDone 门控供空闲期/绘制节流使用）──
   const [loadingDone, setLoadingDone] = useState(false);
   // loadingDone 的 ref 镜像：供 rAF/interval 闭包读取，避免重建动画循环
   const loadingDoneRef = useRef(false);
@@ -284,10 +284,8 @@ export function Gk3Clone() {
   // ready 收 0×0、12s 兜底、直接点开全屏兜底保持不变
   useEffect(() => {
     if (iframeMountReady) return;
-    if (showLoading) {
-      setIframeMountReady(true);
-      return;
-    }
+    // #98：原首访分支（showLoading 覆盖期内立即挂载）随遮罩下线移除，
+    // 统一走 loadingDone 后 requestIdleCallback 空闲挂载（2s 兜底）
     if (!loadingDone) return;
     if (typeof window.requestIdleCallback === "function") {
       const id = window.requestIdleCallback(() => setIframeMountReady(true), { timeout: 2000 });
@@ -295,7 +293,7 @@ export function Gk3Clone() {
     }
     const t = window.setTimeout(() => setIframeMountReady(true), 300);
     return () => window.clearTimeout(t);
-  }, [showLoading, loadingDone, iframeMountReady]);
+  }, [loadingDone, iframeMountReady]);
 
   // #53 init 完成监听：script.js 在空闲期完成全部 mesh 首帧渲染后 postMessage
   // arc-vinyl:ready → 收回 0×0；12s 未收到（WebGL 不可用等）超时兜底收回 0×0，
@@ -313,31 +311,12 @@ export function Gk3Clone() {
     return () => clearTimeout(t);
   }, [iframeMountReady, arcInitDone]);
 
-  // ── 判断是否需要显示加载动画 ──
+  // #98：首屏遮罩下线 —— 原"首访显示 LoadingScreen / 回访跳过"双路径合并为后者：
+  // 挂载即置 loadingDone（主内容直接渲染、各 paused/预热门控立即激活）并恢复滚动位置；
+  // 原缓存判断（isMusicCacheValid/isPlaylistCacheValid）与 handleLoaded 回调随之移除
   useEffect(() => {
-    const hasVisited = localStorage.getItem('gk3-visited');
-    const cacheReady = isMusicCacheValid() && isPlaylistCacheValid();
-
-    if (!cacheReady && !hasVisited) {
-      // 首次访问且无缓存 → 显示加载动画
-      setShowLoading(true);
-    } else {
-      // 缓存有效或已访问过 → 跳过动画，直接显示
-      setLoadingDone(true);
-      // 恢复上次滚动位置
-      const lastScroll = localStorage.getItem('gk3-scroll');
-      if (lastScroll) {
-        requestAnimationFrame(() => {
-          window.scrollTo(0, parseInt(lastScroll, 10));
-        });
-      }
-    }
-  }, []);
-  // 加载完成回调：隐藏动画、标记已访问、恢复滚动位置
-  const handleLoaded = useCallback(() => {
-    setShowLoading(false);
     setLoadingDone(true);
-    localStorage.setItem('gk3-visited', '1');
+    // 恢复上次滚动位置
     const lastScroll = localStorage.getItem('gk3-scroll');
     if (lastScroll) {
       requestAnimationFrame(() => {
@@ -957,7 +936,7 @@ export function Gk3Clone() {
 
   return (
     <>
-      {showLoading && <LoadingScreen onLoaded={handleLoaded} />}
+      {/* #98：首屏遮罩已下线，原 LoadingScreen 挂载点移除（组件文件保留备用） */}
       <div id="pointer" ref={pointerRef} />
       <div id="main">
         <div id="hero">
