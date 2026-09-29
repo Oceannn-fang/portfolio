@@ -39,17 +39,18 @@ interface AlbumTrack {
 
 // ── 工具函数 ──
 
-/** 相对时间格式化：x分钟前 / x小时前 / x天前 */
+/** 相对时间格式化：just now / x min ago / x hr ago / 1 day ago / x days ago（#98 英文化） */
 function formatTimeAgo(isoDate: string): string {
   const diff = Date.now() - new Date(isoDate).getTime();
   if (Number.isNaN(diff)) return '';
   const minutes = Math.floor(diff / 60000);
-  if (minutes < 1) return '刚刚';
-  if (minutes < 60) return `${minutes}分钟前`;
+  if (minutes < 1) return 'just now'; // 秒级一并覆盖
+  if (minutes < 60) return `${minutes} min ago`; // min 缩写单复同形
   const hours = Math.floor(minutes / 60);
-  if (hours < 24) return `${hours}小时前`;
+  if (hours < 24) return `${hours} hr ago`; // hr 缩写单复同形，与 min 风格一致且列宽友好
   const days = Math.floor(hours / 24);
-  return `${days}天前`;
+  // 无周/月分支，更长跨度统一按天计；单复数区分
+  return days === 1 ? '1 day ago' : `${days} days ago`;
 }
 
 /** 时长格式化：m:ss */
