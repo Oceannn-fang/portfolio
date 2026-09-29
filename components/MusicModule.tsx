@@ -182,12 +182,19 @@ export default function MusicModule() {
   const [albums, setAlbums] = useState<Album[]>(cachedAlbums ?? []);
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [albumTracks, setAlbumTracks] = useState<AlbumTrack[] | null>(null);
+  const [albumTracksError, setAlbumTracksError] = useState(false);
+  // #95：专辑详情视图（整面板切换，替代旧 accordion 内联展开）
+  const [albumDetail, setAlbumDetail] = useState<Album | null>(null);
   const [loading, setLoading] = useState(!cachedTracks);
   const [error, setError] = useState<string | null>(null);
   const [authed, setAuthed] = useState(cachedAuthed !== false);
 
   // 切换 tab 时拉取对应数据；有缓存且未过期则直接使用
   useEffect(() => {
+    // #95：tab 切换即退出详情视图并清空展开态（放在 effect 顶部，缓存命中分支也生效，避免残留）
+    setAlbumDetail(null);
+    setExpandedId(null);
+    setAlbumTracks(null);
     // 如果有缓存且已授权且未过期，跳过请求
     if (cachedAuthed === true && isCacheValid()) {
       if (activeTab === 'recent' && cachedTracks) {
@@ -215,8 +222,6 @@ export default function MusicModule() {
     async function loadData() {
       setLoading(true);
       setError(null);
-      setExpandedId(null);
-      setAlbumTracks(null);
       try {
         const url =
           activeTab === 'recent'
@@ -259,59 +264,90 @@ export default function MusicModule() {
     return () => { cancelled = true; };
   }, [activeTab]);
 
-  // 展开专辑时拉取其曲目列表
+  // #95：详情视图打开时拉取专辑曲目（loading/错误态驱动 mm-detail-status 行）
   async function loadAlbumTracks(albumId: string) {
     setAlbumTracks(null);
+    setAlbumTracksError(false);
     try {
       const res = await fetch(`/api/spotify/album-tracks/${albumId}`);
       if (res.status === 401) {
         setAuthed(false);
         return;
       }
-      if (!res.ok) return;
+      if (!res.ok) {
+        setAlbumTracksError(true);
+        return;
+      }
       const data = await res.json();
       setAlbumTracks(Array.isArray(data) ? data : data.tracks ?? []);
     } catch {
-      // 曲目加载失败不阻断 embed 展示
+      setAlbumTracksError(true); // 失败显示错误行，不白屏
     }
   }
 
-  // 点击行/卡片：切换展开状态
+  // 点击最近收听曲目行：切换 embed 展开状态
   function toggleExpand(id: string) {
     if (expandedId === id) {
       setExpandedId(null);
-      setAlbumTracks(null);
       return;
     }
     setExpandedId(id);
-    if (activeTab === 'albums') loadAlbumTracks(id);
-    else setAlbumTracks(null);
   }
+
+  // #95：进入专辑详情视图（记住网格 scrollTop，返回时恢复）
+  function openAlbumDetail(albumId: string) {
+    const album = albums.find((a) => a.id === albumId);
+    if (!album) return;
+    savedGridScroll.current = contentRef.current?.scrollTop ?? 0;
+    setAlbumDetail(album);
+    loadAlbumTracks(albumId);
+  }
+
+  function closeAlbumDetail() {
+    setAlbumDetail(null); // scrollTop 恢复由下方 useEffect 在 DOM 提交后执行
+  }
+
+  // #95：返回网格视图后恢复之前的滚动位置（网格重新渲染后 scrollTop 归零，需手动写回）
+  useEffect(() => {
+    if (albumDetail === null && contentRef.current) {
+      contentRef.current.scrollTop = savedGridScroll.current;
+    }
+  }, [albumDetail]);
 
   // ── 原生事件委托 ──
   // 本组件被渲染在 Gk3Clone 的 viewer 面板中，该面板 DOM 可能被手动搬移到
   // React 根容器之外，导致 React 的合成事件委托（onClick）无法捕获点击。
   // 因此改用原生 addEventListener 在组件根节点上做事件委托。
+  // #95：滚动容器 ref（网格 scrollTop 记忆/恢复）与保存值
+  const contentRef = useRef<HTMLDivElement | null>(null);
+  const savedGridScroll = useRef(0);
   /** 始终指向最新的点击处理逻辑，供原生监听器调用，避免闭包读到旧状态 */
   const clickHandlerRef = useRef<(e: MouseEvent) => void>(() => {});
   clickHandlerRef.current = (e: MouseEvent) => {
     const target = e.target as HTMLElement;
     // 点击落在 Spotify embed iframe 内部时忽略，避免误收起展开面板
     if (target.closest('iframe')) return;
+    // #95：详情视图返回按钮
+    if (target.closest('[data-mm-back]')) {
+      closeAlbumDetail();
+      return;
+    }
     // Tab 切换
     const tab = target.closest('[data-tab]') as HTMLElement | null;
     if (tab) {
       setActiveTab(tab.dataset.tab as 'recent' | 'albums');
       return;
     }
-    // 曲目行 / 专辑卡片：切换展开状态
-    const expandable = target.closest(
-      '[data-track-id], [data-album-id]'
-    ) as HTMLElement | null;
-    if (expandable) {
-      toggleExpand(
-        expandable.dataset.trackId ?? expandable.dataset.albumId ?? ''
-      );
+    // #95：专辑卡片 → 详情视图（替代旧 accordion 内联展开）
+    const albumCard = target.closest('[data-album-id]') as HTMLElement | null;
+    if (albumCard) {
+      openAlbumDetail(albumCard.dataset.albumId ?? '');
+      return;
+    }
+    // 最近收听曲目行：切换 embed 展开状态
+    const trackRow = target.closest('[data-track-id]') as HTMLElement | null;
+    if (trackRow) {
+      toggleExpand(trackRow.dataset.trackId ?? '');
     }
   };
 
@@ -382,23 +418,26 @@ export default function MusicModule() {
   // 3. 正常渲染（点击行为由根节点上的原生事件委托处理，不使用 React onClick）
   return (
     <div className="mm-root" ref={attachRoot}>
-      {/* Tabs */}
+      {/* Tabs：#95 文案英文化（小写风格，与站点 listening/doofus picks 一致） */}
       <div className="mm-tabs">
         <button
           className={`mm-tab${activeTab === 'recent' ? ' active' : ''}`}
           data-tab="recent"
         >
-          最近收听
+          recently played
         </button>
         <button
           className={`mm-tab${activeTab === 'albums' ? ' active' : ''}`}
           data-tab="albums"
         >
-          最近专辑
+          recent albums
         </button>
       </div>
 
-      <div className="mm-content">
+      <div
+        className={`mm-content${albumDetail ? ' mm-detail-open' : ''}`}
+        ref={contentRef}
+      >
         {/* 最近收听：曲目列表，点击展开 track embed */}
         {activeTab === 'recent' &&
           tracks.map((track) => (
@@ -452,8 +491,8 @@ export default function MusicModule() {
             </div>
           ))}
 
-        {/* 专辑推荐：网格卡片，点击展开详情 + album embed + 曲目 */}
-        {activeTab === 'albums' && (
+        {/* #95 专辑推荐：网格视图（点击卡片进详情）/ 详情视图（整面板切换，替代旧 accordion） */}
+        {activeTab === 'albums' && !albumDetail && (
           <div className="mm-grid">
             {albums.map((album) => (
               <div
@@ -480,42 +519,52 @@ export default function MusicModule() {
                     </div>
                   </div>
                 </div>
-                {/* 性能优化：仅展开的专辑才挂载 iframe 与曲目列表 */}
-                {expandedId === album.id && (
-                  <div className="mm-expand open">
-                    <div className="mm-expand-inner">
-                      <div className="mm-embed">
-                        <iframe
-                          src={`https://open.spotify.com/embed/album/${album.id}?utm_source=generator`}
-                          width="100%"
-                          height="352"
-                          frameBorder="0"
-                          allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-                          loading="lazy"
-                          title={`${album.name} - ${album.artist}`}
-                        />
-                      </div>
-                      {/* 专辑曲目列表 */}
-                      {albumTracks && (
-                        <div className="mm-album-tracks">
-                          {albumTracks.map((t) => (
-                            <div key={t.id} className="mm-album-track">
-                              <span className="mm-album-track-num">
-                                {t.trackNumber}
-                              </span>
-                              <span className="mm-album-track-name">{t.name}</span>
-                              <span className="mm-album-track-dur">
-                                {formatDuration(t.durationMs)}
-                              </span>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                )}
+                {/* #95：旧 accordion 内联展开（album embed + 曲目列表）已移除，由详情视图取代 */}
               </div>
             ))}
+          </div>
+        )}
+
+        {/* #95 专辑详情视图：封面/名称/艺术家头（#96 起返回按钮移至头部右侧），曲目列表占满剩余高度可滚动 */}
+        {activeTab === 'albums' && albumDetail && (
+          <div className="mm-detail">
+            <div className="mm-detail-head">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                className="mm-detail-cover"
+                src={albumDetail.imageUrl}
+                alt={albumDetail.name}
+                decoding="async"
+              />
+              <div className="mm-detail-meta">
+                <div className="mm-detail-name">{albumDetail.name}</div>
+                <div className="mm-detail-artist">{albumDetail.artist}</div>
+              </div>
+              {/* #96：返回按钮改为纵向小块（箭头上/back 下），由 meta 的 flex:1 推到头部右侧 */}
+              <button className="mm-back" data-mm-back type="button">
+                <span className="mm-back-arrow">←</span>
+                <span className="mm-back-label">back</span>
+              </button>
+            </div>
+            <div className="mm-detail-tracks">
+              {albumTracksError ? (
+                <div className="mm-detail-status">failed to load tracks</div>
+              ) : albumTracks === null ? (
+                <div className="mm-detail-status">loading tracks…</div>
+              ) : albumTracks.length === 0 ? (
+                <div className="mm-detail-status">no tracks</div>
+              ) : (
+                albumTracks.map((t) => (
+                  <div key={t.id} className="mm-album-track">
+                    <span className="mm-album-track-num">{t.trackNumber}</span>
+                    <span className="mm-album-track-name">{t.name}</span>
+                    <span className="mm-album-track-dur">
+                      {formatDuration(t.durationMs)}
+                    </span>
+                  </div>
+                ))
+              )}
+            </div>
           </div>
         )}
       </div>
