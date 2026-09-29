@@ -11,7 +11,8 @@
   /* 自带背景，与 viewer 面板底色一致，避免透明缝隙漏出页面背景 */
   background: rgba(11, 11, 9, 0.95);
   /* #78：中文回退 serif→微软雅黑；栈序 var 必须在通用族之前，否则 var 永不生效（同 Gk3Clone.css #77 修法） */
-  font-family: "Ellograph Light", "Quincy Light",
+  /* #80：删第二位 "Quincy Light" 衬线回退 —— 英文统一 Ellograph Light 开头（Ellograph 缺字时落到 Quincy 会漏衬线，正是用户反馈的问题） */
+  font-family: "Ellograph Light",
     var(--zh-font, "Microsoft YaHei"), sans-serif;
   color: var(--warm-white, #f5efe6);
   display: flex;
@@ -98,8 +99,9 @@ font-family: "Ellograph Light", var(--zh-font, "Microsoft YaHei"), sans-serif;
 }
 
 .mm-track-name {
-  font-family: "Quincy Light",
-    var(--zh-font, "Microsoft YaHei"), sans-serif; /* 与原页面标题字体一致；#78 中文回退 serif→雅黑，栈序 var 在通用族前 */
+  /* #80：英文曲目名/专辑名 Quincy(衬线)→Ellograph Light，与 .mm-tab/PlaylistModule 无衬线风格统一；中文回退雅黑，栈序 var 在通用族前 */
+  font-family: "Ellograph Light",
+    var(--zh-font, "Microsoft YaHei"), sans-serif;
   font-size: 15px;
   font-weight: normal;
   text-align: left; /* #viewer 的 text-align:center 继承污染，与 playlist（pm-）列表对齐方式一致（任务#38） */
@@ -206,8 +208,9 @@ font-family: "Ellograph Light", var(--zh-font, "Microsoft YaHei"), sans-serif;
 }
 
 .mm-card-name {
-  font-family: "Quincy Light",
-    var(--zh-font, "Microsoft YaHei"), sans-serif; /* 与原页面标题字体一致；#78 中文回退 serif→雅黑，栈序 var 在通用族前 */
+  /* #80：英文曲目名/专辑名 Quincy(衬线)→Ellograph Light，与 .mm-tab/PlaylistModule 无衬线风格统一；中文回退雅黑，栈序 var 在通用族前 */
+  font-family: "Ellograph Light",
+    var(--zh-font, "Microsoft YaHei"), sans-serif;
   font-size: 12px;
   font-weight: normal;
   text-align: left; /* 专辑名左对齐，与曲目列表（任务#38）一致（任务#39）；mm-marquee 时元素变 inline-block + max-content，自身 text-align 不影响滚动动画 */

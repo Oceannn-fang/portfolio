@@ -992,7 +992,7 @@ export function Gk3Clone() {
       <div id="main">
         <div id="hero">
           <div id="hero-inner">
-            <h1>Works, Notes,<br />and Unfinished.</h1> {/* #77：用户要求 and Unfinished. 独占第二行（<br/> 强制断行），字号维持原 70px；layout.tsx pageTitle 由 Felix 同步，不碰 */}
+            <h1>Works, Notes,<br /><span className="hero-sub">and Unfinished.</span></h1> {/* #80：第二行包 span.hero-sub 按比例缩至主标 1/4（17.5px，样式见 Gk3Clone.css），<br/> 保留强制断行；layout.tsx pageTitle 由 Felix 同步，不碰 */}
           </div>
         </div>
         {rows.map(renderRow)}

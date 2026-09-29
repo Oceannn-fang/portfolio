@@ -595,6 +595,19 @@ body.expanded {
   margin: 24px 0 0 24px;
 }
 
+/* #80：副标 "and Unfinished." 按比例缩至主标 1/4 —— 字号 70/4=17.5px、字距 -2/4=-0.5px 同比
+   （等比缩放是用户硬要求，-0.5px 在 17.5px 下与主标 -2px/70px 比例完全一致，目检不突兀则不另调）。
+   display:block 独占一行（<br/> 仍在兑底）；行高不继承 h1 的 80%（17.5px 下行框仅 14px 太挤），
+   改 100% 视觉舒适；margin-top 13px：与主标拉开 tagline 层次间距，同时消除 70px 字形盒
+   （Range 字形盒含 descent，比 56px 行框下溢约 13px）与小字布局盒的 3px 度量交叠带 */
+#hero h1 .hero-sub {
+  display: block;
+  font-size: 17.5px;
+  letter-spacing: -0.5px;
+  line-height: 100%;
+  margin-top: 13px;
+}
+
 .row {
   width: 100%;
   transform: translate3d(0px, 0px, 0px);
