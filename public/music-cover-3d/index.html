@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Arc Vinyl Archive</title>
     <link rel="icon" href="data:," />
-    <link rel="stylesheet" href="styles.css?v=idle-motion-6" />
+    <link rel="stylesheet" href="styles.css?v=album-panel-4" />
   </head>
   <body>
     <main class="archive-shell" aria-label="Curved album cover browser">
@@ -20,6 +20,14 @@
           <div class="focus-cover">
             <img class="focus-cover-image" src="" alt="" />
           </div>
+          <!-- #92 专辑信息面板移到封面左侧：挂在 .focus（方形 = --focus-size）内、
+               .focus-copy 之前，absolute + top:0 + height:100% 与中央封面严格等高；
+               播放按钮保持右侧 .focus-copy 原位 -->
+          <div class="album-panel">
+            <h2 class="album-panel-title"><span class="ap-line" data-text="&nbsp;">&nbsp;</span></h2>
+            <p class="album-panel-artist"><span class="ap-line" data-text="&nbsp;">&nbsp;</span></p>
+            <ol class="album-panel-tracks"></ol>
+          </div>
           <div class="focus-copy">
             <button class="play-button" type="button" aria-pressed="false">
               <span class="play-icon" aria-hidden="true">
@@ -29,6 +37,19 @@
               <span class="play-label">Play preview</span>
               <span class="play-meter" aria-hidden="true"><i></i><i></i><i></i></span>
             </button>
+            <!-- #93 项1 正在播放展开区迁到右侧按钮下方：absolute 挂 .focus-copy 之下
+                 （top:calc(100%+12px)），向下展开不推挤按钮、不占左侧面板；
+                 宽度与按钮区对齐（.focus-copy 宽 = play-button 宽）；
+                 role=status 与 #92b 的 is-open 状态机不变 -->
+            <div class="album-panel-now" role="status">
+              <div class="album-panel-now-clip">
+                <p class="album-panel-now-body">
+                  <span class="album-panel-now-dot" aria-hidden="true"></span>
+                  <span class="album-panel-now-label">Now playing</span>
+                  <span class="album-panel-now-track"></span>
+                </p>
+              </div>
+            </div>
           </div>
         </section>
       </section>
@@ -43,6 +64,6 @@
       }
     }
     </script>
-    <script type="module" src="script.js?v=idle-motion-15"></script>
+    <script type="module" src="script.js?v=album-panel-4"></script>
   </body>
 </html>

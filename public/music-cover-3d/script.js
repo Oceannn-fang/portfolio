@@ -56,6 +56,31 @@ const playLabel = document.querySelector(".play-label");
 const previewAudio = document.querySelector(".preview-audio");
 previewAudio.volume = 0.92;
 window.previewAudio = previewAudio;
+// #91 专辑信息面板 DOM；#92：panel 移入 .focus（封面左侧），标题/艺术家改为
+// .ap-line 内层（外层 h2/p 负责裁切，内层供 marquee 撑宽）
+const albumPanel = document.querySelector(".album-panel");
+const albumPanelTitle = document.querySelector(".album-panel-title");
+const albumPanelArtist = document.querySelector(".album-panel-artist");
+const albumPanelTitleLine = albumPanelTitle?.querySelector(".ap-line") || null;
+const albumPanelArtistLine = albumPanelArtist?.querySelector(".ap-line") || null;
+const albumPanelTracks = document.querySelector(".album-panel-tracks");
+const albumPanelNow = document.querySelector(".album-panel-now");
+const albumPanelNowTrack = document.querySelector(".album-panel-now-track");
+
+// #92 长名悬浮滚动预览（marquee）：复用 MusicModule 的模式 —— 事件委托到面板根
+// 节点，hover 时测量 scrollWidth > clientWidth 才对真正溢出的行加 .ap-marquee
+// 触发 CSS 动画，mouseout 移除；不溢出的行保持单行省略不动
+const AP_MARQUEE_SEL = ".album-panel-title .ap-line, .album-panel-artist .ap-line, .album-panel-tracks .track-name";
+if (albumPanel) {
+  albumPanel.addEventListener("mouseover", (event) => {
+    const el = event.target.closest?.(AP_MARQUEE_SEL);
+    if (el && el.scrollWidth > el.clientWidth) el.classList.add("ap-marquee");
+  });
+  albumPanel.addEventListener("mouseout", (event) => {
+    const el = event.target.closest?.(AP_MARQUEE_SEL);
+    if (el) el.classList.remove("ap-marquee");
+  });
+}
 
 let scene, camera, renderer;
 let cdMeshes = new Map();
@@ -79,6 +104,11 @@ let audioFadeToken = 0;
 let previewSession = 0;
 let selectionTransitionId = 0;
 let activeSelectionFlight = null;
+// #91 面板状态：曲目列表缓存（file → tracks[]）/ 渲染代际（快速切专辑防串）/
+// 正在播放曲目名（空 = 未播放；切专辑/停止/结束/失败时清空）
+const albumTracksCache = new Map();
+let panelSession = 0;
+let nowPlayingTrack = "";
 
 const PREVIEW_VOLUME = 0.92;
 const DUCKED_VOLUME = 0.12;
@@ -166,10 +196,21 @@ function initThreeJS() {
   fill.position.set(-3, 2, 3);
   scene.add(fill);
   
+  // #93 项3：resize 合并到下一帧（0×0↔全屏切换可能连续派发多次 resize 事件，
+  // 避免同帧重复 updateProjectionMatrix + framebuffer 重分配）。
+  // #94 回归修复：setSize 必须保持默认第三参（同步内联 style）。预载期初始
+  // init 发生在 1×1 iframe，setSize(1,1) 会写入 style 1px——内联样式覆盖
+  // 100% 规则；#93 曾改 false 只更新位图，全屏后 style 永远停在 1px，
+  // 整个 three 视觉主体（卡片墙+中央封面）不可见（用户实测“不能正常显示”）。
+  let resizeRaf = 0;
   window.addEventListener('resize', () => {
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.updateProjectionMatrix();
-    renderer.setSize(window.innerWidth, window.innerHeight);
+    if (resizeRaf) return;
+    resizeRaf = requestAnimationFrame(() => {
+      resizeRaf = 0;
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
   });
 }
 
@@ -616,8 +657,12 @@ function isSameAlbum(first, second) {
 // 保持宿主帧间隔 <50ms（无停帧感）。
 const meshBuildQueue = [];
 let meshBuildScheduled = false;
-function scheduleMeshBuild(task) {
-  meshBuildQueue.push(task);
+// #94 冷开渐进：priority 任务（focus 中央封面 mesh）插队到队首——真实首访
+// 常在 init 完成前点击（1×1 预载被打断），打开后每帧 drain 1 任务，
+// focus 优先构建让中央封面最先出现，30 张卡片随后逐帧浮现（渐进加载）。
+function scheduleMeshBuild(task, priority) {
+  if (priority) meshBuildQueue.unshift(task);
+  else meshBuildQueue.push(task);
   if (meshBuildScheduled) return;
   meshBuildScheduled = true;
   requestAnimationFrame(function drain() {
@@ -716,6 +761,7 @@ function setFocusAlbum(album, { transitionPreview = false, coverImage = null, co
   focusImage.src = album.file;
   focusImage.alt = `${album.title} album cover`;
   updatePreviewMeta();
+  renderAlbumPanel(album);
 
   const myFocusToken = ++focusBuildToken;
   if (focusMesh) {
@@ -723,7 +769,8 @@ function setFocusAlbum(album, { transitionPreview = false, coverImage = null, co
     focusMesh = null;
   }
 
-  // 分帧：与卡片 mesh 同一调度器，颜色提取与 mesh 构建拆到相邻两帧
+  // 分帧：与卡片 mesh 同一调度器，颜色提取与 mesh 构建拆到相邻两帧；
+  // #94 priority：中央封面是打开瞬间的视觉锚点，插队优先构建
   const buildFocusMesh = (imgEl) => {
     scheduleMeshBuild(() => {
       if (myFocusToken !== focusBuildToken) return;
@@ -733,8 +780,8 @@ function setFocusAlbum(album, { transitionPreview = false, coverImage = null, co
         focusMesh = createCDCase(album, imgEl, 1, extracted);
         scene.add(focusMesh);
         sceneReadyCount++;
-      });
-    });
+      }, true);
+    }, true);
   };
 
   if (coverImage?.complete && coverImage.naturalWidth) {
@@ -752,7 +799,159 @@ function setFocusAlbum(album, { transitionPreview = false, coverImage = null, co
 }
 
 function getCurrentPreview() {
-  return window.ALBUM_PREVIEWS?.[selectedAlbum.file] || null;
+  const bundled = window.ALBUM_PREVIEWS?.[selectedAlbum.file] || null;
+  if (bundled?.previewUrl) return bundled;
+  // #92 修 Unavailable 误报：旧逻辑只认 ALBUM_PREVIEWS，导致面板已列出可播曲目
+  // （iTunes search/lookup 拉取）但 play-button 仍显示 Unavailable。现回退到面板
+  // 曲目缓存：列表中存在任一 previewUrl 即视为可播（无任何试听才 Unavailable）
+  const fetched = albumTracksCache.get(selectedAlbum.file);
+  const fromList = Array.isArray(fetched) ? fetched.find((track) => track?.previewUrl) : null;
+  return fromList || null;
+}
+
+// #91：缺失试听的 8 张专辑的 iTunes Search 提示词（probe 实测命中配置）。
+// album 词可用 iTunes 原名（与 script.js 本地名可不同），country 按专辑指定：
+// 椎名林檎→JP、ciacia→TW，其余默认 US。砂原良徳 The Sound Of '70s 实测 iTunes 无货
+// （上游返回空曲目 → 面板显示 No track list available，专辑名/艺术家照常显示）。
+const ITUNES_HINTS = {
+  "album_covers_webp/01_frank_ocean_blonde.webp": { artist: "Frank Ocean", album: "Blonde", country: "US" },
+  "album_covers_webp/11_shiina_ringos_shouso_strip.webp": { artist: "椎名林檎", album: "勝訴ストリップ", country: "JP" },
+  "album_covers_webp/16_tyler_the_creator_igor.webp": { artist: "Tyler, The Creator", album: "IGOR", country: "US" },
+  "album_covers_webp/20_sunahara_yoshinori_the_sound_of_70s.webp": { artist: "砂原良徳", album: "The Sound Of '70s", country: "JP" },
+  "album_covers_webp/22_fred_again_ten_days.webp": { artist: "Fred again..", album: "Ten Days", country: "US" },
+  "album_covers_webp/27_lu1_wu_ye_lie_che_shang_de_gao_bie.webp": { artist: "Lu1", album: "Farewell on A Midnight Train", country: "US" },
+  "album_covers_webp/28_frank_ocean_channel_orange.webp": { artist: "Frank Ocean", album: "channel ORANGE", country: "US" },
+  "album_covers_webp/30_ciacia_ta_de_fa_guang_yao_bai.webp": { artist: "ciacia", album: "她的。發光搖擺", country: "TW" },
+};
+
+// 有本地试听的 22 张：从 ALBUM_PREVIEWS.trackViewUrl 提取专辑集合 id
+// （music.apple.com/us/album/<slug>/<collectionId>?i=<trackId>），走 lookup 模式
+function getCollectionId(album) {
+  const preview = window.ALBUM_PREVIEWS?.[album.file];
+  if (!preview?.trackViewUrl) return "";
+  try {
+    const segments = new URL(preview.trackViewUrl).pathname.split("/").filter(Boolean);
+    const last = segments[segments.length - 1];
+    return /^\d+$/.test(last) ? last : "";
+  } catch (e) {
+    return "";
+  }
+}
+
+// 曲目列表获取：collectionId lookup 优先，无则按 hint 走 search。
+// 返回：tracks 数组（可为空 = 上游确认无货）或 null（无数据源/请求失败）。
+// 空数组与失败都缓存，避免同一专辑反复打上游。
+async function fetchAlbumTracks(album) {
+  if (albumTracksCache.has(album.file)) return albumTracksCache.get(album.file);
+  const collectionId = getCollectionId(album);
+  const hint = ITUNES_HINTS[album.file];
+  let url = "";
+  if (collectionId) {
+    url = `/api/itunes?collectionId=${collectionId}`;
+  } else if (hint) {
+    url = `/api/itunes?artist=${encodeURIComponent(hint.artist)}&album=${encodeURIComponent(hint.album)}&country=${hint.country}`;
+  }
+  if (!url) return null;
+  const response = await fetch(url);
+  if (!response.ok) throw new Error(`itunes ${response.status}`);
+  const data = await response.json();
+  const tracks = Array.isArray(data?.tracks) ? data.tracks : [];
+  albumTracksCache.set(album.file, tracks);
+  return tracks;
+}
+
+// 正在播放展开区（#92b）：有曲目 → 面板底部展开（is-open），停止/ended/切专辑重置 → 收起；
+// 文本与列表 track-active 高亮同步
+function setNowPlaying(trackName) {
+  nowPlayingTrack = trackName || "";
+  if (albumPanelNowTrack) {
+    albumPanelNowTrack.textContent = nowPlayingTrack;
+    // #93 项1：胶囊与按钮区同宽，长曲名省略时给原生 tooltip 兜底
+    albumPanelNowTrack.title = nowPlayingTrack;
+  }
+  if (albumPanelNow) albumPanelNow.classList.toggle("is-open", !!nowPlayingTrack);
+  if (albumPanelTracks) {
+    for (const li of albumPanelTracks.children) {
+      const name = li.querySelector(".track-name")?.textContent;
+      li.classList.toggle("track-active", !!nowPlayingTrack && name === nowPlayingTrack);
+    }
+  }
+}
+
+// #91 面板渲染：专辑名/艺术家同步（本地数据，始终可用），曲目列表异步补全。
+// panelSession 代际防串：快速连点两张专辑时，慢响应不得覆盖新选中专辑的面板。
+// #92：标题/艺术家写入 .ap-line 并同步 data-text（marquee ::after 用），换专辑时
+// 移除残留的 marquee 类；曲目落地后刷一次 updatePreviewMeta（修 Unavailable 误报）。
+function renderAlbumPanel(album) {
+  const session = ++panelSession;
+  nowPlayingTrack = "";
+  if (albumPanelNow) albumPanelNow.classList.remove("is-open");
+  if (albumPanelTitleLine) {
+    albumPanelTitleLine.textContent = album.title;
+    albumPanelTitleLine.dataset.text = album.title;
+    albumPanelTitleLine.classList.remove("ap-marquee");
+  }
+  if (albumPanelArtistLine) {
+    albumPanelArtistLine.textContent = album.artist;
+    albumPanelArtistLine.dataset.text = album.artist;
+    albumPanelArtistLine.classList.remove("ap-marquee");
+  }
+  if (!albumPanelTracks) return;
+  albumPanelTracks.replaceChildren();
+  const loading = document.createElement("li");
+  loading.className = "track-state";
+  loading.textContent = "Loading tracks…";
+  albumPanelTracks.appendChild(loading);
+
+  fetchAlbumTracks(album).then((tracks) => {
+    if (session !== panelSession) return;
+    albumPanelTracks.replaceChildren();
+    if (!tracks || tracks.length === 0) {
+      const state = document.createElement("li");
+      state.className = "track-state";
+      state.textContent = tracks ? "No track list available" : "Track list unavailable";
+      albumPanelTracks.appendChild(state);
+      updatePreviewMeta();
+      return;
+    }
+    for (const track of tracks) {
+      const li = document.createElement("li");
+      const no = document.createElement("span");
+      no.className = "track-no";
+      no.textContent = track.trackNumber || "";
+      const name = document.createElement("span");
+      name.className = "track-name";
+      name.textContent = track.trackName;
+      name.dataset.text = track.trackName;
+      li.append(no, name);
+      if (track.previewUrl) {
+        // 有试听：可点播放；再次点击同一首则停止
+        li.classList.add("track-playable");
+        li.addEventListener("click", () => {
+          if (previewPlaying && nowPlayingTrack === track.trackName) {
+            stopPreview();
+            return;
+          }
+          playCurrentPreview({ override: { previewUrl: track.previewUrl, trackName: track.trackName } });
+        });
+      } else {
+        // 无试听：列表照常展示，禁用播放态（悬停 title 说明）
+        li.classList.add("track-muted");
+        li.title = "No preview available";
+      }
+      albumPanelTracks.appendChild(li);
+    }
+    // #92 曲目落地（含拉到的 previewUrl）后刷新播放按钮可用性：
+    // 无本地试听的专辑此刻从 Unavailable 翻转为 Play preview
+    updatePreviewMeta();
+  }).catch(() => {
+    if (session !== panelSession) return;
+    albumPanelTracks.replaceChildren();
+    const state = document.createElement("li");
+    state.className = "track-state";
+    state.textContent = "Track list unavailable";
+    albumPanelTracks.appendChild(state);
+  });
 }
 
 function easeInOutCubic(progress) {
@@ -771,7 +970,9 @@ function fadePreviewVolume(targetVolume, duration = 520) {
       if (token !== audioFadeToken) { resolve(false); return; }
       const progress = Math.min(1, (now - start) / duration);
       const eased = easeInOutCubic(progress);
-      previewAudio.volume = initialVolume + (targetVolume - initialVolume) * eased;
+      // #91 验证发现：浮点极限下表达式可产生 -4.17e-7 这类越界微值，
+      // Chrome 对 volume 赋值越界抛 IndexSizeError（未捕获→console 报错），钳到 [0,1]
+      previewAudio.volume = Math.min(1, Math.max(0, initialVolume + (targetVolume - initialVolume) * eased));
       if (progress < 1) { audioFadeFrame = requestAnimationFrame(step); return; }
       resolve(true);
     }
@@ -819,10 +1020,13 @@ function stopPreview() {
   previewAudio.volume = PREVIEW_VOLUME;
   setPreviewPlaying(false);
   updatePreviewMeta();
+  setNowPlaying("");
 }
 
-async function playCurrentPreview({ fromTransition = false } = {}) {
-  const preview = getCurrentPreview();
+async function playCurrentPreview({ fromTransition = false, override = null } = {}) {
+  // #91：override 为曲目列表点击的逐曲播放（previewUrl + trackName），
+  // 无 override 时保持原有行为（播放专辑默认试听曲）
+  const preview = override || getCurrentPreview();
   if (!preview?.previewUrl) { setPreviewTransitioning(false); updatePreviewMeta(); return; }
 
   const session = ++previewSession;
@@ -830,6 +1034,8 @@ async function playCurrentPreview({ fromTransition = false } = {}) {
 
   setPreviewTransitioning(fromTransition);
   setPreviewPlaying(true, fromTransition ? "Fading in" : "Loading preview");
+  // 目标曲目立即上屏（加载/淡入期间即显示，失败时收敛清空）
+  setNowPlaying(preview.trackName || "");
 
   try {
     previewAudio.currentTime = 0;
@@ -847,6 +1053,7 @@ async function playCurrentPreview({ fromTransition = false } = {}) {
     setPreviewTransitioning(false);
     setPreviewPlaying(false, "Try again");
     playButton.classList.remove("is-playing");
+    setNowPlaying("");
   }
 }
 
@@ -867,6 +1074,7 @@ previewAudio.addEventListener("ended", () => {
   previewAudio.volume = PREVIEW_VOLUME;
   setPreviewPlaying(false);
   updatePreviewMeta();
+  setNowPlaying("");
 });
 
 previewAudio.addEventListener("error", () => {
@@ -874,6 +1082,7 @@ previewAudio.addEventListener("error", () => {
   setPreviewTransitioning(false);
   setPreviewPlaying(false, "Preview unavailable");
   playButton.classList.remove("is-playing");
+  setNowPlaying("");
 });
 
 function selectAlbum(album, sourceImage, card) {
@@ -1025,6 +1234,7 @@ function updateSelectionFlight(time) {
     focusImage.src = flight.album.file;
     focusImage.alt = `${flight.album.title} album cover`;
     updatePreviewMeta();
+    renderAlbumPanel(flight.album);
     if (focusMesh) disposeCDCase(focusMesh);
     focusMesh = flight.mesh;
     focusMesh.visible = true;
@@ -1257,4 +1467,16 @@ window.addEventListener("keydown", (event) => {
 initThreeJS();
 mountLanes();
 setFocusAlbum(selectedAlbum);
+
+// #93 项3：首开卡顿预热。CDP trace 量化定位：首次全屏展开 resize→稳定 2.2s、
+// 主线程几乎空闲而整体帧率掉到 ~20fps —— 瓶颈在光栅化/解码管线：0×0/1×1 隐藏期
+// 卡片 DOM 不在视口内，浏览器不解码封面位图，首次全屏时 30 张 webp 集中解码 +
+// 30 个卡片层首次光栅化。decode() 在空闲预载期强制解码进 image cache
+// （fire-and-forget），与 mesh init 分帧调度同属 1×1 空闲期，不与用户交互抢主线程。
+if ("decode" in HTMLImageElement.prototype) {
+  for (const img of document.querySelectorAll(".album-card img")) {
+    try { img.decode().catch(() => {}); } catch (e) { /* 解码预热失败不影响主流程 */ }
+  }
+}
+
 requestAnimationFrame(tick);
