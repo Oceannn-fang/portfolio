@@ -58,3 +58,7 @@ scripts/verify-*.cjs
 scripts/task*.png
 scripts/task*.cjs
 scripts/task*.json
+
+# CDP/chrome-devtools 调试产生的临时 Chrome 档案，严禁入库
+scripts/.chrome-tmp*/
+.chrome-tmp*/

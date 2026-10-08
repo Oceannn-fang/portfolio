@@ -602,10 +602,17 @@ img {
 @media (max-width: 700px) {
   :root {
     --cover-size: clamp(104px, 31vw, 150px);
-    --focus-size: clamp(220px, 58vw, 300px);
+    /* #101 三轮：封面再缩一档（46vw，矮窗另受 23vh 钳制防横屏裁切）。
+       面板改为视口居中悬浮卡片后，封面 absolute 于面板上方 24px、
+       Now playing 展开时面板上下对称扩展、封面同步上移让位，恒零重叠 */
+    --focus-size: clamp(140px, min(46vw, 23vh), 190px);
   }
 
-  /* #92 窄屏：封面/曲目面板/播放按钮纵向堆叠（面板恢复内容自适应高度） */
+  /* #101 移动端布局重构：.focus-cover 改 absolute 挂 .focus 上方（bottom:100%+24px），
+     面板成为唯一流内子元素 → .focus 高度 = 面板高度，.focus（fixed 视口居中）带动
+     面板恒为“屏幕正中间”的悬浮卡片（收起/展开都居中，不依赖 vh 推算、
+     不受真机工具栏/页面缩放影响 —— 用户截图“面板偏下压封面”根除）。
+     script.js 仅对唱片墙卡片写 transform，不碰 .focus/.focus-cover（已 grep 确认） */
   .focus {
     left: 50%;
     width: var(--focus-size);
@@ -615,31 +622,97 @@ img {
     align-items: center;
   }
 
+  .focus-cover {
+    position: absolute;
+    bottom: calc(100% + 24px);
+    left: 50%;
+    width: var(--focus-size);
+    transform: translateX(-50%);
+  }
+
   .album-panel {
     position: static;
     width: min(88vw, 340px);
     height: auto;
-    max-height: 32vh;
-    margin-top: 12px;
+    padding: 12px 14px 10px; /* #101 14/16/12 收一档 */
+    margin-top: 0;
+  }
+
+  /* #101 标题/歌手各降一档，保持与缩小后列表的比例协调 */
+  .album-panel-title {
+    font-size: 15px;
+  }
+
+  .album-panel-artist {
+    margin-top: 4px;
+    font-size: 10.5px;
+  }
+
+  /* #101 曲目再小一档：11px 字号 + 4px 行 padding → 行高 ≈23.9px，
+     4 行 ≈95.4 → max-height 95px（第 5 行起下滑浏览，overflow-y 基础不变） */
+  .album-panel-tracks {
+    flex: 0 0 auto;
+    margin-top: 8px;
+    max-height: 95px;
+  }
+
+  .album-panel-tracks li {
+    padding: 4px 3px;
+    font-size: 11px;
+  }
+
+  .album-panel-tracks .track-no {
+    font-size: 9.5px;
+  }
+
+  /* #101 播放按钮缩一档：50 → 42（热区仍 ≥40 单手可触）；字/圆钮等比缩小 */
+  .play-button {
+    margin-top: 0;
+    width: 100%;
+    justify-content: center;
+    min-height: 42px;
+    padding: 7px 14px 7px 7px;
+    gap: 10px;
+    font-size: 12.5px;
+  }
+
+  .play-icon {
+    width: 28px;
+    height: 28px;
+  }
+
+  .play-triangle {
+    border-top-width: 6px;
+    border-bottom-width: 6px;
+    border-left-width: 9px;
+  }
+
+  /* #101 Now playing 胶囊随按钮进面板（#99 reparent 逻辑不变），同步收一档 */
+  .album-panel-now {
+    position: static;
+    margin-top: 8px;
+  }
+
+  .album-panel-now .album-panel-now-body {
+    margin-bottom: 8px;
+    padding: 6px 12px;
+    font-size: 11px;
   }
 
   .focus-copy {
-    /* #93 项1：由 static 改 relative —— 保持文档流同时成为展开区
-       （.album-panel-now 为 absolute）的定位包含块，窄屏仍贴按钮下方展开 */
-    position: relative;
-    width: max-content;
-    max-width: 92vw;
-    margin-top: 12px;
-    transform: none;
-    text-align: center;
-  }
-
-  .play-button {
-    margin-top: 0;
+    /* #99 按钮与胶囊 reparent 后此容器为空壳：隐藏（断点外自动恢复显示） */
+    display: none;
   }
 }
 
 @media (max-width: 860px), (max-height: 660px) {
+  :root {
+    /* #101 与 700px 断点同档（本块覆盖 700-860px 宽带与横屏矮窗；后声明覆盖前块同值） */
+    --focus-size: clamp(140px, min(46vw, 23vh), 190px);
+  }
+
+  /* #101 同 700px 断点：面板唯一流内子元素（.focus 高=面板高→恒视口居中悬浮），
+     封面 absolute 上方 24px、展开时封面同步上移让位 */
   .focus {
     height: auto;
     display: flex;
@@ -647,21 +720,80 @@ img {
     align-items: center;
   }
 
+  .focus-cover {
+    position: absolute;
+    bottom: calc(100% + 24px);
+    left: 50%;
+    width: var(--focus-size);
+    transform: translateX(-50%);
+  }
+
   .album-panel {
     position: static;
     width: min(88vw, 340px);
     height: auto;
-    max-height: 34vh;
-    margin-top: 12px;
+    padding: 12px 14px 10px;
+    margin-top: 0;
+  }
+
+  .album-panel-title {
+    font-size: 15px;
+  }
+
+  .album-panel-artist {
+    margin-top: 4px;
+    font-size: 10.5px;
+  }
+
+  .album-panel-tracks {
+    flex: 0 0 auto;
+    margin-top: 8px;
+    max-height: 95px; /* #101 同 700px 断点：11px 字号 4 行 ≈95px */
+  }
+
+  .album-panel-tracks li {
+    padding: 4px 3px;
+    font-size: 11px;
+  }
+
+  .album-panel-tracks .track-no {
+    font-size: 9.5px;
+  }
+
+  .play-button {
+    margin-top: 0;
+    width: 100%;
+    justify-content: center;
+    min-height: 42px;
+    padding: 7px 14px 7px 7px;
+    gap: 10px;
+    font-size: 12.5px;
+  }
+
+  .play-icon {
+    width: 28px;
+    height: 28px;
+  }
+
+  .play-triangle {
+    border-top-width: 6px;
+    border-bottom-width: 6px;
+    border-left-width: 9px;
+  }
+
+  .album-panel-now {
+    position: static;
+    margin-top: 8px;
+  }
+
+  .album-panel-now .album-panel-now-body {
+    margin-bottom: 8px;
+    padding: 6px 12px;
+    font-size: 11px;
   }
 
   .focus-copy {
-    position: relative; /* 同上：展开区包含块 */
-    width: max-content;
-    max-width: 92vw;
-    margin-top: clamp(10px, 2vh, 16px);
-    transform: none;
-    text-align: center;
+    display: none; /* #99 同 700px 断点：reparent 后空壳隐藏 */
   }
 }
 

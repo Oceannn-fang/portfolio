@@ -67,6 +67,31 @@ const albumPanelTracks = document.querySelector(".album-panel-tracks");
 const albumPanelNow = document.querySelector(".album-panel-now");
 const albumPanelNowTrack = document.querySelector(".album-panel-now-track");
 
+// #99 移动端播放按钮集成：断点内（≤860px 宽或 ≤660px 高，与 styles.css 移动端
+// 媒体查询同组合）把 play-button 与 Now playing 展开胶囊 reparent 进 .album-panel
+// 尾部（面板底部固定条：单手拇指热区、与曲目滚动不冲突、面板内不被视口裁切）。
+// 背景：窄屏 .focus-copy 改 relative 后桌面 left:calc(100%+24px)/top:50% 偏移仍生效，
+// 按钮被推到视口右下外（基线实测 btn.right 538 > 视口 390 被裁，用户“播放按钮看不见”）。
+// 断点外移回 .focus-copy 原位（insertBefore 锚点保序，桌面布局零变化）。
+const compactMq = window.matchMedia("(max-width: 860px), (max-height: 660px)");
+const playButtonHome = playButton.parentElement;
+const albumPanelNowHome = albumPanelNow.parentElement;
+const playButtonNext = playButton.nextSibling;
+const albumPanelNowNext = albumPanelNow.nextSibling;
+function applyCompactLayout() {
+  if (!albumPanel) return;
+  if (compactMq.matches) {
+    if (albumPanelNow.parentElement !== albumPanel) albumPanel.appendChild(albumPanelNow);
+    if (playButton.parentElement !== albumPanel) albumPanel.appendChild(playButton);
+  } else if (playButton.parentElement !== playButtonHome) {
+    if (albumPanelNow.parentElement !== albumPanelNowHome) albumPanelNowHome.insertBefore(albumPanelNow, albumPanelNowNext);
+    playButtonHome.insertBefore(playButton, playButtonNext);
+  }
+}
+applyCompactLayout();
+if (compactMq.addEventListener) compactMq.addEventListener("change", applyCompactLayout);
+else if (compactMq.addListener) compactMq.addListener(applyCompactLayout);
+
 // #92 长名悬浮滚动预览（marquee）：复用 MusicModule 的模式 —— 事件委托到面板根
 // 节点，hover 时测量 scrollWidth > clientWidth 才对真正溢出的行加 .ap-marquee
 // 触发 CSS 动画，mouseout 移除；不溢出的行保持单行省略不动
@@ -1318,7 +1343,12 @@ function updateFocus() {
   pointer.roll += (pointer.targetRoll - pointer.roll) * 0.1;
 
   if (focusMesh) {
-    const focusRect = focus.getBoundingClientRect();
+    // #101 移动端面板改为视口正中悬浮卡后，.focus 的 rect 中心 = 面板中心，
+    // 3D 中央封面必须停在 .focus-cover 的真实封面位（移动端 absolute 于面板上方 24px），
+    // 否则 mesh 被居中面板整个盖住（旧锚点 .focus 的回归实锤）。
+    // 桌面端 .focus-cover 与 .focus 同心同宽（方形填满），几何零变化；
+    // 且与 selectAlbum 飞行终点（focusImage rect）天然对齐。
+    const focusRect = focusCover.getBoundingClientRect();
     const centerX = focusRect.left + focusRect.width / 2;
     const centerY = focusRect.top + focusRect.height / 2;
     const worldPos = screenToWorld(centerX + pointer.x, centerY + pointer.y, FOCUS_STACK_Z);
@@ -1422,7 +1452,9 @@ function tick(time) {
 }
 
 window.addEventListener("pointermove", (event) => {
-  const focusRect = focus.getBoundingClientRect();
+  // #101 与 updateFocus 同基准：倾斜/悬停热区跟随 .focus-cover 的真实封面位
+  //（移动端 = 面板上方封面区；桌面端与 .focus 重合，行为不变）
+  const focusRect = focusCover.getBoundingClientRect();
   const centerX = focusRect.left + focusRect.width / 2;
   const centerY = focusRect.top + focusRect.height / 2;
   const rawLocalX = (event.clientX - centerX) / (focusRect.width / 2);
