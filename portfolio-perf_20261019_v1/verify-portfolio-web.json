@@ -1,0 +1,587 @@
+{
+  "base": "http://127.0.0.1:3211",
+  "steps": [
+    {
+      "name": "hover 作品行",
+      "x": 953,
+      "y": 451
+    },
+    {
+      "name": "单图元素",
+      "src": "/images/portfolio/web/should.webp",
+      "currentSrc": "http://127.0.0.1:3211/images/portfolio/web/should.webp",
+      "complete": true,
+      "naturalWidth": 1080,
+      "naturalHeight": 1920
+    },
+    {
+      "0": {
+        "name": "http://127.0.0.1:3211/images/portfolio-thumbs/should.webp",
+        "type": "img",
+        "transferSize": 6084,
+        "encodedBodySize": 5784,
+        "duration": 7
+      },
+      "1": {
+        "name": "http://127.0.0.1:3211/images/portfolio-thumbs/wish-it-was-easy.webp",
+        "type": "img",
+        "transferSize": 17134,
+        "encodedBodySize": 16834,
+        "duration": 8
+      },
+      "2": {
+        "name": "http://127.0.0.1:3211/images/portfolio-thumbs/conveni.webp",
+        "type": "img",
+        "transferSize": 3942,
+        "encodedBodySize": 3642,
+        "duration": 8
+      },
+      "3": {
+        "name": "http://127.0.0.1:3211/images/portfolio-thumbs/taurus.webp",
+        "type": "img",
+        "transferSize": 10826,
+        "encodedBodySize": 10526,
+        "duration": 16
+      },
+      "4": {
+        "name": "http://127.0.0.1:3211/images/portfolio-thumbs/hair-cut-re-make.webp",
+        "type": "img",
+        "transferSize": 12204,
+        "encodedBodySize": 11904,
+        "duration": 58
+      },
+      "5": {
+        "name": "http://127.0.0.1:3211/images/portfolio-thumbs/minuet.webp",
+        "type": "img",
+        "transferSize": 6656,
+        "encodedBodySize": 6356,
+        "duration": 60
+      },
+      "6": {
+        "name": "http://127.0.0.1:3211/images/portfolio-thumbs/heal-me-good.webp",
+        "type": "img",
+        "transferSize": 5314,
+        "encodedBodySize": 5014,
+        "duration": 61
+      },
+      "7": {
+        "name": "http://127.0.0.1:3211/images/portfolio-thumbs/stairs.webp",
+        "type": "img",
+        "transferSize": 4022,
+        "encodedBodySize": 3722,
+        "duration": 66
+      },
+      "8": {
+        "name": "http://127.0.0.1:3211/images/portfolio-thumbs/pictures-of-us.webp",
+        "type": "img",
+        "transferSize": 5252,
+        "encodedBodySize": 4952,
+        "duration": 70
+      },
+      "9": {
+        "name": "http://127.0.0.1:3211/images/portfolio-thumbs/orange-moon.webp",
+        "type": "img",
+        "transferSize": 7108,
+        "encodedBodySize": 6808,
+        "duration": 71
+      },
+      "10": {
+        "name": "http://127.0.0.1:3211/images/portfolio-thumbs/i-dont-dare-to-be-happy.webp",
+        "type": "img",
+        "transferSize": 11382,
+        "encodedBodySize": 11082,
+        "duration": 74
+      },
+      "11": {
+        "name": "http://127.0.0.1:3211/images/portfolio-thumbs/i-did-this-i-did-that.webp",
+        "type": "img",
+        "transferSize": 6338,
+        "encodedBodySize": 6038,
+        "duration": 85
+      },
+      "12": {
+        "name": "http://127.0.0.1:3211/images/portfolio-thumbs/expired.webp",
+        "type": "img",
+        "transferSize": 4818,
+        "encodedBodySize": 4518,
+        "duration": 82
+      },
+      "13": {
+        "name": "http://127.0.0.1:3211/images/portfolio-thumbs/past-days-remain.webp",
+        "type": "img",
+        "transferSize": 8324,
+        "encodedBodySize": 8024,
+        "duration": 83
+      },
+      "14": {
+        "name": "http://127.0.0.1:3211/images/portfolio-thumbs/braincells.webp",
+        "type": "img",
+        "transferSize": 14792,
+        "encodedBodySize": 14492,
+        "duration": 96
+      },
+      "15": {
+        "name": "http://127.0.0.1:3211/images/portfolio-thumbs/mingming.webp",
+        "type": "img",
+        "transferSize": 6826,
+        "encodedBodySize": 6526,
+        "duration": 98
+      },
+      "16": {
+        "name": "http://127.0.0.1:3211/images/portfolio-thumbs/piano.webp",
+        "type": "img",
+        "transferSize": 6098,
+        "encodedBodySize": 5798,
+        "duration": 99
+      },
+      "17": {
+        "name": "http://127.0.0.1:3211/images/portfolio-thumbs/driveslow-intro.webp",
+        "type": "img",
+        "transferSize": 2580,
+        "encodedBodySize": 2280,
+        "duration": 133
+      },
+      "18": {
+        "name": "http://127.0.0.1:3211/images/portfolio-thumbs/pedestrian.webp",
+        "type": "img",
+        "transferSize": 4012,
+        "encodedBodySize": 3712,
+        "duration": 135
+      },
+      "19": {
+        "name": "http://127.0.0.1:3211/images/portfolio-thumbs/life-and-space.webp",
+        "type": "img",
+        "transferSize": 8130,
+        "encodedBodySize": 7830,
+        "duration": 136
+      },
+      "20": {
+        "name": "http://127.0.0.1:3211/images/portfolio-thumbs/dinner-view.webp",
+        "type": "img",
+        "transferSize": 5108,
+        "encodedBodySize": 4808,
+        "duration": 143
+      },
+      "21": {
+        "name": "http://127.0.0.1:3211/images/portfolio-thumbs/flower-blooming-in-joy.webp",
+        "type": "img",
+        "transferSize": 23444,
+        "encodedBodySize": 23144,
+        "duration": 146
+      },
+      "22": {
+        "name": "http://127.0.0.1:3211/images/portfolio-thumbs/illegal.webp",
+        "type": "img",
+        "transferSize": 42262,
+        "encodedBodySize": 41962,
+        "duration": 150
+      },
+      "23": {
+        "name": "http://127.0.0.1:3211/images/portfolio-thumbs/racing-mount-pleasant.webp",
+        "type": "img",
+        "transferSize": 24048,
+        "encodedBodySize": 23748,
+        "duration": 156
+      },
+      "24": {
+        "name": "http://127.0.0.1:3211/images/portfolio-thumbs/vienna.webp",
+        "type": "img",
+        "transferSize": 7232,
+        "encodedBodySize": 6932,
+        "duration": 156
+      },
+      "25": {
+        "name": "http://127.0.0.1:3211/images/portfolio-thumbs/25-never-stop.webp",
+        "type": "img",
+        "transferSize": 10932,
+        "encodedBodySize": 10632,
+        "duration": 161
+      },
+      "26": {
+        "name": "http://127.0.0.1:3211/images/portfolio-thumbs/moonlight.webp",
+        "type": "img",
+        "transferSize": 3052,
+        "encodedBodySize": 2752,
+        "duration": 163
+      },
+      "27": {
+        "name": "http://127.0.0.1:3211/images/portfolio-thumbs/a-speck-of-dust.webp",
+        "type": "img",
+        "transferSize": 8906,
+        "encodedBodySize": 8606,
+        "duration": 165
+      },
+      "28": {
+        "name": "http://127.0.0.1:3211/images/portfolio-thumbs/theres-something-here-for-us-both.webp",
+        "type": "img",
+        "transferSize": 8972,
+        "encodedBodySize": 8672,
+        "duration": 169
+      },
+      "29": {
+        "name": "http://127.0.0.1:3211/images/portfolio-thumbs/a-hundred-lives.webp",
+        "type": "img",
+        "transferSize": 10036,
+        "encodedBodySize": 9736,
+        "duration": 172
+      },
+      "30": {
+        "name": "http://127.0.0.1:3211/images/portfolio-thumbs/burn-dance-extinguish.webp",
+        "type": "img",
+        "transferSize": 6870,
+        "encodedBodySize": 6570,
+        "duration": 175
+      },
+      "31": {
+        "name": "http://127.0.0.1:3211/images/portfolio-thumbs/typewrite-lesson.webp",
+        "type": "img",
+        "transferSize": 14166,
+        "encodedBodySize": 13866,
+        "duration": 178
+      },
+      "32": {
+        "name": "http://127.0.0.1:3211/images/portfolio-thumbs/just-stand-there.webp",
+        "type": "img",
+        "transferSize": 4908,
+        "encodedBodySize": 4608,
+        "duration": 180
+      },
+      "33": {
+        "name": "http://127.0.0.1:3211/images/portfolio-thumbs/when-i-get-home.webp",
+        "type": "img",
+        "transferSize": 3812,
+        "encodedBodySize": 3512,
+        "duration": 189
+      },
+      "34": {
+        "name": "http://127.0.0.1:3211/images/portfolio-thumbs/be.webp",
+        "type": "img",
+        "transferSize": 11606,
+        "encodedBodySize": 11306,
+        "duration": 190
+      },
+      "35": {
+        "name": "http://127.0.0.1:3211/images/portfolio-thumbs/ant-from-up-there.webp",
+        "type": "img",
+        "transferSize": 5992,
+        "encodedBodySize": 5692,
+        "duration": 190
+      },
+      "36": {
+        "name": "http://127.0.0.1:3211/images/portfolio-thumbs/tide.webp",
+        "type": "img",
+        "transferSize": 5090,
+        "encodedBodySize": 4790,
+        "duration": 196
+      },
+      "37": {
+        "name": "http://127.0.0.1:3211/images/portfolio/web/should.webp",
+        "type": "img",
+        "transferSize": 72520,
+        "encodedBodySize": 72220,
+        "duration": 15
+      },
+      "name": "单图阶段的图片请求"
+    },
+    {
+      "name": "浮层图元素",
+      "src": "/images/portfolio/web/should.webp",
+      "complete": true,
+      "naturalWidth": 1080
+    },
+    {
+      "0": {
+        "name": "http://127.0.0.1:3211/images/portfolio-thumbs/should.webp",
+        "type": "img",
+        "transferSize": 6084,
+        "encodedBodySize": 5784,
+        "duration": 7
+      },
+      "1": {
+        "name": "http://127.0.0.1:3211/images/portfolio-thumbs/wish-it-was-easy.webp",
+        "type": "img",
+        "transferSize": 17134,
+        "encodedBodySize": 16834,
+        "duration": 8
+      },
+      "2": {
+        "name": "http://127.0.0.1:3211/images/portfolio-thumbs/conveni.webp",
+        "type": "img",
+        "transferSize": 3942,
+        "encodedBodySize": 3642,
+        "duration": 8
+      },
+      "3": {
+        "name": "http://127.0.0.1:3211/images/portfolio-thumbs/taurus.webp",
+        "type": "img",
+        "transferSize": 10826,
+        "encodedBodySize": 10526,
+        "duration": 16
+      },
+      "4": {
+        "name": "http://127.0.0.1:3211/images/portfolio-thumbs/hair-cut-re-make.webp",
+        "type": "img",
+        "transferSize": 12204,
+        "encodedBodySize": 11904,
+        "duration": 58
+      },
+      "5": {
+        "name": "http://127.0.0.1:3211/images/portfolio-thumbs/minuet.webp",
+        "type": "img",
+        "transferSize": 6656,
+        "encodedBodySize": 6356,
+        "duration": 60
+      },
+      "6": {
+        "name": "http://127.0.0.1:3211/images/portfolio-thumbs/heal-me-good.webp",
+        "type": "img",
+        "transferSize": 5314,
+        "encodedBodySize": 5014,
+        "duration": 61
+      },
+      "7": {
+        "name": "http://127.0.0.1:3211/images/portfolio-thumbs/stairs.webp",
+        "type": "img",
+        "transferSize": 4022,
+        "encodedBodySize": 3722,
+        "duration": 66
+      },
+      "8": {
+        "name": "http://127.0.0.1:3211/images/portfolio-thumbs/pictures-of-us.webp",
+        "type": "img",
+        "transferSize": 5252,
+        "encodedBodySize": 4952,
+        "duration": 70
+      },
+      "9": {
+        "name": "http://127.0.0.1:3211/images/portfolio-thumbs/orange-moon.webp",
+        "type": "img",
+        "transferSize": 7108,
+        "encodedBodySize": 6808,
+        "duration": 71
+      },
+      "10": {
+        "name": "http://127.0.0.1:3211/images/portfolio-thumbs/i-dont-dare-to-be-happy.webp",
+        "type": "img",
+        "transferSize": 11382,
+        "encodedBodySize": 11082,
+        "duration": 74
+      },
+      "11": {
+        "name": "http://127.0.0.1:3211/images/portfolio-thumbs/i-did-this-i-did-that.webp",
+        "type": "img",
+        "transferSize": 6338,
+        "encodedBodySize": 6038,
+        "duration": 85
+      },
+      "12": {
+        "name": "http://127.0.0.1:3211/images/portfolio-thumbs/expired.webp",
+        "type": "img",
+        "transferSize": 4818,
+        "encodedBodySize": 4518,
+        "duration": 82
+      },
+      "13": {
+        "name": "http://127.0.0.1:3211/images/portfolio-thumbs/past-days-remain.webp",
+        "type": "img",
+        "transferSize": 8324,
+        "encodedBodySize": 8024,
+        "duration": 83
+      },
+      "14": {
+        "name": "http://127.0.0.1:3211/images/portfolio-thumbs/braincells.webp",
+        "type": "img",
+        "transferSize": 14792,
+        "encodedBodySize": 14492,
+        "duration": 96
+      },
+      "15": {
+        "name": "http://127.0.0.1:3211/images/portfolio-thumbs/mingming.webp",
+        "type": "img",
+        "transferSize": 6826,
+        "encodedBodySize": 6526,
+        "duration": 98
+      },
+      "16": {
+        "name": "http://127.0.0.1:3211/images/portfolio-thumbs/piano.webp",
+        "type": "img",
+        "transferSize": 6098,
+        "encodedBodySize": 5798,
+        "duration": 99
+      },
+      "17": {
+        "name": "http://127.0.0.1:3211/images/portfolio-thumbs/driveslow-intro.webp",
+        "type": "img",
+        "transferSize": 2580,
+        "encodedBodySize": 2280,
+        "duration": 133
+      },
+      "18": {
+        "name": "http://127.0.0.1:3211/images/portfolio-thumbs/pedestrian.webp",
+        "type": "img",
+        "transferSize": 4012,
+        "encodedBodySize": 3712,
+        "duration": 135
+      },
+      "19": {
+        "name": "http://127.0.0.1:3211/images/portfolio-thumbs/life-and-space.webp",
+        "type": "img",
+        "transferSize": 8130,
+        "encodedBodySize": 7830,
+        "duration": 136
+      },
+      "20": {
+        "name": "http://127.0.0.1:3211/images/portfolio-thumbs/dinner-view.webp",
+        "type": "img",
+        "transferSize": 5108,
+        "encodedBodySize": 4808,
+        "duration": 143
+      },
+      "21": {
+        "name": "http://127.0.0.1:3211/images/portfolio-thumbs/flower-blooming-in-joy.webp",
+        "type": "img",
+        "transferSize": 23444,
+        "encodedBodySize": 23144,
+        "duration": 146
+      },
+      "22": {
+        "name": "http://127.0.0.1:3211/images/portfolio-thumbs/illegal.webp",
+        "type": "img",
+        "transferSize": 42262,
+        "encodedBodySize": 41962,
+        "duration": 150
+      },
+      "23": {
+        "name": "http://127.0.0.1:3211/images/portfolio-thumbs/racing-mount-pleasant.webp",
+        "type": "img",
+        "transferSize": 24048,
+        "encodedBodySize": 23748,
+        "duration": 156
+      },
+      "24": {
+        "name": "http://127.0.0.1:3211/images/portfolio-thumbs/vienna.webp",
+        "type": "img",
+        "transferSize": 7232,
+        "encodedBodySize": 6932,
+        "duration": 156
+      },
+      "25": {
+        "name": "http://127.0.0.1:3211/images/portfolio-thumbs/25-never-stop.webp",
+        "type": "img",
+        "transferSize": 10932,
+        "encodedBodySize": 10632,
+        "duration": 161
+      },
+      "26": {
+        "name": "http://127.0.0.1:3211/images/portfolio-thumbs/moonlight.webp",
+        "type": "img",
+        "transferSize": 3052,
+        "encodedBodySize": 2752,
+        "duration": 163
+      },
+      "27": {
+        "name": "http://127.0.0.1:3211/images/portfolio-thumbs/a-speck-of-dust.webp",
+        "type": "img",
+        "transferSize": 8906,
+        "encodedBodySize": 8606,
+        "duration": 165
+      },
+      "28": {
+        "name": "http://127.0.0.1:3211/images/portfolio-thumbs/theres-something-here-for-us-both.webp",
+        "type": "img",
+        "transferSize": 8972,
+        "encodedBodySize": 8672,
+        "duration": 169
+      },
+      "29": {
+        "name": "http://127.0.0.1:3211/images/portfolio-thumbs/a-hundred-lives.webp",
+        "type": "img",
+        "transferSize": 10036,
+        "encodedBodySize": 9736,
+        "duration": 172
+      },
+      "30": {
+        "name": "http://127.0.0.1:3211/images/portfolio-thumbs/burn-dance-extinguish.webp",
+        "type": "img",
+        "transferSize": 6870,
+        "encodedBodySize": 6570,
+        "duration": 175
+      },
+      "31": {
+        "name": "http://127.0.0.1:3211/images/portfolio-thumbs/typewrite-lesson.webp",
+        "type": "img",
+        "transferSize": 14166,
+        "encodedBodySize": 13866,
+        "duration": 178
+      },
+      "32": {
+        "name": "http://127.0.0.1:3211/images/portfolio-thumbs/just-stand-there.webp",
+        "type": "img",
+        "transferSize": 4908,
+        "encodedBodySize": 4608,
+        "duration": 180
+      },
+      "33": {
+        "name": "http://127.0.0.1:3211/images/portfolio-thumbs/when-i-get-home.webp",
+        "type": "img",
+        "transferSize": 3812,
+        "encodedBodySize": 3512,
+        "duration": 189
+      },
+      "34": {
+        "name": "http://127.0.0.1:3211/images/portfolio-thumbs/be.webp",
+        "type": "img",
+        "transferSize": 11606,
+        "encodedBodySize": 11306,
+        "duration": 190
+      },
+      "35": {
+        "name": "http://127.0.0.1:3211/images/portfolio-thumbs/ant-from-up-there.webp",
+        "type": "img",
+        "transferSize": 5992,
+        "encodedBodySize": 5692,
+        "duration": 190
+      },
+      "36": {
+        "name": "http://127.0.0.1:3211/images/portfolio-thumbs/tide.webp",
+        "type": "img",
+        "transferSize": 5090,
+        "encodedBodySize": 4790,
+        "duration": 196
+      },
+      "37": {
+        "name": "http://127.0.0.1:3211/images/portfolio/web/should.webp",
+        "type": "img",
+        "transferSize": 72520,
+        "encodedBodySize": 72220,
+        "duration": 15
+      },
+      "name": "全部图片请求"
+    }
+  ],
+  "assertions": {
+    "单图使用 .webp": true,
+    "单图已解码（naturalWidth>0）": true,
+    "浮层使用 .webp": true,
+    "未请求任何 PNG 原图": true,
+    "确有 webp 请求": true
+  },
+  "transfer": {
+    "webp请求数": 1,
+    "webp传输字节": 72520,
+    "png请求数": 0,
+    "png请求": [],
+    "webp明细": [
+      {
+        "name": "should.webp",
+        "kb": 71,
+        "ms": 15
+      }
+    ]
+  },
+  "shots": {
+    "single": "unavailable: CDP 超时: Page.captureScreenshot",
+    "overlay": "unavailable: CDP 超时: Page.captureScreenshot"
+  },
+  "passed": true
+}

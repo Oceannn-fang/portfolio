@@ -1,0 +1,167 @@
+{
+  "base": "http://127.0.0.1:3211",
+  "path": "/film/roll-017",
+  "steps": [
+    {
+      "name": "初次进入（无偏好）",
+      "strips": 10,
+      "frames": 40,
+      "columns": 4,
+      "rowGap": "5px",
+      "frameSize": {
+        "w": 313,
+        "h": 208
+      },
+      "frameAspect": 1.5,
+      "perforationBg": "radial-gradient(circle, rgba(244, 239, 226, 0.7) 0px, rgba(244, 239, 226, 0.7) 2.2px, rgba(0, 0, 0, 0) 2.5px)",
+      "activeDensity": "4",
+      "stored": null
+    },
+    {
+      "name": "点击 6 列",
+      "strips": 7,
+      "frames": 40,
+      "columns": 6,
+      "rowGap": "5px",
+      "frameSize": {
+        "w": 207,
+        "h": 138
+      },
+      "frameAspect": 1.5,
+      "perforationBg": "radial-gradient(circle, rgba(244, 239, 226, 0.7) 0px, rgba(244, 239, 226, 0.7) 2.2px, rgba(0, 0, 0, 0) 2.5px)",
+      "activeDensity": "6",
+      "stored": "6"
+    },
+    {
+      "name": "刷新后（偏好恢复）",
+      "strips": 7,
+      "frames": 40,
+      "columns": 6,
+      "rowGap": "5px",
+      "frameSize": {
+        "w": 207,
+        "h": 138
+      },
+      "frameAspect": 1.5,
+      "perforationBg": "radial-gradient(circle, rgba(244, 239, 226, 0.7) 0px, rgba(244, 239, 226, 0.7) 2.2px, rgba(0, 0, 0, 0) 2.5px)",
+      "activeDensity": "6",
+      "stored": "6"
+    },
+    {
+      "name": "窄屏 900x1000（6 列）",
+      "strips": 7,
+      "frames": 40,
+      "columns": 6,
+      "rowGap": "5px",
+      "frameSize": {
+        "w": 126,
+        "h": 84
+      },
+      "frameAspect": 1.5,
+      "perforationBg": "radial-gradient(circle, rgba(244, 239, 226, 0.7) 0px, rgba(244, 239, 226, 0.7) 2.2px, rgba(0, 0, 0, 0) 2.5px)",
+      "activeDensity": "6",
+      "stored": "6"
+    },
+    {
+      "name": "点击 3 列",
+      "strips": 14,
+      "frames": 40,
+      "columns": 3,
+      "rowGap": "5px",
+      "frameSize": {
+        "w": 418,
+        "h": 279
+      },
+      "frameAspect": 1.5,
+      "perforationBg": "radial-gradient(circle, rgba(244, 239, 226, 0.7) 0px, rgba(244, 239, 226, 0.7) 2.2px, rgba(0, 0, 0, 0) 2.5px)",
+      "activeDensity": "3",
+      "stored": "3"
+    },
+    {
+      "name": "灯箱打开",
+      "open": true
+    },
+    {
+      "name": "灯箱 Esc 关闭",
+      "closed": true
+    }
+  ],
+  "passed": true,
+  "got": {
+    "initial": {
+      "strips": 10,
+      "frames": 40,
+      "columns": 4,
+      "rowGap": "5px",
+      "frameSize": {
+        "w": 313,
+        "h": 208
+      },
+      "frameAspect": 1.5,
+      "perforationBg": "radial-gradient(circle, rgba(244, 239, 226, 0.7) 0px, rgba(244, 239, 226, 0.7) 2.2px, rgba(0, 0, 0, 0) 2.5px)",
+      "activeDensity": "4",
+      "stored": null
+    },
+    "after6": {
+      "strips": 7,
+      "frames": 40,
+      "columns": 6,
+      "rowGap": "5px",
+      "frameSize": {
+        "w": 207,
+        "h": 138
+      },
+      "frameAspect": 1.5,
+      "perforationBg": "radial-gradient(circle, rgba(244, 239, 226, 0.7) 0px, rgba(244, 239, 226, 0.7) 2.2px, rgba(0, 0, 0, 0) 2.5px)",
+      "activeDensity": "6",
+      "stored": "6"
+    },
+    "afterReload": {
+      "strips": 7,
+      "frames": 40,
+      "columns": 6,
+      "rowGap": "5px",
+      "frameSize": {
+        "w": 207,
+        "h": 138
+      },
+      "frameAspect": 1.5,
+      "perforationBg": "radial-gradient(circle, rgba(244, 239, 226, 0.7) 0px, rgba(244, 239, 226, 0.7) 2.2px, rgba(0, 0, 0, 0) 2.5px)",
+      "activeDensity": "6",
+      "stored": "6"
+    },
+    "after3": {
+      "strips": 14,
+      "frames": 40,
+      "columns": 3,
+      "rowGap": "5px",
+      "frameSize": {
+        "w": 418,
+        "h": 279
+      },
+      "frameAspect": 1.5,
+      "perforationBg": "radial-gradient(circle, rgba(244, 239, 226, 0.7) 0px, rgba(244, 239, 226, 0.7) 2.2px, rgba(0, 0, 0, 0) 2.5px)",
+      "activeDensity": "3",
+      "stored": "3"
+    },
+    "narrow": {
+      "strips": 7,
+      "frames": 40,
+      "columns": 6,
+      "rowGap": "5px",
+      "frameSize": {
+        "w": 126,
+        "h": 84
+      },
+      "frameAspect": 1.5,
+      "perforationBg": "radial-gradient(circle, rgba(244, 239, 226, 0.7) 0px, rgba(244, 239, 226, 0.7) 2.2px, rgba(0, 0, 0, 0) 2.5px)",
+      "activeDensity": "6",
+      "stored": "6"
+    }
+  },
+  "shots": {
+    "desktop4": "unavailable: CDP 超时: Page.captureScreenshot",
+    "desktop6": "unavailable: CDP 超时: Page.captureScreenshot",
+    "narrow": "unavailable: CDP 超时: Page.captureScreenshot"
+  }
+}

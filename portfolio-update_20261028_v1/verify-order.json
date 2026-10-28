@@ -1,0 +1,21 @@
+{
+  "order": [
+    "應該",
+    "我連快樂都不敢了",
+    "life & space",
+    "there’s something here for us both",
+    "wish it was easy",
+    "i did this, i did that",
+    "一夜情",
+    "晚餐見",
+    "一百種生活",
+    "conveni"
+  ],
+  "assertions": {
+    "第一条是「應該」": true,
+    "「一夜情」在「晚餐見」之前": true,
+    "「一夜情」不在最顶": true,
+    "前面一条是 i-did-this-i-did-that": true
+  },
+  "passed": true
+}

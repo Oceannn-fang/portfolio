@@ -1,0 +1,13 @@
+{
+  "port": 9222,
+  "base": "http://127.0.0.1:3211",
+  "startedAt": "2026-10-16T07:19:52.017Z",
+  "thresholds": {
+    "expectedFallbackMs": 6000,
+    "beforeCheckMs": 1500,
+    "afterCheckMs": 9000
+  },
+  "modes": [],
+  "chromePid": 29648,
+  "fatal": "调试端口 9222 在 30000ms 内未就绪"
+}

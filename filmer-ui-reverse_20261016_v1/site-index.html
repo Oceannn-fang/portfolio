@@ -1,0 +1,808 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Filmer - 你的胶片摄影数据库</title>
+    <meta name="description" content="Filmer 是一款专为胶卷摄影爱好者打造的 iOS 应用，帮助你记录每一卷胶卷的拍摄参数、管理照片、生成冲扫单据。">
+    <link rel="icon" type="image/png" href="app-icon.png">
+    <link rel="apple-touch-icon" href="app-icon.png">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #2d2d2d;
+            --primary-dark: #1a1a1a;
+            --secondary: #4a4a4a;
+            --text: #1a1a1a;
+            --text-secondary: #666666;
+            --bg: #ffffff;
+            --bg-secondary: #f5f5f5;
+            --gradient: linear-gradient(135deg, #1a1a1a 0%, #4a4a4a 100%);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--text);
+            background-color: var(--bg);
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* Navigation */
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            padding: 16px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+        }
+
+        .nav-logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+            color: var(--text);
+        }
+
+        .nav-logo img {
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+        }
+
+        .nav-logo span {
+            font-size: 20px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 32px;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: var(--text-secondary);
+            font-size: 15px;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+
+        .nav-links a:hover {
+            color: var(--primary);
+        }
+
+        .nav-download {
+            background: var(--gradient);
+            color: white !important;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-weight: 600 !important;
+        }
+
+        .nav-download:hover {
+            opacity: 0.9;
+            color: white !important;
+        }
+
+        /* Hero Section */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 120px 40px 80px;
+            background: linear-gradient(180deg, #f8f9fc 0%, #ffffff 100%);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle at 50% 50%, rgba(0, 0, 0, 0.03) 0%, transparent 50%);
+            animation: pulse 15s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 0.8; }
+            50% { transform: scale(1.1); opacity: 1; }
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 1;
+            max-width: 900px;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(0, 0, 0, 0.06);
+            color: var(--primary);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 24px;
+        }
+
+        .hero h1 {
+            font-size: clamp(48px, 8vw, 72px);
+            font-weight: 800;
+            line-height: 1.1;
+            margin-bottom: 24px;
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-subtitle {
+            font-size: clamp(18px, 2.5vw, 24px);
+            color: var(--text-secondary);
+            margin-bottom: 40px;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 60px;
+        }
+
+        .btn-primary {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: var(--gradient);
+            color: white;
+            padding: 16px 32px;
+            border-radius: 12px;
+            font-size: 17px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn-primary svg {
+            width: 24px;
+            height: 24px;
+        }
+
+        .btn-secondary {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: white;
+            color: var(--text);
+            padding: 16px 32px;
+            border-radius: 12px;
+            font-size: 17px;
+            font-weight: 600;
+            text-decoration: none;
+            border: 2px solid #e5e7eb;
+            transition: all 0.2s;
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .hero-screenshot {
+            position: relative;
+            z-index: 1;
+            max-width: 320px;
+            margin: 0 auto;
+        }
+
+        .hero-screenshot img {
+            width: 100%;
+            height: auto;
+            border-radius: 40px;
+            box-shadow: 0 40px 100px rgba(0, 0, 0, 0.15);
+        }
+
+        .hero-screenshot::after {
+            content: '';
+            position: absolute;
+            inset: -20px;
+            background: var(--gradient);
+            border-radius: 50px;
+            z-index: -1;
+            opacity: 0.1;
+            filter: blur(40px);
+        }
+
+        /* Features Section */
+        .features {
+            padding: 120px 40px;
+            background: var(--bg);
+        }
+
+        .section-header {
+            text-align: center;
+            max-width: 700px;
+            margin: 0 auto 80px;
+        }
+
+        .section-header h2 {
+            font-size: clamp(32px, 5vw, 48px);
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: var(--text);
+        }
+
+        .section-header p {
+            font-size: 18px;
+            color: var(--text-secondary);
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 32px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .feature-card {
+            background: var(--bg-secondary);
+            padding: 40px 32px;
+            border-radius: 20px;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08);
+        }
+
+        .feature-icon {
+            width: 60px;
+            height: 60px;
+            background: var(--gradient);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 24px;
+            font-size: 28px;
+        }
+
+        .feature-card h3 {
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            color: var(--text);
+        }
+
+        .feature-card p {
+            font-size: 16px;
+            color: var(--text-secondary);
+            line-height: 1.7;
+        }
+
+        /* Highlight Section */
+        .highlight {
+            padding: 120px 40px;
+            background: linear-gradient(180deg, #f8f9fc 0%, #ffffff 100%);
+        }
+
+        .highlight-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 80px;
+            align-items: center;
+        }
+
+        .highlight-text h2 {
+            font-size: clamp(32px, 4vw, 44px);
+            font-weight: 700;
+            margin-bottom: 24px;
+            line-height: 1.2;
+        }
+
+        .highlight-text p {
+            font-size: 18px;
+            color: var(--text-secondary);
+            margin-bottom: 32px;
+            line-height: 1.8;
+        }
+
+        .highlight-list {
+            list-style: none;
+        }
+
+        .highlight-list li {
+            display: flex;
+            align-items: flex-start;
+            gap: 16px;
+            margin-bottom: 20px;
+            font-size: 17px;
+        }
+
+        .highlight-list li::before {
+            content: '✓';
+            width: 28px;
+            height: 28px;
+            background: rgba(0, 0, 0, 0.08);
+            color: var(--primary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+
+        .highlight-visual {
+            position: relative;
+        }
+
+        .highlight-visual img {
+            width: 100%;
+            max-width: 400px;
+            border-radius: 30px;
+            box-shadow: 0 40px 80px rgba(0, 0, 0, 0.12);
+        }
+
+        /* Pro Section */
+        .pro-section {
+            padding: 120px 40px;
+            background: var(--gradient);
+            color: white;
+            text-align: center;
+        }
+
+        .pro-section h2 {
+            font-size: clamp(36px, 5vw, 52px);
+            font-weight: 800;
+            margin-bottom: 20px;
+        }
+
+        .pro-section p {
+            font-size: 20px;
+            opacity: 0.9;
+            margin-bottom: 40px;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .pro-features {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            flex-wrap: wrap;
+            margin-bottom: 50px;
+        }
+
+        .pro-feature {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 17px;
+            font-weight: 500;
+        }
+
+        .pro-feature span {
+            width: 32px;
+            height: 32px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-white {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: white;
+            color: var(--text);
+            padding: 18px 36px;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: 700;
+            text-decoration: none;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .btn-white:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Footer */
+        footer {
+            padding: 80px 40px 40px;
+            background: #1a1a2e;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr;
+            gap: 60px;
+        }
+
+        .footer-brand h3 {
+            color: white;
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .footer-brand img {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+        }
+
+        .footer-brand p {
+            font-size: 15px;
+            line-height: 1.7;
+            margin-bottom: 20px;
+        }
+
+        .footer-social {
+            display: flex;
+            gap: 16px;
+        }
+
+        .footer-social a {
+            width: 40px;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            text-decoration: none;
+            transition: background 0.2s;
+        }
+
+        .footer-social a:hover {
+            background: var(--primary);
+        }
+
+        .footer-column h4 {
+            color: white;
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+
+        .footer-column ul {
+            list-style: none;
+        }
+
+        .footer-column li {
+            margin-bottom: 12px;
+        }
+
+        .footer-column a {
+            color: rgba(255, 255, 255, 0.7);
+            text-decoration: none;
+            font-size: 15px;
+            transition: color 0.2s;
+        }
+
+        .footer-column a:hover {
+            color: white;
+        }
+
+        .footer-bottom {
+            max-width: 1200px;
+            margin: 60px auto 0;
+            padding-top: 30px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 14px;
+        }
+
+        .footer-bottom a {
+            color: rgba(255, 255, 255, 0.7);
+            text-decoration: none;
+        }
+
+        .footer-bottom a:hover {
+            color: white;
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .highlight-content {
+                grid-template-columns: 1fr;
+                text-align: center;
+            }
+
+            .highlight-visual {
+                order: -1;
+            }
+
+            .highlight-visual img {
+                max-width: 300px;
+                margin: 0 auto;
+                display: block;
+            }
+
+            .highlight-list li {
+                justify-content: center;
+            }
+
+            .footer-content {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            nav {
+                padding: 16px 20px;
+            }
+
+            .nav-links {
+                display: none;
+            }
+
+            .hero {
+                padding: 100px 20px 60px;
+            }
+
+            .features,
+            .highlight,
+            .pro-section {
+                padding: 80px 20px;
+            }
+
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .pro-features {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .footer-content {
+                grid-template-columns: 1fr;
+                gap: 40px;
+            }
+
+            .footer-bottom {
+                flex-direction: column;
+                gap: 16px;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav>
+        <a href="/" class="nav-logo">
+            <img src="app-icon.png" alt="Filmer">
+            <span>Filmer</span>
+        </a>
+        <div class="nav-links">
+            <a href="#features">功能</a>
+            <a href="#pro">PRO</a>
+            <a href="support.html">支持</a>
+            <a href="https://apps.apple.com/app/filmer" class="nav-download">下载</a>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <h1>你的胶片摄影数据库</h1>
+            <p class="hero-subtitle">
+                Filmer 帮助你记录每一卷胶卷的拍摄参数、管理照片、生成冲扫单据。
+            </p>
+            <div class="hero-buttons">
+                <a href="https://apps.apple.com/app/filmer" class="btn-primary">
+                    <svg viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M18.71 19.5C17.88 20.74 17 21.95 15.66 21.97C14.32 22 13.89 21.18 12.37 21.18C10.84 21.18 10.37 21.95 9.1 22C7.79 22.05 6.8 20.68 5.96 19.47C4.25 17 2.94 12.45 4.7 9.39C5.57 7.87 7.13 6.91 8.82 6.88C10.1 6.86 11.32 7.75 12.11 7.75C12.89 7.75 14.37 6.68 15.92 6.84C16.57 6.87 18.39 7.1 19.56 8.82C19.47 8.88 17.39 10.1 17.41 12.63C17.44 15.65 20.06 16.66 20.09 16.67C20.06 16.74 19.67 18.11 18.71 19.5ZM13 3.5C13.73 2.67 14.94 2.04 15.94 2C16.07 3.17 15.6 4.35 14.9 5.19C14.21 6.04 13.07 6.7 11.95 6.61C11.8 5.46 12.36 4.26 13 3.5Z"/>
+                    </svg>
+                    App Store 下载
+                </a>
+                <a href="#features" class="btn-secondary">
+                    了解更多
+                </a>
+            </div>
+        </div>
+        <div class="hero-screenshot">
+            <img src="app-icon.png" alt="Filmer App Screenshot" style="border-radius: 22.37%;">
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features" id="features">
+        <div class="section-header">
+            <h2>为胶卷摄影而生</h2>
+            <p>强大的功能，简洁的设计，让你专注于摄影本身</p>
+        </div>
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon">📚</div>
+                <h3>胶卷型录</h3>
+                <p>内置丰富的胶卷数据库，涵盖柯达、富士、伊尔福等主流品牌，快速选择并记录你使用的胶卷型号。</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">📝</div>
+                <h3>参数记录</h3>
+                <p>为每一张照片记录光圈、快门、焦距等拍摄参数，以及拍摄地点和备注信息，方便日后回顾和学习。</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">☁️</div>
+                <h3>云端导入</h3>
+                <p>支持从百度网盘、WebDAV 等云存储服务导入照片，轻松管理你的胶卷扫描文件。</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">📍</div>
+                <h3>地点标记</h3>
+                <p>记录每张照片的拍摄地点，在地图上查看你的拍摄轨迹，重温每一次摄影之旅。</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🧾</div>
+                <h3>冲扫单据</h3>
+                <p>一键生成专业的冲扫单据，包含胶卷信息和特殊要求，方便与冲扫店沟通。</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🔒</div>
+                <h3>隐私优先</h3>
+                <p>所有数据存储在本地设备，我们不会上传、访问或分享你的任何个人数据。</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Highlight Section -->
+    <section class="highlight">
+        <div class="highlight-content">
+            <div class="highlight-text">
+                <h2>你的胶片摄影数据库</h2>
+                <p>
+                    胶卷摄影的魅力在于慢下来，用心记录每一个瞬间。Filmer 帮助你建立完整的胶卷档案，从选卷、拍摄到冲扫，全程陪伴。
+                </p>
+                <ul class="highlight-list">
+                    <li>支持几乎所有市面主流胶卷型号</li>
+                    <li>自动写入照片 EXIF 信息</li>
+                    <li>按胶卷维度归档，记录冲扫工艺</li>
+                </ul>
+            </div>
+            <div class="highlight-visual">
+                <img src="app-icon.png" alt="Filmer Feature" style="border-radius: 20px;">
+            </div>
+        </div>
+    </section>
+
+    <!-- Pro Section -->
+    <section class="pro-section" id="pro">
+        <h2>Filmer PRO</h2>
+        <p>解锁全部高级功能，获得完整的胶卷管理体验</p>
+        <div class="pro-features">
+            <div class="pro-feature">
+                <span>☁️</span>
+                百度网盘导入
+            </div>
+            <div class="pro-feature">
+                <span>🔗</span>
+                WebDAV 支持
+            </div>
+            <div class="pro-feature">
+                <span>📊</span>
+                统计分析
+            </div>
+            <div class="pro-feature">
+                <span>🎨</span>
+                自定义主题
+            </div>
+        </div>
+        <a href="https://apps.apple.com/app/filmer" class="btn-white">
+            开始免费试用
+        </a>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-content">
+            <div class="footer-brand">
+                <h3>
+                    <img src="app-icon.png" alt="Filmer">
+                    Filmer
+                </h3>
+                <p>你的胶片摄影数据库</p>
+                <div class="footer-social">
+                    <a href="mailto:filmerapp@163.com" title="Email">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M20 4H4C2.9 4 2.01 4.9 2.01 6L2 18C2 19.1 2.9 20 4 20H20C21.1 20 22 19.1 22 18V6C22 4.9 21.1 4 20 4ZM20 8L12 13L4 8V6L12 11L20 6V8Z"/>
+                        </svg>
+                    </a>
+                </div>
+            </div>
+            <div class="footer-column">
+                <h4>产品</h4>
+                <ul>
+                    <li><a href="#features">功能介绍</a></li>
+                    <li><a href="#pro">Filmer PRO</a></li>
+                    <li><a href="https://apps.apple.com/app/filmer">下载应用</a></li>
+                </ul>
+            </div>
+            <div class="footer-column">
+                <h4>支持</h4>
+                <ul>
+                    <li><a href="support.html">帮助中心</a></li>
+                    <li><a href="mailto:filmerapp@163.com">联系我们</a></li>
+                    <li><a href="support.html#faq">常见问题</a></li>
+                </ul>
+            </div>
+            <div class="footer-column">
+                <h4>法律</h4>
+                <ul>
+                    <li><a href="privacy.html">隐私政策</a></li>
+                    <li><a href="privacy-third-party-sdk.html">第三方 SDK 清单（Android）</a></li>
+                    <li><a href="privacy-collected-info.html">个人信息收集清单（Android）</a></li>
+                    <li><a href="terms.html">服务条款</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>© 2026 Filmer. 保留所有权利。</p>
+            <div style="display: flex; align-items: center; gap: 16px; flex-wrap: wrap; justify-content: center;">
+                <a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer">浙ICP备2026040292号</a>
+                <a href="https://beian.mps.gov.cn/#/query/webSearch?code=33010202005847" rel="noreferrer" target="_blank" style="display: inline-flex; align-items: center; gap: 4px;">
+                    <img src="beian-icon.png" alt="" style="width: 16px; height: 16px;">浙公网安备33010202005847号
+                </a>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>
+

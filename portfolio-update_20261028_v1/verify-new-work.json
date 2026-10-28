@@ -1,0 +1,64 @@
+{
+  "base": "http://127.0.0.1:3211",
+  "steps": [
+    {
+      "name": "works 列表",
+      "count": 10,
+      "first": "一夜情",
+      "last": "conveni"
+    },
+    {
+      "name": "DriftWall 缩略图（hover 后）",
+      "count": 38,
+      "first": "/images/portfolio-thumbs/一夜情.webp",
+      "hasNew": true
+    },
+    {
+      "name": "单图",
+      "src": "/images/portfolio/web/一夜情.webp",
+      "complete": true,
+      "w": 1080,
+      "h": 1920
+    },
+    {
+      "name": "浮层",
+      "src": "/images/portfolio/web/一夜情.webp",
+      "complete": true,
+      "w": 1080
+    }
+  ],
+  "assertions": {
+    "列表第一条是 一夜情": true,
+    "DriftWall 含 一夜情 缩略图": true,
+    "单图用 web/一夜情.webp": true,
+    "单图已解码 1080x1920": true,
+    "浮层用 .webp": true,
+    "未请求 一夜情.png 原图": true
+  },
+  "transfer": {
+    "webp请求": [
+      {
+        "name": "一夜情.webp",
+        "kb": 0
+      },
+      {
+        "name": "一夜情.webp",
+        "kb": 0
+      },
+      {
+        "name": "一夜情.webp",
+        "kb": 0
+      },
+      {
+        "name": "一夜情.webp",
+        "kb": 0
+      }
+    ],
+    "png请求": [],
+    "该作品请求总数": 4
+  },
+  "shots": {
+    "single": "unavailable: CDP 超时: Page.captureScreenshot"
+  },
+  "passed": true
+}

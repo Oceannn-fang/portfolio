@@ -1,0 +1,1855 @@
+{
+  "port": 9222,
+  "base": "http://127.0.0.1:3211",
+  "startedAt": "2026-10-16T08:10:47.930Z",
+  "thresholds": {
+    "expectedFallbackMs": 6000,
+    "beforeCheckMs": 1500,
+    "afterCheckMs": 9000
+  },
+  "modes": [
+    {
+      "mode": "real",
+      "network": [
+        {
+          "kind": "request",
+          "url": "https://i.scdn.co/image/ab67616d00001e024d100df0be7285a2f1176c7a",
+          "type": "Image"
+        },
+        {
+          "kind": "response",
+          "url": "https://i.scdn.co/image/ab67616d00001e024d100df0be7285a2f1176c7a",
+          "status": 200
+        },
+        {
+          "kind": "request",
+          "url": "https://i.scdn.co/image/ab67616d00001e024d100df0be7285a2f1176c7a",
+          "type": "Image"
+        },
+        {
+          "kind": "response",
+          "url": "https://i.scdn.co/image/ab67616d00001e024d100df0be7285a2f1176c7a",
+          "status": 200
+        },
+        {
+          "kind": "request",
+          "url": "https://i.scdn.co/image/ab67616d00001e024d100df0be7285a2f1176c7a",
+          "type": "Image"
+        },
+        {
+          "kind": "response",
+          "url": "https://i.scdn.co/image/ab67616d00001e024d100df0be7285a2f1176c7a",
+          "status": 200
+        },
+        {
+          "kind": "request",
+          "url": "https://i.scdn.co/image/ab67616d00001e024d100df0be7285a2f1176c7a",
+          "type": "Image"
+        },
+        {
+          "kind": "response",
+          "url": "https://i.scdn.co/image/ab67616d00001e024d100df0be7285a2f1176c7a",
+          "status": 200
+        },
+        {
+          "kind": "request",
+          "url": "https://i.scdn.co/image/ab67616d00001e024d100df0be7285a2f1176c7a",
+          "type": "Image"
+        },
+        {
+          "kind": "response",
+          "url": "https://i.scdn.co/image/ab67616d00001e024d100df0be7285a2f1176c7a",
+          "status": 200
+        },
+        {
+          "kind": "request",
+          "url": "https://i.scdn.co/image/ab67616d00001e024d100df0be7285a2f1176c7a",
+          "type": "Image"
+        },
+        {
+          "kind": "response",
+          "url": "https://i.scdn.co/image/ab67616d00001e024d100df0be7285a2f1176c7a",
+          "status": 200
+        },
+        {
+          "kind": "request",
+          "url": "https://i.scdn.co/image/ab67616d00001e024d100df0be7285a2f1176c7a",
+          "type": "Image"
+        },
+        {
+          "kind": "response",
+          "url": "https://i.scdn.co/image/ab67616d00001e024d100df0be7285a2f1176c7a",
+          "status": 200
+        },
+        {
+          "kind": "request",
+          "url": "https://i.scdn.co/image/ab67616d00001e02b014ece88b0f00073a036630",
+          "type": "Image"
+        },
+        {
+          "kind": "response",
+          "url": "https://i.scdn.co/image/ab67616d00001e02b014ece88b0f00073a036630",
+          "status": 200
+        },
+        {
+          "kind": "request",
+          "url": "https://i.scdn.co/image/ab67616d00001e0293c812017763535bb202b703",
+          "type": "Image"
+        },
+        {
+          "kind": "response",
+          "url": "https://i.scdn.co/image/ab67616d00001e0293c812017763535bb202b703",
+          "status": 200
+        },
+        {
+          "kind": "request",
+          "url": "https://i.scdn.co/image/ab67616d00001e022282821d2690ed5214d212a0",
+          "type": "Image"
+        },
+        {
+          "kind": "response",
+          "url": "https://i.scdn.co/image/ab67616d00001e022282821d2690ed5214d212a0",
+          "status": 200
+        },
+        {
+          "kind": "request",
+          "url": "https://i.scdn.co/image/ab67616d00001e023db7ea09c015de448cf6a217",
+          "type": "Image"
+        },
+        {
+          "kind": "response",
+          "url": "https://i.scdn.co/image/ab67616d00001e023db7ea09c015de448cf6a217",
+          "status": 200
+        },
+        {
+          "kind": "request",
+          "url": "https://i.scdn.co/image/ab67616d00001e02f3c170c57c3c095bd3e0cd49",
+          "type": "Image"
+        },
+        {
+          "kind": "response",
+          "url": "https://i.scdn.co/image/ab67616d00001e02f3c170c57c3c095bd3e0cd49",
+          "status": 200
+        },
+        {
+          "kind": "request",
+          "url": "https://i.scdn.co/image/ab67616d00001e026ab1170ad82205b7333d8850",
+          "type": "Image"
+        },
+        {
+          "kind": "response",
+          "url": "https://i.scdn.co/image/ab67616d00001e026ab1170ad82205b7333d8850",
+          "status": 200
+        },
+        {
+          "kind": "request",
+          "url": "https://open.spotify.com/embed/track/52MmSaZatihx118mTayXY2?utm_source=generator",
+          "type": "Document"
+        },
+        {
+          "kind": "request",
+          "url": "https://open.spotify.com/favicon.ico",
+          "type": "Fetch"
+        },
+        {
+          "kind": "failed",
+          "requestId": "33392.266",
+          "errorText": "net::ERR_ABORTED",
+          "blockedReason": null,
+          "type": "Fetch"
+        },
+        {
+          "kind": "failed",
+          "requestId": "11217348B48337DBEC8282F3223180CF",
+          "errorText": "net::ERR_ABORTED",
+          "blockedReason": null,
+          "type": "Document"
+        }
+      ],
+      "consoleErrors": [],
+      "steps": {
+        "armed": "no-interception",
+        "probe": "installed",
+        "pre": {
+          "musicRow": true,
+          "errorText": null
+        },
+        "locateMusicRow": {
+          "x": 943,
+          "y": 403,
+          "text": "recently played",
+          "hitIsInside": true,
+          "hitTag": "LI"
+        },
+        "musicViewer": {
+          "viewerPresent": true,
+          "trackCount": 20
+        },
+        "locateTrack": {
+          "x": 233,
+          "y": 236,
+          "text": "The Pavements Light (feat. Haruomi Hoson",
+          "hitIsInside": true,
+          "hitTag": "DIV.mm-track-name"
+        },
+        "expandClickedAt": "2026-10-16T08:10:58.727Z"
+      },
+      "assertions": {
+        "点击后 embed 容器已挂载": true,
+        "降级延迟符合该失败模式": true,
+        "最终降级为网易云入口": true,
+        "降级后 iframe 已卸载": true,
+        "降级面板高度与 embed 对齐（152±4px，含 1px 边框）": true,
+        "降级含网易云搜索链接": true,
+        "降级含 Spotify 直链": true,
+        "控制台无 error": true,
+        "静默挂起期间未提前降级": true
+      },
+      "shots": {
+        "before": "unavailable: CDP 命令超时（8000ms）：Page.captureScreenshot",
+        "after": "unavailable: CDP 命令超时（8000ms）：Page.captureScreenshot"
+      },
+      "startedAt": "2026-10-16T08:10:50.184Z",
+      "before": {
+        "embedWrapper": true,
+        "iframePresent": true,
+        "iframeSrc": "https://open.spotify.com/embed/track/52MmSaZatihx118mTayXY2?utm_source=generator",
+        "fallbackPresent": false,
+        "fallbackHeight": null,
+        "fallbackText": null,
+        "links": [],
+        "expandedOpen": true,
+        "elapsedMs": 1507
+      },
+      "degradeAtMs": 6492,
+      "after": {
+        "embedWrapper": false,
+        "iframePresent": false,
+        "iframeSrc": null,
+        "fallbackPresent": true,
+        "fallbackHeight": 154,
+        "fallbackText": "Spotify 播放器当前网络不可用在网易云音乐搜索这首歌 ↗在 Spotify 打开",
+        "links": [
+          {
+            "text": "在网易云音乐搜索这首歌 ↗",
+            "href": "https://music.163.com/#/search/m/?s=The%20Pavements%20Light%20(feat.%20Haruomi%20Hosono)%20The%20Avalanches%2C%20Haruomi%20Hosono"
+          },
+          {
+            "text": "在 Spotify 打开",
+            "href": "https://open.spotify.com/track/52MmSaZatihx118mTayXY2"
+          }
+        ],
+        "expandedOpen": true,
+        "elapsedMs": 14529
+      },
+      "events": [
+        {
+          "t": 15022,
+          "type": "removed",
+          "src": "https://open.spotify.com/embed/track/52MmSaZatihx118mTayXY2?utm_source=generator"
+        }
+      ],
+      "networkSummary": {
+        "requests": 15,
+        "responseStatuses": [
+          200
+        ],
+        "failures": [
+          "net::ERR_ABORTED"
+        ]
+      },
+      "passed": true
+    },
+    {
+      "mode": "block",
+      "network": [
+        {
+          "kind": "request",
+          "url": "https://i.scdn.co/image/ab67616d00001e024d100df0be7285a2f1176c7a",
+          "type": "Image"
+        },
+        {
+          "kind": "failed",
+          "requestId": "33392.318",
+          "errorText": "",
+          "blockedReason": "inspector",
+          "type": "Image"
+        },
+        {
+          "kind": "request",
+          "url": "https://i.scdn.co/image/ab67616d00001e024d100df0be7285a2f1176c7a",
+          "type": "Image"
+        },
+        {
+          "kind": "failed",
+          "requestId": "33392.320",
+          "errorText": "",
+          "blockedReason": "inspector",
+          "type": "Image"
+        },
+        {
+          "kind": "request",
+          "url": "https://i.scdn.co/image/ab67616d00001e024d100df0be7285a2f1176c7a",
+          "type": "Image"
+        },
+        {
+          "kind": "failed",
+          "requestId": "33392.368",
+          "errorText": "",
+          "blockedReason": "inspector",
+          "type": "Image"
+        },
+        {
+          "kind": "request",
+          "url": "https://i.scdn.co/image/ab67616d00001e024d100df0be7285a2f1176c7a",
+          "type": "Image"
+        },
+        {
+          "kind": "failed",
+          "requestId": "33392.369",
+          "errorText": "",
+          "blockedReason": "inspector",
+          "type": "Image"
+        },
+        {
+          "kind": "request",
+          "url": "https://i.scdn.co/image/ab67616d00001e024d100df0be7285a2f1176c7a",
+          "type": "Image"
+        },
+        {
+          "kind": "failed",
+          "requestId": "33392.370",
+          "errorText": "",
+          "blockedReason": "inspector",
+          "type": "Image"
+        },
+        {
+          "kind": "request",
+          "url": "https://i.scdn.co/image/ab67616d00001e024d100df0be7285a2f1176c7a",
+          "type": "Image"
+        },
+        {
+          "kind": "failed",
+          "requestId": "33392.372",
+          "errorText": "",
+          "blockedReason": "inspector",
+          "type": "Image"
+        },
+        {
+          "kind": "request",
+          "url": "https://i.scdn.co/image/ab67616d00001e024d100df0be7285a2f1176c7a",
+          "type": "Image"
+        },
+        {
+          "kind": "failed",
+          "requestId": "33392.373",
+          "errorText": "",
+          "blockedReason": "inspector",
+          "type": "Image"
+        },
+        {
+          "kind": "request",
+          "url": "https://i.scdn.co/image/ab67616d00001e024d100df0be7285a2f1176c7a",
+          "type": "Image"
+        },
+        {
+          "kind": "failed",
+          "requestId": "33392.374",
+          "errorText": "",
+          "blockedReason": "inspector",
+          "type": "Image"
+        },
+        {
+          "kind": "request",
+          "url": "https://i.scdn.co/image/ab67616d00001e024d100df0be7285a2f1176c7a",
+          "type": "Image"
+        },
+        {
+          "kind": "failed",
+          "requestId": "33392.375",
+          "errorText": "",
+          "blockedReason": "inspector",
+          "type": "Image"
+        },
+        {
+          "kind": "request",
+          "url": "https://i.scdn.co/image/ab67616d00001e024d100df0be7285a2f1176c7a",
+          "type": "Image"
+        },
+        {
+          "kind": "failed",
+          "requestId": "33392.376",
+          "errorText": "",
+          "blockedReason": "inspector",
+          "type": "Image"
+        },
+        {
+          "kind": "request",
+          "url": "https://i.scdn.co/image/ab67616d00001e024d100df0be7285a2f1176c7a",
+          "type": "Image"
+        },
+        {
+          "kind": "failed",
+          "requestId": "33392.377",
+          "errorText": "",
+          "blockedReason": "inspector",
+          "type": "Image"
+        },
+        {
+          "kind": "request",
+          "url": "https://i.scdn.co/image/ab67616d00001e024d100df0be7285a2f1176c7a",
+          "type": "Image"
+        },
+        {
+          "kind": "failed",
+          "requestId": "33392.378",
+          "errorText": "",
+          "blockedReason": "inspector",
+          "type": "Image"
+        },
+        {
+          "kind": "request",
+          "url": "https://i.scdn.co/image/ab67616d00001e024d100df0be7285a2f1176c7a",
+          "type": "Image"
+        },
+        {
+          "kind": "failed",
+          "requestId": "33392.379",
+          "errorText": "",
+          "blockedReason": "inspector",
+          "type": "Image"
+        },
+        {
+          "kind": "request",
+          "url": "https://i.scdn.co/image/ab67616d00001e024d100df0be7285a2f1176c7a",
+          "type": "Image"
+        },
+        {
+          "kind": "failed",
+          "requestId": "33392.380",
+          "errorText": "",
+          "blockedReason": "inspector",
+          "type": "Image"
+        },
+        {
+          "kind": "request",
+          "url": "https://i.scdn.co/image/ab67616d00001e024d100df0be7285a2f1176c7a",
+          "type": "Image"
+        },
+        {
+          "kind": "failed",
+          "requestId": "33392.381",
+          "errorText": "",
+          "blockedReason": "inspector",
+          "type": "Image"
+        },
+        {
+          "kind": "request",
+          "url": "https://i.scdn.co/image/ab67616d00001e024d100df0be7285a2f1176c7a",
+          "type": "Image"
+        },
+        {
+          "kind": "failed",
+          "requestId": "33392.382",
+          "errorText": "",
+          "blockedReason": "inspector",
+          "type": "Image"
+        },
+        {
+          "kind": "request",
+          "url": "https://i.scdn.co/image/ab67616d00001e024d100df0be7285a2f1176c7a",
+          "type": "Image"
+        },
+        {
+          "kind": "failed",
+          "requestId": "33392.383",
+          "errorText": "",
+          "blockedReason": "inspector",
+          "type": "Image"
+        },
+        {
+          "kind": "request",
+          "url": "https://i.scdn.co/image/ab67616d00001e024d100df0be7285a2f1176c7a",
+          "type": "Image"
+        },
+        {
+          "kind": "failed",
+          "requestId": "33392.384",
+          "errorText": "",
+          "blockedReason": "inspector",
+          "type": "Image"
+        },
+        {
+          "kind": "request",
+          "url": "https://i.scdn.co/image/ab67616d00001e024d100df0be7285a2f1176c7a",
+          "type": "Image"
+        },
+        {
+          "kind": "failed",
+          "requestId": "33392.385",
+          "errorText": "",
+          "blockedReason": "inspector",
+          "type": "Image"
+        },
+        {
+          "kind": "request",
+          "url": "https://i.scdn.co/image/ab67616d00001e024d100df0be7285a2f1176c7a",
+          "type": "Image"
+        },
+        {
+          "kind": "failed",
+          "requestId": "33392.386",
+          "errorText": "",
+          "blockedReason": "inspector",
+          "type": "Image"
+        },
+        {
+          "kind": "request",
+          "url": "https://i.scdn.co/image/ab67616d00001e024d100df0be7285a2f1176c7a",
+          "type": "Image"
+        },
+        {
+          "kind": "failed",
+          "requestId": "33392.387",
+          "errorText": "",
+          "blockedReason": "inspector",
+          "type": "Image"
+        },
+        {
+          "kind": "request",
+          "url": "https://i.scdn.co/image/ab67616d00001e024d100df0be7285a2f1176c7a",
+          "type": "Image"
+        },
+        {
+          "kind": "failed",
+          "requestId": "33392.388",
+          "errorText": "",
+          "blockedReason": "inspector",
+          "type": "Image"
+        },
+        {
+          "kind": "request",
+          "url": "https://i.scdn.co/image/ab67616d00001e024d100df0be7285a2f1176c7a",
+          "type": "Image"
+        },
+        {
+          "kind": "failed",
+          "requestId": "33392.389",
+          "errorText": "",
+          "blockedReason": "inspector",
+          "type": "Image"
+        },
+        {
+          "kind": "request",
+          "url": "https://i.scdn.co/image/ab67616d00001e024d100df0be7285a2f1176c7a",
+          "type": "Image"
+        },
+        {
+          "kind": "failed",
+          "requestId": "33392.390",
+          "errorText": "",
+          "blockedReason": "inspector",
+          "type": "Image"
+        },
+        {
+          "kind": "request",
+          "url": "https://i.scdn.co/image/ab67616d00001e024d100df0be7285a2f1176c7a",
+          "type": "Image"
+        },
+        {
+          "kind": "failed",
+          "requestId": "33392.391",
+          "errorText": "",
+          "blockedReason": "inspector",
+          "type": "Image"
+        },
+        {
+          "kind": "request",
+          "url": "https://i.scdn.co/image/ab67616d00001e024d100df0be7285a2f1176c7a",
+          "type": "Image"
+        },
+        {
+          "kind": "failed",
+          "requestId": "33392.392",
+          "errorText": "",
+          "blockedReason": "inspector",
+          "type": "Image"
+        },
+        {
+          "kind": "request",
+          "url": "https://i.scdn.co/image/ab67616d00001e024d100df0be7285a2f1176c7a",
+          "type": "Image"
+        },
+        {
+          "kind": "failed",
+          "requestId": "33392.393",
+          "errorText": "",
+          "blockedReason": "inspector",
+          "type": "Image"
+        },
+        {
+          "kind": "request",
+          "url": "https://i.scdn.co/image/ab67616d00001e024d100df0be7285a2f1176c7a",
+          "type": "Image"
+        },
+        {
+          "kind": "failed",
+          "requestId": "33392.394",
+          "errorText": "",
+          "blockedReason": "inspector",
+          "type": "Image"
+        },
+        {
+          "kind": "request",
+          "url": "https://i.scdn.co/image/ab67616d00001e024d100df0be7285a2f1176c7a",
+          "type": "Image"
+        },
+        {
+          "kind": "failed",
+          "requestId": "33392.395",
+          "errorText": "",
+          "blockedReason": "inspector",
+          "type": "Image"
+        },
+        {
+          "kind": "request",
+          "url": "https://i.scdn.co/image/ab67616d00001e024d100df0be7285a2f1176c7a",
+          "type": "Image"
+        },
+        {
+          "kind": "failed",
+          "requestId": "33392.396",
+          "errorText": "",
+          "blockedReason": "inspector",
+          "type": "Image"
+        },
+        {
+          "kind": "request",
+          "url": "https://i.scdn.co/image/ab67616d00001e024d100df0be7285a2f1176c7a",
+          "type": "Image"
+        },
+        {
+          "kind": "failed",
+          "requestId": "33392.397",
+          "errorText": "",
+          "blockedReason": "inspector",
+          "type": "Image"
+        },
+        {
+          "kind": "request",
+          "url": "https://i.scdn.co/image/ab67616d00001e024d100df0be7285a2f1176c7a",
+          "type": "Image"
+        },
+        {
+          "kind": "failed",
+          "requestId": "33392.398",
+          "errorText": "",
+          "blockedReason": "inspector",
+          "type": "Image"
+        },
+        {
+          "kind": "request",
+          "url": "https://i.scdn.co/image/ab67616d00001e024d100df0be7285a2f1176c7a",
+          "type": "Image"
+        },
+        {
+          "kind": "failed",
+          "requestId": "33392.399",
+          "errorText": "",
+          "blockedReason": "inspector",
+          "type": "Image"
+        },
+        {
+          "kind": "request",
+          "url": "https://i.scdn.co/image/ab67616d00001e024d100df0be7285a2f1176c7a",
+          "type": "Image"
+        },
+        {
+          "kind": "failed",
+          "requestId": "33392.400",
+          "errorText": "",
+          "blockedReason": "inspector",
+          "type": "Image"
+        },
+        {
+          "kind": "request",
+          "url": "https://i.scdn.co/image/ab67616d00001e024d100df0be7285a2f1176c7a",
+          "type": "Image"
+        },
+        {
+          "kind": "failed",
+          "requestId": "33392.401",
+          "errorText": "",
+          "blockedReason": "inspector",
+          "type": "Image"
+        },
+        {
+          "kind": "request",
+          "url": "https://i.scdn.co/image/ab67616d00001e024d100df0be7285a2f1176c7a",
+          "type": "Image"
+        },
+        {
+          "kind": "failed",
+          "requestId": "33392.402",
+          "errorText": "",
+          "blockedReason": "inspector",
+          "type": "Image"
+        },
+        {
+          "kind": "request",
+          "url": "https://i.scdn.co/image/ab67616d00001e024d100df0be7285a2f1176c7a",
+          "type": "Image"
+        },
+        {
+          "kind": "failed",
+          "requestId": "33392.403",
+          "errorText": "",
+          "blockedReason": "inspector",
+          "type": "Image"
+        },
+        {
+          "kind": "request",
+          "url": "https://i.scdn.co/image/ab67616d00001e024d100df0be7285a2f1176c7a",
+          "type": "Image"
+        },
+        {
+          "kind": "failed",
+          "requestId": "33392.404",
+          "errorText": "",
+          "blockedReason": "inspector",
+          "type": "Image"
+        },
+        {
+          "kind": "request",
+          "url": "https://i.scdn.co/image/ab67616d00001e024d100df0be7285a2f1176c7a",
+          "type": "Image"
+        },
+        {
+          "kind": "failed",
+          "requestId": "33392.405",
+          "errorText": "",
+          "blockedReason": "inspector",
+          "type": "Image"
+        },
+        {
+          "kind": "request",
+          "url": "https://i.scdn.co/image/ab67616d00001e024d100df0be7285a2f1176c7a",
+          "type": "Image"
+        },
+        {
+          "kind": "failed",
+          "requestId": "33392.406",
+          "errorText": "",
+          "blockedReason": "inspector",
+          "type": "Image"
+        },
+        {
+          "kind": "request",
+          "url": "https://i.scdn.co/image/ab67616d00001e024d100df0be7285a2f1176c7a",
+          "type": "Image"
+        },
+        {
+          "kind": "failed",
+          "requestId": "33392.407",
+          "errorText": "",
+          "blockedReason": "inspector",
+          "type": "Image"
+        },
+        {
+          "kind": "request",
+          "url": "https://i.scdn.co/image/ab67616d00001e024d100df0be7285a2f1176c7a",
+          "type": "Image"
+        },
+        {
+          "kind": "failed",
+          "requestId": "33392.408",
+          "errorText": "",
+          "blockedReason": "inspector",
+          "type": "Image"
+        },
+        {
+          "kind": "request",
+          "url": "https://i.scdn.co/image/ab67616d00001e024d100df0be7285a2f1176c7a",
+          "type": "Image"
+        },
+        {
+          "kind": "failed",
+          "requestId": "33392.409",
+          "errorText": "",
+          "blockedReason": "inspector",
+          "type": "Image"
+        },
+        {
+          "kind": "request",
+          "url": "https://i.scdn.co/image/ab67616d00001e024d100df0be7285a2f1176c7a",
+          "type": "Image"
+        },
+        {
+          "kind": "failed",
+          "requestId": "33392.410",
+          "errorText": "",
+          "blockedReason": "inspector",
+          "type": "Image"
+        },
+        {
+          "kind": "request",
+          "url": "https://i.scdn.co/image/ab67616d00001e024d100df0be7285a2f1176c7a",
+          "type": "Image"
+        },
+        {
+          "kind": "failed",
+          "requestId": "33392.411",
+          "errorText": "",
+          "blockedReason": "inspector",
+          "type": "Image"
+        },
+        {
+          "kind": "request",
+          "url": "https://i.scdn.co/image/ab67616d00001e024d100df0be7285a2f1176c7a",
+          "type": "Image"
+        },
+        {
+          "kind": "failed",
+          "requestId": "33392.412",
+          "errorText": "",
+          "blockedReason": "inspector",
+          "type": "Image"
+        },
+        {
+          "kind": "request",
+          "url": "https://i.scdn.co/image/ab67616d00001e024d100df0be7285a2f1176c7a",
+          "type": "Image"
+        },
+        {
+          "kind": "failed",
+          "requestId": "33392.413",
+          "errorText": "",
+          "blockedReason": "inspector",
+          "type": "Image"
+        },
+        {
+          "kind": "request",
+          "url": "https://i.scdn.co/image/ab67616d00001e024d100df0be7285a2f1176c7a",
+          "type": "Image"
+        },
+        {
+          "kind": "failed",
+          "requestId": "33392.414",
+          "errorText": "",
+          "blockedReason": "inspector",
+          "type": "Image"
+        },
+        {
+          "kind": "request",
+          "url": "https://i.scdn.co/image/ab67616d00001e024d100df0be7285a2f1176c7a",
+          "type": "Image"
+        },
+        {
+          "kind": "failed",
+          "requestId": "33392.415",
+          "errorText": "",
+          "blockedReason": "inspector",
+          "type": "Image"
+        },
+        {
+          "kind": "request",
+          "url": "https://i.scdn.co/image/ab67616d00001e024d100df0be7285a2f1176c7a",
+          "type": "Image"
+        },
+        {
+          "kind": "failed",
+          "requestId": "33392.416",
+          "errorText": "",
+          "blockedReason": "inspector",
+          "type": "Image"
+        },
+        {
+          "kind": "request",
+          "url": "https://i.scdn.co/image/ab67616d00001e024d100df0be7285a2f1176c7a",
+          "type": "Image"
+        },
+        {
+          "kind": "failed",
+          "requestId": "33392.417",
+          "errorText": "",
+          "blockedReason": "inspector",
+          "type": "Image"
+        },
+        {
+          "kind": "request",
+          "url": "https://i.scdn.co/image/ab67616d00001e024d100df0be7285a2f1176c7a",
+          "type": "Image"
+        },
+        {
+          "kind": "failed",
+          "requestId": "33392.418",
+          "errorText": "",
+          "blockedReason": "inspector",
+          "type": "Image"
+        },
+        {
+          "kind": "request",
+          "url": "https://i.scdn.co/image/ab67616d00001e024d100df0be7285a2f1176c7a",
+          "type": "Image"
+        },
+        {
+          "kind": "failed",
+          "requestId": "33392.419",
+          "errorText": "",
+          "blockedReason": "inspector",
+          "type": "Image"
+        },
+        {
+          "kind": "request",
+          "url": "https://i.scdn.co/image/ab67616d00001e024d100df0be7285a2f1176c7a",
+          "type": "Image"
+        },
+        {
+          "kind": "failed",
+          "requestId": "33392.420",
+          "errorText": "",
+          "blockedReason": "inspector",
+          "type": "Image"
+        },
+        {
+          "kind": "request",
+          "url": "https://i.scdn.co/image/ab67616d00001e024d100df0be7285a2f1176c7a",
+          "type": "Image"
+        },
+        {
+          "kind": "failed",
+          "requestId": "33392.421",
+          "errorText": "",
+          "blockedReason": "inspector",
+          "type": "Image"
+        },
+        {
+          "kind": "request",
+          "url": "https://i.scdn.co/image/ab67616d00001e024d100df0be7285a2f1176c7a",
+          "type": "Image"
+        },
+        {
+          "kind": "failed",
+          "requestId": "33392.422",
+          "errorText": "",
+          "blockedReason": "inspector",
+          "type": "Image"
+        },
+        {
+          "kind": "request",
+          "url": "https://i.scdn.co/image/ab67616d00001e024d100df0be7285a2f1176c7a",
+          "type": "Image"
+        },
+        {
+          "kind": "failed",
+          "requestId": "33392.423",
+          "errorText": "",
+          "blockedReason": "inspector",
+          "type": "Image"
+        },
+        {
+          "kind": "request",
+          "url": "https://i.scdn.co/image/ab67616d00001e024d100df0be7285a2f1176c7a",
+          "type": "Image"
+        },
+        {
+          "kind": "failed",
+          "requestId": "33392.424",
+          "errorText": "",
+          "blockedReason": "inspector",
+          "type": "Image"
+        },
+        {
+          "kind": "request",
+          "url": "https://i.scdn.co/image/ab67616d00001e024d100df0be7285a2f1176c7a",
+          "type": "Image"
+        },
+        {
+          "kind": "failed",
+          "requestId": "33392.425",
+          "errorText": "",
+          "blockedReason": "inspector",
+          "type": "Image"
+        },
+        {
+          "kind": "request",
+          "url": "https://i.scdn.co/image/ab67616d00001e024d100df0be7285a2f1176c7a",
+          "type": "Image"
+        },
+        {
+          "kind": "failed",
+          "requestId": "33392.426",
+          "errorText": "",
+          "blockedReason": "inspector",
+          "type": "Image"
+        },
+        {
+          "kind": "request",
+          "url": "https://i.scdn.co/image/ab67616d00001e024d100df0be7285a2f1176c7a",
+          "type": "Image"
+        },
+        {
+          "kind": "failed",
+          "requestId": "33392.427",
+          "errorText": "",
+          "blockedReason": "inspector",
+          "type": "Image"
+        },
+        {
+          "kind": "request",
+          "url": "https://i.scdn.co/image/ab67616d00001e02b014ece88b0f00073a036630",
+          "type": "Image"
+        },
+        {
+          "kind": "failed",
+          "requestId": "33392.428",
+          "errorText": "",
+          "blockedReason": "inspector",
+          "type": "Image"
+        },
+        {
+          "kind": "request",
+          "url": "https://i.scdn.co/image/ab67616d00001e0293c812017763535bb202b703",
+          "type": "Image"
+        },
+        {
+          "kind": "failed",
+          "requestId": "33392.429",
+          "errorText": "",
+          "blockedReason": "inspector",
+          "type": "Image"
+        },
+        {
+          "kind": "request",
+          "url": "https://i.scdn.co/image/ab67616d00001e022282821d2690ed5214d212a0",
+          "type": "Image"
+        },
+        {
+          "kind": "failed",
+          "requestId": "33392.430",
+          "errorText": "",
+          "blockedReason": "inspector",
+          "type": "Image"
+        },
+        {
+          "kind": "request",
+          "url": "https://i.scdn.co/image/ab67616d00001e023db7ea09c015de448cf6a217",
+          "type": "Image"
+        },
+        {
+          "kind": "failed",
+          "requestId": "33392.431",
+          "errorText": "",
+          "blockedReason": "inspector",
+          "type": "Image"
+        },
+        {
+          "kind": "request",
+          "url": "https://i.scdn.co/image/ab67616d00001e02f3c170c57c3c095bd3e0cd49",
+          "type": "Image"
+        },
+        {
+          "kind": "failed",
+          "requestId": "33392.432",
+          "errorText": "",
+          "blockedReason": "inspector",
+          "type": "Image"
+        },
+        {
+          "kind": "request",
+          "url": "https://i.scdn.co/image/ab67616d00001e026ab1170ad82205b7333d8850",
+          "type": "Image"
+        },
+        {
+          "kind": "failed",
+          "requestId": "33392.433",
+          "errorText": "",
+          "blockedReason": "inspector",
+          "type": "Image"
+        },
+        {
+          "kind": "request",
+          "url": "https://i.scdn.co/image/ab67616d00001e02bbdc82a688f84e5b91f25962",
+          "type": "Image"
+        },
+        {
+          "kind": "failed",
+          "requestId": "33392.434",
+          "errorText": "",
+          "blockedReason": "inspector",
+          "type": "Image"
+        },
+        {
+          "kind": "request",
+          "url": "https://i.scdn.co/image/ab67616d00001e02654e48d684f793d62201e0ef",
+          "type": "Image"
+        },
+        {
+          "kind": "failed",
+          "requestId": "33392.435",
+          "errorText": "",
+          "blockedReason": "inspector",
+          "type": "Image"
+        },
+        {
+          "kind": "request",
+          "url": "https://i.scdn.co/image/ab67616d00001e0298cd43a5e15ef95b67661cde",
+          "type": "Image"
+        },
+        {
+          "kind": "failed",
+          "requestId": "33392.436",
+          "errorText": "",
+          "blockedReason": "inspector",
+          "type": "Image"
+        }
+      ],
+      "consoleErrors": [],
+      "steps": {
+        "armed": "block",
+        "probe": "installed",
+        "pre": {
+          "musicRow": true,
+          "errorText": null
+        },
+        "locateMusicRow": {
+          "x": 943,
+          "y": 403,
+          "text": "recently played",
+          "hitIsInside": true,
+          "hitTag": "LI"
+        },
+        "musicViewer": {
+          "viewerPresent": true,
+          "trackCount": 20
+        },
+        "locateTrack": {
+          "x": 234,
+          "y": 256,
+          "text": "The Pavements Light (feat. Haruomi Hoson",
+          "hitIsInside": true,
+          "hitTag": "DIV.mm-track-name"
+        },
+        "expandClickedAt": "2026-10-16T08:11:44.666Z"
+      },
+      "assertions": {
+        "点击后 embed 容器已挂载": false,
+        "降级延迟符合该失败模式": false,
+        "最终降级为网易云入口": false,
+        "降级后 iframe 已卸载": true,
+        "降级面板高度与 embed 对齐（152±4px，含 1px 边框）": false,
+        "降级含网易云搜索链接": false,
+        "降级含 Spotify 直链": false,
+        "控制台无 error": true
+      },
+      "shots": {
+        "before": "unavailable: CDP 命令超时（8000ms）：Page.captureScreenshot",
+        "after": "unavailable: CDP 命令超时（8000ms）：Page.captureScreenshot"
+      },
+      "startedAt": "2026-10-16T08:11:21.277Z",
+      "before": {
+        "embedWrapper": false,
+        "iframePresent": false,
+        "iframeSrc": null,
+        "fallbackPresent": false,
+        "fallbackHeight": null,
+        "fallbackText": null,
+        "links": [],
+        "expandedOpen": false,
+        "elapsedMs": 1569
+      },
+      "degradeAtMs": null,
+      "after": {
+        "embedWrapper": false,
+        "iframePresent": false,
+        "iframeSrc": null,
+        "fallbackPresent": false,
+        "fallbackHeight": null,
+        "fallbackText": null,
+        "links": [],
+        "expandedOpen": false,
+        "elapsedMs": 17054
+      },
+      "events": [],
+      "networkSummary": {
+        "requests": 70,
+        "responseStatuses": [],
+        "failures": [
+          ""
+        ]
+      },
+      "passed": false
+    },
+    {
+      "mode": "hang",
+      "network": [
+        {
+          "kind": "request",
+          "url": "https://i.scdn.co/image/ab67616d00001e024d100df0be7285a2f1176c7a",
+          "type": "Image"
+        },
+        {
+          "kind": "failed",
+          "requestId": "33392.488",
+          "errorText": "",
+          "blockedReason": "inspector",
+          "type": "Image"
+        },
+        {
+          "kind": "request",
+          "url": "https://i.scdn.co/image/ab67616d00001e024d100df0be7285a2f1176c7a",
+          "type": "Image"
+        },
+        {
+          "kind": "failed",
+          "requestId": "33392.490",
+          "errorText": "",
+          "blockedReason": "inspector",
+          "type": "Image"
+        },
+        {
+          "kind": "request",
+          "url": "https://i.scdn.co/image/ab67616d00001e024d100df0be7285a2f1176c7a",
+          "type": "Image"
+        },
+        {
+          "kind": "failed",
+          "requestId": "33392.538",
+          "errorText": "",
+          "blockedReason": "inspector",
+          "type": "Image"
+        },
+        {
+          "kind": "request",
+          "url": "https://i.scdn.co/image/ab67616d00001e024d100df0be7285a2f1176c7a",
+          "type": "Image"
+        },
+        {
+          "kind": "failed",
+          "requestId": "33392.539",
+          "errorText": "",
+          "blockedReason": "inspector",
+          "type": "Image"
+        },
+        {
+          "kind": "request",
+          "url": "https://i.scdn.co/image/ab67616d00001e024d100df0be7285a2f1176c7a",
+          "type": "Image"
+        },
+        {
+          "kind": "failed",
+          "requestId": "33392.540",
+          "errorText": "",
+          "blockedReason": "inspector",
+          "type": "Image"
+        },
+        {
+          "kind": "request",
+          "url": "https://i.scdn.co/image/ab67616d00001e024d100df0be7285a2f1176c7a",
+          "type": "Image"
+        },
+        {
+          "kind": "failed",
+          "requestId": "33392.541",
+          "errorText": "",
+          "blockedReason": "inspector",
+          "type": "Image"
+        },
+        {
+          "kind": "request",
+          "url": "https://i.scdn.co/image/ab67616d00001e024d100df0be7285a2f1176c7a",
+          "type": "Image"
+        },
+        {
+          "kind": "failed",
+          "requestId": "33392.542",
+          "errorText": "",
+          "blockedReason": "inspector",
+          "type": "Image"
+        },
+        {
+          "kind": "request",
+          "url": "https://i.scdn.co/image/ab67616d00001e024d100df0be7285a2f1176c7a",
+          "type": "Image"
+        },
+        {
+          "kind": "failed",
+          "requestId": "33392.543",
+          "errorText": "",
+          "blockedReason": "inspector",
+          "type": "Image"
+        },
+        {
+          "kind": "request",
+          "url": "https://i.scdn.co/image/ab67616d00001e024d100df0be7285a2f1176c7a",
+          "type": "Image"
+        },
+        {
+          "kind": "failed",
+          "requestId": "33392.544",
+          "errorText": "",
+          "blockedReason": "inspector",
+          "type": "Image"
+        },
+        {
+          "kind": "request",
+          "url": "https://i.scdn.co/image/ab67616d00001e024d100df0be7285a2f1176c7a",
+          "type": "Image"
+        },
+        {
+          "kind": "failed",
+          "requestId": "33392.545",
+          "errorText": "",
+          "blockedReason": "inspector",
+          "type": "Image"
+        },
+        {
+          "kind": "request",
+          "url": "https://i.scdn.co/image/ab67616d00001e024d100df0be7285a2f1176c7a",
+          "type": "Image"
+        },
+        {
+          "kind": "failed",
+          "requestId": "33392.546",
+          "errorText": "",
+          "blockedReason": "inspector",
+          "type": "Image"
+        },
+        {
+          "kind": "request",
+          "url": "https://i.scdn.co/image/ab67616d00001e024d100df0be7285a2f1176c7a",
+          "type": "Image"
+        },
+        {
+          "kind": "failed",
+          "requestId": "33392.547",
+          "errorText": "",
+          "blockedReason": "inspector",
+          "type": "Image"
+        },
+        {
+          "kind": "request",
+          "url": "https://i.scdn.co/image/ab67616d00001e024d100df0be7285a2f1176c7a",
+          "type": "Image"
+        },
+        {
+          "kind": "failed",
+          "requestId": "33392.548",
+          "errorText": "",
+          "blockedReason": "inspector",
+          "type": "Image"
+        },
+        {
+          "kind": "request",
+          "url": "https://i.scdn.co/image/ab67616d00001e024d100df0be7285a2f1176c7a",
+          "type": "Image"
+        },
+        {
+          "kind": "failed",
+          "requestId": "33392.549",
+          "errorText": "",
+          "blockedReason": "inspector",
+          "type": "Image"
+        },
+        {
+          "kind": "request",
+          "url": "https://i.scdn.co/image/ab67616d00001e024d100df0be7285a2f1176c7a",
+          "type": "Image"
+        },
+        {
+          "kind": "failed",
+          "requestId": "33392.550",
+          "errorText": "",
+          "blockedReason": "inspector",
+          "type": "Image"
+        },
+        {
+          "kind": "request",
+          "url": "https://i.scdn.co/image/ab67616d00001e024d100df0be7285a2f1176c7a",
+          "type": "Image"
+        },
+        {
+          "kind": "failed",
+          "requestId": "33392.551",
+          "errorText": "",
+          "blockedReason": "inspector",
+          "type": "Image"
+        },
+        {
+          "kind": "request",
+          "url": "https://i.scdn.co/image/ab67616d00001e024d100df0be7285a2f1176c7a",
+          "type": "Image"
+        },
+        {
+          "kind": "failed",
+          "requestId": "33392.552",
+          "errorText": "",
+          "blockedReason": "inspector",
+          "type": "Image"
+        },
+        {
+          "kind": "request",
+          "url": "https://i.scdn.co/image/ab67616d00001e024d100df0be7285a2f1176c7a",
+          "type": "Image"
+        },
+        {
+          "kind": "failed",
+          "requestId": "33392.553",
+          "errorText": "",
+          "blockedReason": "inspector",
+          "type": "Image"
+        },
+        {
+          "kind": "request",
+          "url": "https://i.scdn.co/image/ab67616d00001e024d100df0be7285a2f1176c7a",
+          "type": "Image"
+        },
+        {
+          "kind": "failed",
+          "requestId": "33392.554",
+          "errorText": "",
+          "blockedReason": "inspector",
+          "type": "Image"
+        },
+        {
+          "kind": "request",
+          "url": "https://i.scdn.co/image/ab67616d00001e024d100df0be7285a2f1176c7a",
+          "type": "Image"
+        },
+        {
+          "kind": "failed",
+          "requestId": "33392.555",
+          "errorText": "",
+          "blockedReason": "inspector",
+          "type": "Image"
+        },
+        {
+          "kind": "request",
+          "url": "https://i.scdn.co/image/ab67616d00001e024d100df0be7285a2f1176c7a",
+          "type": "Image"
+        },
+        {
+          "kind": "failed",
+          "requestId": "33392.556",
+          "errorText": "",
+          "blockedReason": "inspector",
+          "type": "Image"
+        },
+        {
+          "kind": "request",
+          "url": "https://i.scdn.co/image/ab67616d00001e024d100df0be7285a2f1176c7a",
+          "type": "Image"
+        },
+        {
+          "kind": "failed",
+          "requestId": "33392.557",
+          "errorText": "",
+          "blockedReason": "inspector",
+          "type": "Image"
+        },
+        {
+          "kind": "request",
+          "url": "https://i.scdn.co/image/ab67616d00001e024d100df0be7285a2f1176c7a",
+          "type": "Image"
+        },
+        {
+          "kind": "failed",
+          "requestId": "33392.558",
+          "errorText": "",
+          "blockedReason": "inspector",
+          "type": "Image"
+        },
+        {
+          "kind": "request",
+          "url": "https://i.scdn.co/image/ab67616d00001e024d100df0be7285a2f1176c7a",
+          "type": "Image"
+        },
+        {
+          "kind": "failed",
+          "requestId": "33392.559",
+          "errorText": "",
+          "blockedReason": "inspector",
+          "type": "Image"
+        },
+        {
+          "kind": "request",
+          "url": "https://i.scdn.co/image/ab67616d00001e024d100df0be7285a2f1176c7a",
+          "type": "Image"
+        },
+        {
+          "kind": "failed",
+          "requestId": "33392.560",
+          "errorText": "",
+          "blockedReason": "inspector",
+          "type": "Image"
+        },
+        {
+          "kind": "request",
+          "url": "https://i.scdn.co/image/ab67616d00001e024d100df0be7285a2f1176c7a",
+          "type": "Image"
+        },
+        {
+          "kind": "failed",
+          "requestId": "33392.561",
+          "errorText": "",
+          "blockedReason": "inspector",
+          "type": "Image"
+        },
+        {
+          "kind": "request",
+          "url": "https://i.scdn.co/image/ab67616d00001e024d100df0be7285a2f1176c7a",
+          "type": "Image"
+        },
+        {
+          "kind": "failed",
+          "requestId": "33392.562",
+          "errorText": "",
+          "blockedReason": "inspector",
+          "type": "Image"
+        },
+        {
+          "kind": "request",
+          "url": "https://i.scdn.co/image/ab67616d00001e024d100df0be7285a2f1176c7a",
+          "type": "Image"
+        },
+        {
+          "kind": "failed",
+          "requestId": "33392.563",
+          "errorText": "",
+          "blockedReason": "inspector",
+          "type": "Image"
+        },
+        {
+          "kind": "request",
+          "url": "https://i.scdn.co/image/ab67616d00001e024d100df0be7285a2f1176c7a",
+          "type": "Image"
+        },
+        {
+          "kind": "failed",
+          "requestId": "33392.564",
+          "errorText": "",
+          "blockedReason": "inspector",
+          "type": "Image"
+        },
+        {
+          "kind": "request",
+          "url": "https://i.scdn.co/image/ab67616d00001e024d100df0be7285a2f1176c7a",
+          "type": "Image"
+        },
+        {
+          "kind": "failed",
+          "requestId": "33392.565",
+          "errorText": "",
+          "blockedReason": "inspector",
+          "type": "Image"
+        },
+        {
+          "kind": "request",
+          "url": "https://i.scdn.co/image/ab67616d00001e024d100df0be7285a2f1176c7a",
+          "type": "Image"
+        },
+        {
+          "kind": "failed",
+          "requestId": "33392.566",
+          "errorText": "",
+          "blockedReason": "inspector",
+          "type": "Image"
+        },
+        {
+          "kind": "request",
+          "url": "https://i.scdn.co/image/ab67616d00001e024d100df0be7285a2f1176c7a",
+          "type": "Image"
+        },
+        {
+          "kind": "failed",
+          "requestId": "33392.567",
+          "errorText": "",
+          "blockedReason": "inspector",
+          "type": "Image"
+        },
+        {
+          "kind": "request",
+          "url": "https://i.scdn.co/image/ab67616d00001e024d100df0be7285a2f1176c7a",
+          "type": "Image"
+        },
+        {
+          "kind": "failed",
+          "requestId": "33392.568",
+          "errorText": "",
+          "blockedReason": "inspector",
+          "type": "Image"
+        },
+        {
+          "kind": "request",
+          "url": "https://i.scdn.co/image/ab67616d00001e024d100df0be7285a2f1176c7a",
+          "type": "Image"
+        },
+        {
+          "kind": "failed",
+          "requestId": "33392.569",
+          "errorText": "",
+          "blockedReason": "inspector",
+          "type": "Image"
+        },
+        {
+          "kind": "request",
+          "url": "https://i.scdn.co/image/ab67616d00001e024d100df0be7285a2f1176c7a",
+          "type": "Image"
+        },
+        {
+          "kind": "failed",
+          "requestId": "33392.570",
+          "errorText": "",
+          "blockedReason": "inspector",
+          "type": "Image"
+        },
+        {
+          "kind": "request",
+          "url": "https://i.scdn.co/image/ab67616d00001e024d100df0be7285a2f1176c7a",
+          "type": "Image"
+        },
+        {
+          "kind": "failed",
+          "requestId": "33392.571",
+          "errorText": "",
+          "blockedReason": "inspector",
+          "type": "Image"
+        },
+        {
+          "kind": "request",
+          "url": "https://i.scdn.co/image/ab67616d00001e024d100df0be7285a2f1176c7a",
+          "type": "Image"
+        },
+        {
+          "kind": "failed",
+          "requestId": "33392.572",
+          "errorText": "",
+          "blockedReason": "inspector",
+          "type": "Image"
+        },
+        {
+          "kind": "request",
+          "url": "https://i.scdn.co/image/ab67616d00001e024d100df0be7285a2f1176c7a",
+          "type": "Image"
+        },
+        {
+          "kind": "failed",
+          "requestId": "33392.573",
+          "errorText": "",
+          "blockedReason": "inspector",
+          "type": "Image"
+        },
+        {
+          "kind": "request",
+          "url": "https://i.scdn.co/image/ab67616d00001e024d100df0be7285a2f1176c7a",
+          "type": "Image"
+        },
+        {
+          "kind": "failed",
+          "requestId": "33392.574",
+          "errorText": "",
+          "blockedReason": "inspector",
+          "type": "Image"
+        },
+        {
+          "kind": "request",
+          "url": "https://i.scdn.co/image/ab67616d00001e024d100df0be7285a2f1176c7a",
+          "type": "Image"
+        },
+        {
+          "kind": "failed",
+          "requestId": "33392.575",
+          "errorText": "",
+          "blockedReason": "inspector",
+          "type": "Image"
+        },
+        {
+          "kind": "request",
+          "url": "https://i.scdn.co/image/ab67616d00001e024d100df0be7285a2f1176c7a",
+          "type": "Image"
+        },
+        {
+          "kind": "failed",
+          "requestId": "33392.576",
+          "errorText": "",
+          "blockedReason": "inspector",
+          "type": "Image"
+        },
+        {
+          "kind": "request",
+          "url": "https://i.scdn.co/image/ab67616d00001e024d100df0be7285a2f1176c7a",
+          "type": "Image"
+        },
+        {
+          "kind": "failed",
+          "requestId": "33392.577",
+          "errorText": "",
+          "blockedReason": "inspector",
+          "type": "Image"
+        },
+        {
+          "kind": "request",
+          "url": "https://i.scdn.co/image/ab67616d00001e024d100df0be7285a2f1176c7a",
+          "type": "Image"
+        },
+        {
+          "kind": "failed",
+          "requestId": "33392.578",
+          "errorText": "",
+          "blockedReason": "inspector",
+          "type": "Image"
+        },
+        {
+          "kind": "request",
+          "url": "https://i.scdn.co/image/ab67616d00001e024d100df0be7285a2f1176c7a",
+          "type": "Image"
+        },
+        {
+          "kind": "failed",
+          "requestId": "33392.579",
+          "errorText": "",
+          "blockedReason": "inspector",
+          "type": "Image"
+        },
+        {
+          "kind": "request",
+          "url": "https://i.scdn.co/image/ab67616d00001e024d100df0be7285a2f1176c7a",
+          "type": "Image"
+        },
+        {
+          "kind": "failed",
+          "requestId": "33392.580",
+          "errorText": "",
+          "blockedReason": "inspector",
+          "type": "Image"
+        },
+        {
+          "kind": "request",
+          "url": "https://i.scdn.co/image/ab67616d00001e024d100df0be7285a2f1176c7a",
+          "type": "Image"
+        },
+        {
+          "kind": "failed",
+          "requestId": "33392.581",
+          "errorText": "",
+          "blockedReason": "inspector",
+          "type": "Image"
+        },
+        {
+          "kind": "request",
+          "url": "https://i.scdn.co/image/ab67616d00001e024d100df0be7285a2f1176c7a",
+          "type": "Image"
+        },
+        {
+          "kind": "failed",
+          "requestId": "33392.583",
+          "errorText": "",
+          "blockedReason": "inspector",
+          "type": "Image"
+        },
+        {
+          "kind": "request",
+          "url": "https://i.scdn.co/image/ab67616d00001e024d100df0be7285a2f1176c7a",
+          "type": "Image"
+        },
+        {
+          "kind": "failed",
+          "requestId": "33392.584",
+          "errorText": "",
+          "blockedReason": "inspector",
+          "type": "Image"
+        },
+        {
+          "kind": "request",
+          "url": "https://i.scdn.co/image/ab67616d00001e024d100df0be7285a2f1176c7a",
+          "type": "Image"
+        },
+        {
+          "kind": "failed",
+          "requestId": "33392.585",
+          "errorText": "",
+          "blockedReason": "inspector",
+          "type": "Image"
+        }
+      ],
+      "consoleErrors": [],
+      "steps": {
+        "armed": "hang",
+        "probe": "installed",
+        "pre": {
+          "musicRow": true,
+          "errorText": null
+        },
+        "locateMusicRow": {
+          "x": 943,
+          "y": 403,
+          "text": "recently played",
+          "hitIsInside": true,
+          "hitTag": "LI"
+        },
+        "musicViewer": {
+          "viewerPresent": true,
+          "trackCount": 20
+        },
+        "locateTrack": {
+          "x": 234,
+          "y": 256,
+          "text": "The Pavements Light (feat. Haruomi Hoson",
+          "hitIsInside": true,
+          "hitTag": "DIV.mm-track-name"
+        },
+        "expandClickedAt": "2026-10-16T08:12:33.184Z"
+      },
+      "assertions": {
+        "点击后 embed 容器已挂载": false,
+        "降级延迟符合该失败模式": false,
+        "最终降级为网易云入口": false,
+        "降级后 iframe 已卸载": true,
+        "降级面板高度与 embed 对齐（152±4px，含 1px 边框）": false,
+        "降级含网易云搜索链接": false,
+        "降级含 Spotify 直链": false,
+        "控制台无 error": true
+      },
+      "shots": {
+        "before": "unavailable: CDP 命令超时（8000ms）：Page.captureScreenshot",
+        "after": "unavailable: CDP 命令超时（8000ms）：Page.captureScreenshot"
+      },
+      "startedAt": "2026-10-16T08:12:09.729Z",
+      "before": {
+        "embedWrapper": false,
+        "iframePresent": false,
+        "iframeSrc": null,
+        "fallbackPresent": false,
+        "fallbackHeight": null,
+        "fallbackText": null,
+        "links": [],
+        "expandedOpen": false,
+        "elapsedMs": 1593
+      },
+      "degradeAtMs": null,
+      "after": {
+        "embedWrapper": false,
+        "iframePresent": false,
+        "iframeSrc": null,
+        "fallbackPresent": false,
+        "fallbackHeight": null,
+        "fallbackText": null,
+        "links": [],
+        "expandedOpen": false,
+        "elapsedMs": 17081
+      },
+      "events": [],
+      "networkSummary": {
+        "requests": 49,
+        "responseStatuses": [],
+        "failures": [
+          ""
+        ]
+      },
+      "passed": false
+    }
+  ],
+  "chromePid": 33780,
+  "passed": false,
+  "finishedAt": "2026-10-16T08:12:58.276Z"
+}

@@ -1,0 +1,53 @@
+{
+  "port": 9222,
+  "base": "http://127.0.0.1:3211",
+  "startedAt": "2026-10-16T08:16:22.231Z",
+  "thresholds": {
+    "expectedFallbackMs": 6000,
+    "beforeCheckMs": 1500,
+    "afterCheckMs": 9000
+  },
+  "modes": [
+    {
+      "mode": "block",
+      "network": [
+        {
+          "kind": "request",
+          "url": "https://i.scdn.co/image/ab67616d00001e024d100df0be7285a2f1176c7a",
+          "type": "Image"
+        },
+        {
+          "kind": "failed",
+          "requestId": "33392.637",
+          "errorText": "",
+          "blockedReason": "inspector",
+          "type": "Image"
+        },
+        {
+          "kind": "request",
+          "url": "https://i.scdn.co/image/ab67616d00001e024d100df0be7285a2f1176c7a",
+          "type": "Image"
+        },
+        {
+          "kind": "failed",
+          "requestId": "33392.686",
+          "errorText": "",
+          "blockedReason": "inspector",
+          "type": "Image"
+        }
+      ],
+      "consoleErrors": [],
+      "steps": {
+        "armed": "block"
+      },
+      "assertions": {},
+      "shots": {},
+      "startedAt": "2026-10-16T08:16:22.424Z",
+      "error": "CDP 命令超时（20000ms）：Runtime.evaluate",
+      "passed": false
+    }
+  ],
+  "chromePid": 37212,
+  "passed": false,
+  "finishedAt": "2026-10-16T08:17:06.983Z"
+}

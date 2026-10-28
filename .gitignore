@@ -1,4 +1,4 @@
-﻿# dependencies
+# dependencies
 node_modules/
 .pnp
 .pnp.js
@@ -62,3 +62,20 @@ scripts/task*.json
 # CDP/chrome-devtools 调试产生的临时 Chrome 档案，严禁入库
 scripts/.chrome-tmp*/
 .chrome-tmp*/
+
+# ── 胶片档案素材（2026-10-28 分级）──────────────────────────────
+# 原始扫描件 4556x3047、单张 7-20MB，合计 540MB，页面并不加载它们
+# （lib/film-rolls.ts 只引用 roll-xxx/web/ 与 roll-xxx/thumbs/）。
+# 入库只保留衍生图：web/ ≈13.5MB + thumbs/ ≈1.3MB。
+# 注意 '*' 不跨目录，故本规则只命中 roll-xxx/ 根目录下的原图，不影响 web/ 与 thumbs/。
+public/images/film/roll-*/*.jpg
+public/images/film/roll-*/*.jpeg
+public/images/film/roll-*/*.png
+
+# ── 调试/构建临时产物 ───────────────────────────────────────────
+# Playwright CLI 的控制台日志（85 个文件、约 11MB）
+.playwright-cli/
+# 作品导入的中转副本（与存档/成品重复）
+.tmp-portfolio-import/
+# 截图验证产物（证据留在各任务文件夹里，根目录不囤）
+/output/
