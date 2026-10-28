@@ -8,7 +8,7 @@ export const metadata: Metadata = {
   title: pageTitle,
   description: "Product Designer",
   // #71 SEO：单页站点，canonical 固定指向根路径；相对 URL 由 metadataBase
-  // （NEXT_PUBLIC_SITE_URL，线上为 https://oceanfolio.vercel.app）解析为绝对地址
+  // （NEXT_PUBLIC_SITE_URL，线上取当前自定义域名，如 https://你的域名）解析为绝对地址
   alternates: {
     canonical: "/",
   },

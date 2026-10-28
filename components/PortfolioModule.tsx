@@ -20,7 +20,9 @@ interface PortfolioModuleProps {
  * 性能设计（交互加载卡顿修复，数据见 trace）：
  * - DriftWall 常驻挂载，切单图只隐藏（display:none）：隐藏后 IntersectionObserver
  *   自动暂停漂移计算（不烧主线程），回总览零 DOM 重建、零图片重解码
- * - tile 全部使用 240×428 WebP 缩略图（原图 1080×1920 PNG 仅在单图模式加载）：
+ * - tile 全部使用 240×428 WebP 缩略图；单图模式与浮层使用 1080×1920 WebP 衍生图
+ *   （/images/portfolio/web/*.webp，单张约 270KB）。原为 PNG 原图单张 3-6MB，
+ *   国内直连 Vercel 实测单张 9-18 秒，改为衍生图后同尺寸下体积降到 8%：
  *   99 tile 的解码开销从 ~110MB 原图降为 ~0.3MB 缩略图
  * - 空闲预解码：总览打开后在空闲时段串行 img.decode() 预热缩略图（预解码结果进
  *   Chromium 图片缓存；图不在 DOM 上不触发光栅，不产生交互帧竞争）
@@ -47,7 +49,7 @@ export default function PortfolioModule({ selectedWork, onOpenOverlay }: Portfol
     let cancelled = false;
     const target = portfolioWorks.find((w) => w.id === workId);
     const img = new Image();
-    img.src = target?.image ?? '';
+    img.src = target?.imageWeb ?? target?.image ?? '';
     const reveal = () => {
       if (!cancelled) setSingleReady(true);
     };
@@ -119,7 +121,7 @@ export default function PortfolioModule({ selectedWork, onOpenOverlay }: Portfol
         <div className="pom-root pom-single">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src={work.image}
+            src={work.imageWeb ?? work.image}
             alt={work.title}
             className={`pom-single-img${singleReady ? ' is-ready' : ''}`}
             decoding="async"
