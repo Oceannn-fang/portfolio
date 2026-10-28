@@ -8,17 +8,19 @@ import MusicModule, { warmMusicCache } from "./MusicModule";
 import AlbumShowcase, { warmAlbumCovers } from "./AlbumShowcase";
 import PlaylistModule, { warmPlaylistCache } from "./PlaylistModule";
 import PortfolioModule from "./PortfolioModule";
+import FilmArchiveModule from "./FilmArchiveModule";
+import { filmRolls } from "../lib/film-rolls";
 import TiltedCard from "./TiltedCard";
 import { portfolioWorks } from "../lib/portfolio-images";
 // #98：首屏启动遮罩已下线（LoadingScreen.tsx 文件保留备用，不再挂载）
 // —— 用户反馈资源慢时遮罩反而拖延首屏，改为内容挂载即渲染；原"回访跳过遮罩"路径成为唯一路径
 
-type ViewerMode = "phone" | "video" | "social" | "pin" | "music" | "showcase" | "playlist" | "portfolio";
+type ViewerMode = "phone" | "video" | "social" | "pin" | "music" | "showcase" | "playlist" | "portfolio" | "film";
 
 type WorkItem = {
   text: React.ReactNode;
   href?: string;
-  target?: "_new" | "_blank";
+  target?: "_self" | "_new" | "_blank";
   viewer?: ViewerMode;
   media?: string;
   rowId: string;
@@ -117,6 +119,26 @@ const rows: Row[] = [
       rowId: "portfolio",
       workId: work.id,
     })),
+  },
+  {
+    id: "film",
+    title: <>film archive / rolls</>,
+    items: [
+      ...filmRolls.slice(0, 3).map((roll) => ({
+        text: `${String(roll.rollNumber).padStart(3, "0")} / ${roll.title}`,
+        href: `/film/${roll.id}`,
+        target: "_self" as const,
+        viewer: "film" as ViewerMode,
+        rowId: "film",
+      })),
+      {
+        text: "view all rolls",
+        href: "/film",
+        target: "_self" as const,
+        viewer: "film" as ViewerMode,
+        rowId: "film",
+      },
+    ],
   },
   {
     id: "elsewhere",
@@ -442,7 +464,7 @@ export function Gk3Clone() {
     const video = videoRef.current;
     const videoFrame = videoFrameRef.current;
     if (!video) return;
-    if (viewing && currentMedia && viewerClass !== "social" && viewerClass !== "pin" && viewerClass !== "music" && viewerClass !== "showcase" && viewerClass !== "playlist" && viewerClass !== "portfolio") {
+    if (viewing && currentMedia && viewerClass !== "social" && viewerClass !== "pin" && viewerClass !== "music" && viewerClass !== "showcase" && viewerClass !== "playlist" && viewerClass !== "portfolio" && viewerClass !== "film") {
       if (clearVideoTimerRef.current) {
         clearTimeout(clearVideoTimerRef.current);
         clearVideoTimerRef.current = null;
@@ -788,6 +810,20 @@ export function Gk3Clone() {
     document.body.classList.toggle("link", Boolean(item.href));
   };
 
+  const prepFilmArchive = () => {
+    cancelEndViewerTimer();
+    setViewerClass("film");
+    setActiveRow("film");
+    setViewing(true);
+    setSelectedPortfolioWork(null);
+    setActiveItem(null);
+    setCurrentMedia(null);
+    setPlaceholder("a roll is a small chapter");
+    flipRef.current = window.matchMedia("(max-aspect-ratio: 16/12)").matches ? 1 : -1;
+    document.body.classList.add("cursor");
+    document.body.classList.remove("link");
+  };
+
   // portfolio 行：hover 行标题（h2）时打开 DriftWall 总览（不选中任何作品）
   const prepPortfolioOverview = () => {
     cancelEndViewerTimer();
@@ -859,7 +895,7 @@ export function Gk3Clone() {
 
     return (
       <div
-        className={`row${activeRow === row.id && viewing ? " active" : ""}`}
+        className={`row row-${row.id}${activeRow === row.id && viewing ? " active" : ""}`}
         key={row.id}
       >
         {row.title ? (
@@ -870,6 +906,20 @@ export function Gk3Clone() {
                 if (!window.matchMedia("(hover: none) and (pointer: coarse)").matches) {
                   prepPortfolioOverview();
                 }
+              }}
+              onMouseLeave={() => {
+                if (!window.matchMedia("(hover: none) and (pointer: coarse)").matches) {
+                  cancelEndViewerTimer();
+                  endViewerTimerRef.current = setTimeout(endViewer, 150);
+                }
+              }}
+            >
+              {row.title}
+            </h2>
+          ) : row.id === "film" ? (
+            <h2
+              onMouseEnter={() => {
+                if (!window.matchMedia("(hover: none) and (pointer: coarse)").matches) prepFilmArchive();
               }}
               onMouseLeave={() => {
                 if (!window.matchMedia("(hover: none) and (pointer: coarse)").matches) {
@@ -920,7 +970,11 @@ export function Gk3Clone() {
                 }}
               >
                 {item.href ? (
-                  <a href={item.href} target={item.target ?? "_blank"} rel="noopener noreferrer">
+                  <a
+                    href={item.href}
+                    target={item.target ?? (item.href.startsWith("/") ? "_self" : "_blank")}
+                    rel="noopener noreferrer"
+                  >
                     {item.text}
                   </a>
                 ) : (
@@ -1015,6 +1069,15 @@ export function Gk3Clone() {
               <PlaylistModule />
             </div>
           )}
+          {viewing && viewerClass === "film" && (
+            <div
+              id="filmViewer"
+              onMouseEnter={cancelEndViewerTimer}
+              onMouseLeave={() => { cancelEndViewerTimer(); endViewerTimerRef.current = setTimeout(endViewer, 150); }}
+            >
+              <FilmArchiveModule mode="preview" />
+            </div>
+          )}
           {viewing && viewerClass === "portfolio" && (
             <div
               id="portfolioViewer"
@@ -1100,7 +1163,7 @@ export function Gk3Clone() {
             return (
               <div className="pom-overlay-card" onClick={(e) => e.stopPropagation()}>
                 <TiltedCard
-                  imageSrc={overlayWork.image}
+                  imageSrc={overlayWork.imageWeb ?? overlayWork.image}
                   altText={overlayWork.title}
                   captionText={overlayWork.title}
                   containerHeight="min(88vh, 142.2222vw)"
@@ -1120,9 +1183,4 @@ export function Gk3Clone() {
     </>
   );
 }
-
-
-
-
-
 

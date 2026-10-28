@@ -16,6 +16,8 @@
 app/
   page.tsx                  # 入口，唯一渲染 <Gk3Clone />
   layout.tsx / globals.css  # 全局布局与样式
+  film/page.tsx             # 胶片档案总览
+  film/[rollId]/page.tsx    # 单卷胶片页（Next.js 15：params 为 Promise，需 await）
   api/
     auth/spotify/route.ts           # OAuth 授权跳转（生成 state + cookie）
     auth/spotify/callback/route.ts  # OAuth 回调（state 校验 + token 交换）
@@ -26,10 +28,12 @@ components/
   Gk3Clone.tsx / .css       # 核心组件（~900 行），整站 UI
   MusicModule.tsx / .css    # Spotify 音乐面板（mm- 前缀类名）
   AlbumShowcase.tsx / .css  # 精选推荐 iframe 容器（as- 前缀类名）
+  FilmArchiveModule.tsx / .css  # 胶片档案 viewer / 总览 / 单卷网格与灯箱（far- 前缀类名）
   Noise.tsx / noisePhase.ts # 噪点覆盖层与共享相位
   Hero/About/Work/...       # 早期独立组件，当前未接入页面
 lib/
   data.ts                   # 静态数据：profile / portfolioImages / recentAlbums / works 等
+  film-rolls.ts             # 胶片卷、帧原图与缩略图登记表
   spotify.ts                # Spotify 服务端工具（仅 Node runtime，禁止客户端引入）
   spotify-token.json        # 运行时 token（已 gitignore，勿提交）
 public/
@@ -37,6 +41,8 @@ public/
   music-cover-3d/           # 独立静态 3D 专辑页（被 AlbumShowcase iframe 嵌入）
   images/albums/、images/portfolio/  # 专辑封面与作品图（PNG，体积较大）
   images/portfolio-thumbs/           # 作品缩略图（240×428 WebP，DriftWall tile 用；由 scripts/generate-portfolio-thumbs.mjs 生成）
+  images/film/<roll-id>/             # 胶片原图；thumbs/ 为对应 WebP 缩略图
+  images/film/<roll-id>/web/         # 灯箱大图（长边 2000 JPG q82，单张 0.15-0.47MB）；由 scripts/_film-web-20261015/make-sample.py 生成，原图不参与页面加载
 ```
 
 ## 核心架构
@@ -46,19 +52,21 @@ public/
 页面唯一渲染组件（`app/page.tsx` → `<Gk3Clone />`），复刻 gk3.website 的行列表 + Viewer 交互。
 
 **Viewer 系统**：
-- `type ViewerMode = "phone" | "video" | "social" | "pin" | "music" | "showcase"`
+- `type ViewerMode = "phone" | "video" | "social" | "pin" | "music" | "showcase" | "playlist" | "portfolio" | "film"`
 - 触发：行内 `<li>` 的 `onMouseEnter` 调用 `prepViewer()`（触屏设备 `hover: none` 跳过）；`work-wrapper` 的 `onMouseLeave` 延迟 150ms 关闭（`endViewerTimerRef`），music/showcase 面板自身 `onMouseEnter` 可取消关闭定时器
 - 滚动超过 200px 自动关闭 viewer
-- viewer 内容按 `viewerClass` 条件渲染：`music` → `<MusicModule />`，`showcase` → `<AlbumShowcase />`
+- viewer 内容按 `viewerClass` 条件渲染：`music` → `<MusicModule />`，`showcase` → `<AlbumShowcase />`，`playlist` → `<PlaylistModule />`，`portfolio` → `<PortfolioModule />`，`film` → `<FilmArchiveModule mode="preview" />`
 
-**Rows 数组**（当前 5 行，定义于组件文件顶部 `const rows: Row[]`）：
+**Rows 数组**（定义于组件文件顶部 `const rows: Row[]`）：
 | id | 内容 | viewer |
 |---|---|---|
 | `music` | listening / spotify → "recently played" | `music` |
 | `showcase` | 精选推荐 arc vinyl → "enter the archive" | `showcase` |
-| `elsewhere` | 社交链接（Instagram/Threads/LinkedIn/Unsplash/Substack） | `social` |
+| `playlist` | doofus picks | `playlist` |
+| `portfolio` | works → 最新 10 个作品 | `portfolio` |
+| `film` | film archive / rolls → 最新 3 卷 + "view all rolls" | `film` |
+| `elsewhere` | 社交链接（rednote / tiktok / weChat official account） | `social` |
 | `bar` | 分隔条（`bar: true`，无 items） | — |
-| `legal` | 页脚法律信息（`legal: true`） | — |
 
 **颜色旋转引擎**：`setInterval` 15fps 执行 `setGradient()`，对基准色（深蓝 `[4,9,46]` / 靛蓝 `[16,34,128]` / 绯红前景 `[220,20,60]`）做 HSL 色相往返旋转（±12°，步进 0.45°/帧），写入 CSS 变量 `--fg-color` / `--bg-color` / `--panel-color` / `--scrim` 等，并同步 `<meta theme-color>` 与动态生成的 SVG favicon；亮度还驱动噪点相位（`setSharedNoisePhase`）。
 
@@ -89,6 +97,13 @@ public/
 
 极简组件：在 viewer 面板中 iframe 嵌入 `/music-cover-3d/index.html`（原版弧形黑胶动画）。iframe 独立视口使其中的 `position: fixed` 与 window 尺寸引用自动适配。静态资源完整位于 `public/music-cover-3d/`（index.html / script.js / styles.css / album_covers/）。
 
+### 胶片档案 (FilmArchiveModule)
+
+- 数据源：`lib/film-rolls.ts` 登记卷号、拍摄信息与实际存在的帧文件；缩略图使用 `public/images/film/<roll-id>/thumbs/`。
+- 三种模式：主页 viewer 的 `preview`、`/film` 的 `archive`、`/film/[rollId]` 的 `roll`。
+- 单卷页提供响应式网格和全屏灯箱；灯箱支持按钮、`←` / `→` 方向键切换、`Escape` 关闭，并预载相邻原图。
+- 档案内跳转使用 Next.js 客户端路由；主页中的 film 条目保持同页导航，不篡改外部社交链接的新标签行为。
+
 ## Viewer 尺寸规格
 
 以下参数均以 `components/Gk3Clone.css` 为准，断点判定使用 `@media (max-aspect-ratio: 16/12)`（窄屏时 viewer 从左侧移到右侧）。
@@ -101,6 +116,7 @@ public/
 | `showcase` | 34% | 65vh | `top: 50%`, `translateY(-50%)` |
 | `playlist` | 34% | 65vh | `top: 50%`, `translateY(-50%)` |
 | `portfolio`（单图 `.pom-frame-mode`） | 34% | 66vh | `top: 50%`, `translateY(-50%)` |
+| `film` | 34% | 65vh | `top: 50%`, `translateY(-50%)` |
 
 **桌面端边框样式**（内容面板 `#musicViewer` / `#showcaseViewer` / `#playlistViewer`，`inset: 0 10%` 即左右各留 10%，实际占 80% 宽度）：
 
@@ -110,7 +126,7 @@ border: 1px solid rgba(244, 239, 226, 0.1);
 box-shadow: 0 8px 40px rgba(0, 0, 0, 0.5);
 ```
 
-桌面端默认**不**使用手机边框素材：`#viewer.music/showcase/playlist/portfolio #videoFrame:after { background-image: none; }`。
+桌面端默认**不**使用手机边框素材：`#viewer.music/showcase/playlist/portfolio/film #videoFrame:after { background-image: none; }`。
 
 例外：portfolio 单图模式通过 `#videoFrame:has(.pom-frame-mode):after` 单独恢复边框图（特异性更高），桌面 + 窄屏均显示，详见下方「手机边框适配规范」。
 
@@ -144,7 +160,7 @@ box-shadow: 0 8px 40px rgba(0, 0, 0, 0.5);
 |--------|--------|------|
 | `music` / `playlist` | `#0b0b09` | 纯黑，同时关闭 `backdrop-filter` |
 | `showcase` | `#f4f1e9` | 暖纸色，与 AlbumShowcase 背景一致 |
-| `portfolio` | `#0b0b09` | 纯色，两端一致 |
+| `portfolio` / `film` | `#0b0b09` | 纯色，两端一致 |
 
 ## 手机边框适配规范（phone-frame-2.png）
 
@@ -206,6 +222,8 @@ box-shadow: 0 8px 40px rgba(0, 0, 0, 0.5);
 | recently played | `music` | `components/MusicModule.tsx` | `/api/spotify/recently-played`、`/api/spotify/albums` |
 | arc vinyl | `showcase` | `components/AlbumShowcase.tsx` | 本地静态资源（`public/music-cover-3d/`） |
 | playlist | `playlist` | `components/PlaylistModule.tsx` | `/api/netease/playlist` |
+| works | `portfolio` | `components/PortfolioModule.tsx` | `lib/portfolio-images.ts` |
+| film archive / rolls | `film` | `components/FilmArchiveModule.tsx` | `lib/film-rolls.ts`、`public/images/film/` |
 
 ## 缓存策略
 
@@ -262,6 +280,8 @@ pnpm start      # 生产启动
 - Gk3Clone 主体（行列表、Viewer、颜色旋转、WebGL 背景、噪点层）
 - Spotify OAuth 全链路 + 三个数据 API + MusicModule（最近收听/专辑推荐双 Tab、Embed 播放）
 - AlbumShowcase（music-cover-3d iframe 嵌入）
+- Portfolio viewer（DriftWall 总览、单图与 TiltedCard 浮层）
+- Film Archive（主页预览、`/film` 总览、单卷网格、灯箱导航）
 
 **已知问题 / 待优化**：
 - `components/` 下 Hero/About/Work/Contact/Listening/Navbar/PortfolioGallery/SmoothScroll/CardSwap/CircularGallery/Grainient/ThreeDCardStack 等早期组件未接入页面
@@ -275,7 +295,7 @@ pnpm start      # 生产启动
 
 - **代码风格**：2 空格缩进、单引号（Gk3Clone.tsx 历史上用双引号，改动时跟随所在文件）、语句带分号
 - **组件命名**：PascalCase 文件名 + default export（`MusicModule.tsx`）；Gk3Clone 为具名导出 `export function Gk3Clone()`
-- **CSS 类名前缀**：独立功能模块使用统一前缀避免与宿主冲突——MusicModule 用 `mm-`，AlbumShowcase 用 `as-`；根元素需显式 `pointer-events: auto`
+- **CSS 类名前缀**：独立功能模块使用统一前缀避免与宿主冲突——MusicModule 用 `mm-`，AlbumShowcase 用 `as-`，FilmArchiveModule 用 `far-`；根元素需显式 `pointer-events: auto`
 - **服务端隔离**：`lib/spotify.ts` 仅限 Node runtime 的 route.ts 引入，禁止进入客户端组件
 - **Next.js 15 动态路由**：`params` 类型为 Promise，必须 `const { id } = await params;`，且对外部传入 ID 做正则校验后再拼接上游 URL
 
