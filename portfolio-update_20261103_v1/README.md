@@ -109,8 +109,7 @@ node portfolio-update_20261103_v1\verify-new-work.cjs 9333 http://127.0.0.1:3211
 
 1. **存档里那张重复图会一直被报为"新作品"**（到本轮已是第 2 次）。要么把存档那份改名/移走，
    要么每次手动跳过。需要用户决定。
-2. **未推送、未部署**：线上仍是旧版本。
-3. `scripts/update-portfolio.mjs` 仍不生成 `imageWeb`，走管线接入的作品会自动缺衍生图、回退原图（慢）。
+2. `scripts/update-portfolio.mjs` 仍不生成 `imageWeb`，走管线接入的作品会自动缺衍生图、回退原图（慢）。
 
 ---
 
@@ -122,5 +121,64 @@ node portfolio-update_20261103_v1\verify-new-work.cjs 9333 http://127.0.0.1:3211
 | `add-work-carmen.py` | 单件作品接入（原图 + 缩略图 + 衍生图，含重复项复核） |
 | `verify-new-work.cjs` | 展示路径验证（7 条断言，含空断言自检） |
 | `verify-new-work.json` | 断言与请求记录 |
-| `shots/rea-04-decode-settle.png` | 浮层渲染截图 |
-| `tsc.tsbuildinfo`、`prod-server.log` | 类型检查/构建记录 |
+| `verify-after-film-offline.json` | 摘除 film 入口后重跑的作品集验证 |
+| `verify-deploy.ps1` | 线上验收脚本（307 重定向 / bundle 内容） |
+| `deploy-verify.txt` | 线上验收原始输出 |
+| `shots/rea-04-decode-settle.png` | 本地浮层渲染截图 |
+| `shots/rea-05-decode-settle.png` | **线上**浮层渲染截图 |
+| `tsc.tsbuildinfo`、`prod-server*.log` | 类型检查/构建记录 |
+
+---
+
+## 八、上线（2026-11-03）
+
+### 8.1 问题：首次推送把 film 一起发了出去
+
+用户只要求上线作品集。第一次推的是 master 上 4 个提交，其中含 film 模块，
+结果 `/film` 返回 200（胶片档案真的上网了）。用户指出后修正。
+
+### 8.2 修正方式：不删文件，只摘入口 + 重定向
+
+`git revert` 会从磁盘删掉 `app/film/`、`FilmArchiveModule`、`film-rolls.ts` 和
+80 个 film 图片文件——**删除文件是红线**，故改用非破坏性做法（提交 `a5d5946`）：
+
+| 改动 | 内容 |
+|---|---|
+| `components/Gk3Clone.tsx` | 删掉 film 行（首屏入口）、`prepFilmArchive()`、film viewer 分支、2 个 import、`ViewerMode` 里的 `"film"`、`viewerClass !== "film"` 判断 |
+| `next.config.ts` | 新增 `redirects()`：`/film` 与 `/film/:path*` → `/`（307） |
+
+页面与素材**全部保留在仓库**，恢复只需删掉 `redirects` 并加回首屏行。
+（遗留：`Gk3Clone.css` 里 film 专用样式成了死 CSS；按"无关死代码只提出不删"的规矩未动。）
+
+### 8.3 上线验收（`verify-deploy.ps1`）
+
+网络前提：本机直连 vercel.app 超时；**系统代理已被关闭**（`ProxyEnable=0`），
+但 `127.0.0.1:7890` 的代理进程仍在跑 → 脚本用 `curl -x` 显式指定代理。
+
+```
+[17:25:23] 第1轮  首页=200  /film=0    /film/roll-017=0    chunks=8  carmen=False  film入口=False
+[17:26:29] 第2轮  首页=0    /film=0    /film/roll-017=0    chunks=0  carmen=False  film入口=False
+[17:27:04] 第3轮  首页=200  /film=307  /film/roll-017=307  chunks=8  carmen=True   film入口=False
+✅ 上线验收通过：胶片已下线（307 重定向）、作品集含 carmen、首屏无 film 入口
+```
+
+线上实拍：`shots/rea-05-decode-settle.png`（`https://oceanfolio.vercel.app/` 的 Carmen 浮层）。
+
+线上列表实测（Playwright 严格模式报错信息顺带给出的完整 10 条）：
+
+```
+Carmen / 應該 / 我連快樂都不敢了 / Life & Space / There's Something Here for Us Both
+/ Wish it Was Easy / I Did This, I Did That / 一夜情 / 晚餐見 / 一百種生活
+```
+
+Carmen 第一、`一夜情` 在 `晚餐見` 之前——与上一轮小红书核对结果一致。
+
+### 8.4 踩坑记录
+
+1. **`$home` 是 PowerShell 只读自动变量**：脚本把首页响应存进 `$home`，赋值静默失败，
+   导致 `chunks=0`、断言全部落空、**空转 27 轮**。改用 `$pageHome` 后一次通过。
+2. **推送分支**：本地在 `codex/film-archive`，生产分支是 `master`（不是 main）。
+   先 `--ff-only` 合并到 master 再推，否则只能产生 preview 部署。
+3. **临时配置的 Chrome 会自己退出**，并发实例还会抢 9333 端口；必须按 `user-data-dir` 精确清理。
+4. **REA 的 `wait_for` 遇多元素会触发 Playwright 严格模式报错**，选择器要带 `>> nth=0`。
+

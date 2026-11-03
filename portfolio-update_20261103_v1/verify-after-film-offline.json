@@ -1,0 +1,57 @@
+{
+  "base": "http://127.0.0.1:3211",
+  "work": "Carmen",
+  "steps": [
+    {
+      "name": "works 列表",
+      "count": 10,
+      "first": "carmen"
+    },
+    {
+      "name": "DriftWall 缩略图",
+      "count": 117,
+      "first": "/images/portfolio-thumbs/carmen.webp",
+      "hasNew": true
+    },
+    {
+      "name": "单图",
+      "src": "/images/portfolio/web/carmen.webp",
+      "complete": true,
+      "w": 1080,
+      "h": 1920
+    },
+    {
+      "name": "浮层",
+      "src": "/images/portfolio/web/carmen.webp",
+      "complete": true,
+      "w": 1080
+    }
+  ],
+  "assertions": {
+    "列表第一条是目标作品": true,
+    "DriftWall 含该作品缩略图": true,
+    "单图用 web/<id>.webp": true,
+    "单图已解码 1080x1920": true,
+    "浮层用 .webp": true,
+    "未请求原图 .png": true,
+    "确实发生了 .webp 请求（非空断言自检）": true
+  },
+  "transfer": {
+    "webp请求": [
+      {
+        "name": "carmen.webp",
+        "kb": 239
+      },
+      {
+        "name": "carmen.webp",
+        "kb": 239
+      }
+    ],
+    "png请求": [],
+    "该作品请求总数": 2
+  },
+  "shots": {
+    "single": "E:\\portfolio\\portfolio-update_20261103_v1\\shots\\new-work-single.png"
+  },
+  "passed": true
+}

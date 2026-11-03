@@ -1,0 +1,7 @@
+代理: http://127.0.0.1:7890   目标: https://oceanfolio.vercel.app
+
+  [17:25:23] 第1轮  首页=200  /film=0  /film/roll-017=0  chunks=8  carmen=False  film入口=False
+  [17:26:29] 第2轮  首页=0  /film=0  /film/roll-017=0  chunks=0  carmen=False  film入口=False
+  [17:27:04] 第3轮  首页=200  /film=307  /film/roll-017=307  chunks=8  carmen=True  film入口=False
+
+✅ 上线验收通过：胶片已下线（307 重定向）、作品集含 carmen、首屏无 film 入口
