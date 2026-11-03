@@ -1290,8 +1290,7 @@ span.comma {
 #viewer.music #videoFrame:after,
 #viewer.showcase #videoFrame:after,
 #viewer.playlist #videoFrame:after,
-#viewer.portfolio #videoFrame:after,
-#viewer.film #videoFrame:after {
+#viewer.portfolio #videoFrame:after {
   background-image: none;
 }
 @media (max-aspect-ratio: 16/12) {
@@ -1469,8 +1468,7 @@ span.comma {
   #viewer.music #videoFrame:after,
   #viewer.showcase #videoFrame:after,
   #viewer.playlist #videoFrame:after,
-  #viewer.portfolio #videoFrame:after,
-  #viewer.film #videoFrame:after {
+  #viewer.portfolio #videoFrame:after {
     content: '';
     position: absolute;
     /* videoFrame 开启 overflow:hidden 后，inset:-2% 的外扩部分会被裁掉，
@@ -1485,8 +1483,7 @@ span.comma {
   #viewer.music #videoFrame,
   #viewer.showcase #videoFrame,
   #viewer.playlist #videoFrame,
-  #viewer.portfolio #videoFrame,
-  #viewer.film #videoFrame {
+  #viewer.portfolio #videoFrame {
     overflow: hidden;
     /* 与手机屏幕圆角匹配（>= 内容面板圆角，保证裁切链协调） */
     border-radius: 12% / 5%;
@@ -1495,8 +1492,7 @@ span.comma {
   #musicViewer,
   #showcaseViewer,
   #playlistViewer,
-  #portfolioViewer,
-  #filmViewer {
+  #portfolioViewer {
     /* 加大 inset 匹配手机边框 bezel 厚度：上下 8%、左右 5%，内容完全收进屏幕可视区域 */
     inset: 5% 5%;
     /* 比例圆角匹配手机屏幕的大圆角（与 videoFrame 同档） */
@@ -1545,69 +1541,3 @@ span.comma {
      此处无需再覆盖统一规则的 12%/5%（.pom-frame-mode 特异性更高）。 */
 }
 
-/* ── Film Archive preview viewer ── */
-#viewer.film {
-  width: 34%;
-  height: 65vh;
-  top: 50%;
-  transform: translateY(-50%);
-  z-index: 20;
-}
-#viewer.film #videoWrapper { display: none; }
-#viewer.film #videoFrame {
-  transform: scale(1);
-  opacity: 1;
-  align-items: stretch;
-  justify-content: stretch;
-  position: relative;
-}
-#filmViewer {
-  position: absolute;
-  inset: 0 10%;
-  width: auto;
-  height: auto;
-  pointer-events: auto;
-  z-index: 10;
-  background: #0b0b09;
-  border: 1px solid rgba(244, 239, 226, .1);
-  border-radius: 12px;
-  overflow-x: hidden;
-  overflow-y: auto;
-  box-shadow: 0 8px 40px rgba(0, 0, 0, .5);
-  overscroll-behavior: contain;
-  scrollbar-width: none;
-}
-#filmViewer::-webkit-scrollbar { display: none; }
-#filmViewer img { display: block !important; }
-.viewing #viewer.film h4 { opacity: 0; }
-
-@media (max-aspect-ratio: 16/12) {
-  #viewer.film {
-    width: 100%;
-    height: 70vh;
-    top: 15vh;
-    transform: translateX(100%);
-  }
-  .viewing #viewer.film { transform: translateX(0); }
-  #viewer.film #videoFrame {
-    flex-basis: auto;
-    width: calc(70vh * 1304 / 2866);
-    height: 70vh;
-    padding: 0;
-    margin: 0 24px 0 auto;
-    transform: none;
-    position: relative;
-    overflow: hidden;
-    border-radius: 12% / 5%;
-  }
-  #filmViewer {
-    inset: 5% 5%;
-    height: auto;
-    padding: 5% 0 0;
-    border: 0;
-    border-radius: 12% / 5%;
-    box-shadow: none;
-    overflow-x: hidden;
-    overflow-y: auto;
-  }
-}

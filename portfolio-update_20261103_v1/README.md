@@ -182,3 +182,61 @@ Carmen 第一、`一夜情` 在 `晚餐見` 之前——与上一轮小红书核
 3. **临时配置的 Chrome 会自己退出**，并发实例还会抢 9333 端口；必须按 `user-data-dir` 精确清理。
 4. **REA 的 `wait_for` 遇多元素会触发 Playwright 严格模式报错**，选择器要带 `>> nth=0`。
 
+---
+
+## 九、收尾：清 film 死 CSS + 存档重复图改名（2026-11-03 追加）
+
+### 9.1 清掉 film 残留样式
+
+film 下线后，`Gk3Clone.css` 里 16 处 film 选择器成了死代码。难点在于**film 与 portfolio
+共用同一组选择器**，不能整块删：
+
+```css
+/* 共有 4 处是这种"共享列表"形式 */
+#viewer.portfolio #videoFrame:after,
+#viewer.film #videoFrame:after { ... }      ← 只删 film 那一行和逗号
+```
+
+处理方式：4 处共享列表逐行摘掉 `#viewer.film` / `#filmViewer`，末尾 film 专属块
+（`/* ── Film Archive preview viewer ── */` 起，含独立媒体查询）整块删除。
+
+- 行数 **1613 → 1543**（-70）
+- 花括号配平 222 / 222
+- 残留检查：0 处 film
+
+### 9.2 存档重复图改名
+
+`C:\Users\86185\OneDrive\图片\存档\I did it, I did that.png` → 加 `.bak` 后缀
+（4,233,850 bytes 不变，仍在原目录，只是不再被 `*.png` 扫描命中）。
+
+改后 `--dry-run` 不再把它报为新作品。
+
+> 副作用：脚本现在提示 `I did it, I did that.psd`（35.7MB）无同名 PNG、需先导出。
+> 这是**提示不是插入**，未处理（PSD 是同一张图的源文件，是否也改名需用户另定）。
+
+### 9.3 回归验证（`verify-css-regression.cjs`）
+
+| 断言 | 桌面 1440×900 | 窄屏 900×1000 |
+|---|---|---|
+| 单图渲染且已解码 | ✅ 1080×1920 | ✅ 1080×1920 |
+| 单图是 `web/carmen.webp` | ✅ | ✅ |
+| viewer 有实际尺寸 | ✅ 484×594 | ✅ 883×700 |
+| panel 样式生效（半径 12.8%/6%、overflow hidden） | ✅ | ✅ |
+| 页面无 film 节点 | ✅ | ✅ |
+
+5/5 PASS。
+
+### 9.4 发现一个**既有**问题（不是本次改动引入）
+
+窄屏 900×1000 下，hover 作品行后 `body.viewing` 已加上、`.viewing #viewer.portfolio`
+选择器也确实匹配，但 `#viewer.portfolio` 仍保持 `transform: translateX(70vw)`、`opacity: 0`
+—— **viewer 没有滑入**。
+
+**A/B 对照证明这是既有问题**：把 CSS 暂存回 HEAD（`git stash`）重建后，
+同样得到 `opacity:0 / translateX(630)`，与改动后完全一致。
+
+原因方向：窄屏隐藏用的 `translateX(70vw)`（`#viewer.portfolio`，特异性 1-1-0）
+本应被 `.viewing #viewer.portfolio`（1-2-0）覆盖，实测未覆盖——疑似还有更高优先级规则或
+源码顺序问题。**本次未修**（超出"清死 CSS"范围），已记录待办。
+
+

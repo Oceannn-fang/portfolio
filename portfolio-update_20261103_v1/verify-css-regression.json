@@ -1,0 +1,59 @@
+{
+  "base": "http://127.0.0.1:3211",
+  "viewports": [
+    {
+      "name": "desktop 1440x900",
+      "viewer": {
+        "w": 484,
+        "h": 594,
+        "x": 0,
+        "y": 153
+      },
+      "viewerOpacity": "1",
+      "viewerTransform": "matrix(1, 0, 0, 1, 0, -297)",
+      "panel": {
+        "inset": "29.6875px 13.5px 29.6875px 13.5px",
+        "radius": "12.8% / 6%",
+        "overflow": "hidden"
+      },
+      "img": {
+        "src": "/images/portfolio/web/carmen.webp",
+        "complete": true,
+        "w": 1080,
+        "h": 1920
+      },
+      "filmNodes": 0
+    },
+    {
+      "name": "narrow 900x1000",
+      "viewer": {
+        "w": 883,
+        "h": 700,
+        "x": 630,
+        "y": 150
+      },
+      "viewerOpacity": "0",
+      "viewerTransform": "matrix(1, 0, 0, 1, 630, 0)",
+      "panel": {
+        "inset": "35px 15.9219px 35px 15.9219px",
+        "radius": "12.8% / 6%",
+        "overflow": "hidden"
+      },
+      "img": {
+        "src": "/images/portfolio/web/carmen.webp",
+        "complete": true,
+        "w": 1080,
+        "h": 1920
+      },
+      "filmNodes": 0
+    }
+  ],
+  "assertions": {
+    "两档视口都渲染了单图": true,
+    "单图都是 carmen 的 webp": true,
+    "portfolio viewer 有实际尺寸": true,
+    "portfolio panel 完成样式计算": true,
+    "页面无 film 节点残留": true
+  },
+  "passed": true
+}
