@@ -23,6 +23,7 @@ export interface PortfolioWork {
 }
 
 export const portfolioWorks: PortfolioWork[] = [
+  { id: 'carmen', title: 'Carmen', image: '/images/portfolio/carmen.png', imageWeb: '/images/portfolio/web/carmen.webp', thumb: '/images/portfolio-thumbs/carmen.webp', date: '2026-11-01' },
   { id: 'should', title: '應該', image: '/images/portfolio/應該.png', imageWeb: '/images/portfolio/web/should.webp', thumb: '/images/portfolio-thumbs/should.webp', date: '2026-10-11' },
   { id: 'i-dont-dare-to-be-happy', title: '我連快樂都不敢了', image: '/images/portfolio/我連快樂都不敢了.png', imageWeb: '/images/portfolio/web/i-dont-dare-to-be-happy.webp', thumb: '/images/portfolio-thumbs/i-dont-dare-to-be-happy.webp', date: '2026-10-08' },
   { id: 'life-and-space', title: 'Life & Space', image: '/images/portfolio/Life & space.png', imageWeb: '/images/portfolio/web/life-and-space.webp', thumb: '/images/portfolio-thumbs/life-and-space.webp', date: '2026-09-22' },
