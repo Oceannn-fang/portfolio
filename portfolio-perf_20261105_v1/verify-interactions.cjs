@@ -25,6 +25,8 @@ const imgState = (page) =>
     executablePath:
       'C:/Users/86185/AppData/Local/ms-playwright/chromium-1234/chrome-win64/chrome.exe',
     args: ['--no-first-run'],
+    // 线上复核需要走系统代理（vercel.app 国内直连被 DNS 污染）
+    proxy: process.env.MEASURE_PROXY ? { server: process.env.MEASURE_PROXY } : undefined,
   });
   const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
   const consoleErrors = [];
@@ -33,7 +35,7 @@ const imgState = (page) =>
     if (m.type() === 'error') consoleErrors.push(m.text().slice(0, 160));
   });
   page.on('response', (r) => {
-    if (r.status() >= 400) bad.push(`${r.status()} ${r.url().replace('http://127.0.0.1:3212', '')}`);
+    if (r.status() >= 400) bad.push(`${r.status()} ${r.url()}`);
   });
   page.on('pageerror', (e) => consoleErrors.push('pageerror: ' + e.message.slice(0, 160)));
 

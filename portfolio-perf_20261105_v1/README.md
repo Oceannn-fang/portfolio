@@ -149,6 +149,37 @@ insert { id: 'test-work', ..., imageWeb: '/images/portfolio/web/test-work.webp',
 截图：`shot-viewer-portfolio.png`（viewer 单图）、`shot-overlay-portfolio.png`（浮层）、
 `shot-viewer-music.png`、`shot-viewer-showcase.png`。
 
+### 3.10 线上复核（提交 6fc2dcd 部署后实测）
+
+`git push` 后约 30 秒 Vercel 完成部署，以下为线上实测（经系统代理 `127.0.0.1:7890`，
+`vercel.app` 国内直连被 DNS 污染，解析到 `162.220.12.226`）。
+
+缓存头（`next.config.ts` 的 `headers()` 在 Vercel 上**确实作用于 `public/` 静态文件**，
+无需再用 `vercel.json` 兜底）：
+
+| 路径 | 线上 Cache-Control |
+|---|---|
+| `/images/portfolio/web/vienna.webp` | `public, max-age=604800, stale-while-revalidate=86400` |
+| `/images/portfolio-thumbs/carmen.webp` | 同上 |
+| `/gk3-assets/img/phone-frame-2.png` | `public, max-age=31536000, immutable` |
+| `/music-cover-3d/album_covers_webp/01_*.webp` | 同上 |
+| `/fonts/SourceHanSerifCN-SemiBold.otf` | 同上 |
+
+重定向与下架资源：
+
+| 路径 | 线上状态 |
+|---|---|
+| `/cardstack-preview` | 307 → `/` |
+| `/driftwall-test` | 307 → `/` |
+| `/film` | 307 → `/` |
+| `/images/portfolio/Vienna.png`（已移出） | 404 |
+| `/images/albums/Vienna.png`（已移出） | 404 |
+| `/` | 200，TTFB 0.95s |
+
+线上交互端到端（`MEASURE_PROXY=... verify-interactions.cjs https://oceanfolio.vercel.app/`）：
+viewer 单图与 TiltedCard 浮层均正常解码 `1080×1920` 的 WebP，MusicModule 挂载，
+AlbumShowcase 封面 `480×480`，**失败请求 0 / 控制台报错 0**。
+
 ---
 
 ## 四、验证命令
@@ -186,13 +217,12 @@ node --check scripts\generate-portfolio-thumbs.mjs
 
 ## 六、未做 / 待你拍板
 
-1. **线上复核**：本轮只在本地 `next start` 验证。Vercel 上的 `headers()` 生效需部署后复测；
-   当前 `oceanfolio.vercel.app` 直连被 DNS 污染（解析到 Facebook 段），系统代理 7890 也已失效，
-   所以无法在本地对线上做最终确认。
-2. **国内可达性**：结构性阻塞，前端无解，需自定义域名 + Cloudflare 或换托管。
-3. **仓库体积未降**：`git mv` 保留了历史，仓库 pack 仍是 909MB（只影响 clone/构建拉取，不影响部署包）。
+1. **国内可达性**：结构性阻塞，前端无解，需自定义域名 + Cloudflare 或换托管。
+   目前 `vercel.app` 直连仍被 DNS 污染（解析到 `162.220.12.226` / `2001::2d4d:baff`），
+   只有走代理才能访问 —— 这是目前对国内访客影响最大的一项，优先级应高于任何前端优化。
+2. **仓库体积未降**：`git mv` 保留了历史，仓库 pack 仍是 909MB（只影响 clone/构建拉取，不影响部署包）。
    要真正缩小需要重写历史，风险大，建议不做。
-4. **`public/images/film`（15MB 已跟踪）**：胶片模块已下线但素材按原计划保留，未动。
+3. **`public/images/film`（15MB 已跟踪）**：胶片模块已下线但素材按原计划保留，未动。
    如果确认不再恢复胶片，可以照同样方式移出，再省 15MB。
 
 ---
