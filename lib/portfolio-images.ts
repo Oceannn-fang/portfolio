@@ -1,7 +1,8 @@
 /**
  * 作品集图片数据
- * 对应 public/images/portfolio/ 下的作品图（使用中文/日文/韩文原文件名，
- * 不含旧的拼音重名版本）。按修改时间倒序排列（最新在前）。
+ * 原图（1080×1920 PNG）已归档到 assets-src/images/portfolio/（2026-11-05 移出 public，
+ * 部署包不再携带 175MB PNG）；展示只用 web/ 与 portfolio-thumbs/ 下的 WebP。
+ * 按修改时间倒序排列（最新在前）。
  * #62：英文标题统一标准 Title Case（虚词 it/was/a/the/of/for/in/on 小写）；
  * 用户拍板 be→Be、自行人→Mercei、Ant From Up There→Concorde（画面单曲名），id 同步联动。
  */
@@ -9,11 +10,16 @@
 export interface PortfolioWork {
   id: string;
   title: string;
-  /** 原图路径，如 /images/portfolio/xxx.png（1080×1920 无损 PNG，单张 3-6MB；仅作兜底，勿直接用于展示） */
+  /**
+   * 原图的历史路径（/images/portfolio/xxx.png）。原图已移出 public，该 URL 不再可访问，
+   * 仅作溯源记录。代码里仍有 `imageWeb ?? image` 兜底，但新作品必须由
+   * scripts/update-portfolio.mjs 生成 imageWeb，否则兜底会请求到 404。
+   */
   image: string;
   /**
    * 单图模式与放大浮层用的 WebP 衍生图（1080×1920 q82，单张约 270KB）。
-   * 生成：portfolio-perf_20261019_v1/make-portfolio-web.py；缺失时回退 image（旧条目/新接入未转码时仍可显示）
+   * 生成：scripts/update-portfolio.mjs（新作品自动生成）或
+   * portfolio-perf_20261019_v1/make-portfolio-web.py（历史批量）
    */
   imageWeb?: string;
   /** 缩略图路径，如 /images/portfolio-thumbs/xxx.webp（DriftWall tile 使用，240×428） */

@@ -37,9 +37,14 @@ import path from 'node:path';
 const ROOT = path.resolve(import.meta.dirname, '..');
 const DEFAULT_SRC = 'C:\\Users\\86185\\OneDrive\\图片\\存档';
 const DEFAULT_REGISTRY = path.join(ROOT, 'lib', 'portfolio-images.ts');
-const DEFAULT_PUBLIC = path.join(ROOT, 'public', 'images', 'portfolio');
+// 2026-11-05：原图不再进 public（public/images/portfolio/*.png 共 175MB 已移到
+// assets-src/images/portfolio，部署包不再携带）。运行时只加载 web/ 与
+// portfolio-thumbs/ 的 WebP 衍生图。
+const DEFAULT_ORIGINALS = path.join(ROOT, 'assets-src', 'images', 'portfolio');
+const DEFAULT_WEB = path.join(ROOT, 'public', 'images', 'portfolio', 'web');
 const DEFAULT_THUMBS = path.join(ROOT, 'public', 'images', 'portfolio-thumbs');
 const THUMB_W = 240, THUMB_H = 428, THUMB_Q = 80;
+const WEB_W = 1080, WEB_Q = 82;
 
 // ── ANSI 彩色（非 TTY / NO_COLOR 时自动去色） ──
 const colorEnabled = process.stdout.isTTY && !process.env.NO_COLOR;
@@ -55,7 +60,10 @@ const gray = (s) => c(90, s);
 function parseArgs(argv) {
   const opts = {
     src: DEFAULT_SRC, date: null, dryRun: false,
-    registry: DEFAULT_REGISTRY, publicDir: DEFAULT_PUBLIC, thumbsDir: DEFAULT_THUMBS,
+    registry: DEFAULT_REGISTRY,
+    originalsDir: DEFAULT_ORIGINALS,
+    webDir: DEFAULT_WEB,
+    thumbsDir: DEFAULT_THUMBS,
   };
   for (let i = 2; i < argv.length; i++) {
     const a = argv[i];
@@ -63,7 +71,9 @@ function parseArgs(argv) {
     else if (a === '--date') opts.date = argv[++i];
     else if (a === '--dry-run') opts.dryRun = true;
     else if (a === '--registry') opts.registry = path.resolve(argv[++i]);
-    else if (a === '--public-dir') opts.publicDir = path.resolve(argv[++i]);
+    // --public-dir 为旧名（原图曾放在 public/images/portfolio），保留兼容
+    else if (a === '--originals-dir' || a === '--public-dir') opts.originalsDir = path.resolve(argv[++i]);
+    else if (a === '--web-dir') opts.webDir = path.resolve(argv[++i]);
     else if (a === '--thumbs-dir') opts.thumbsDir = path.resolve(argv[++i]);
     else if (a === '--help' || a === '-h') { printHelp(); process.exit(0); }
     else { console.error(red(`未知参数: ${a}（--help 查看用法）`)); process.exit(2); }
@@ -74,12 +84,13 @@ function parseArgs(argv) {
 function printHelp() {
   console.log(`作品图片标准化更新管线（#88）
 用法: node scripts/update-portfolio.mjs [选项]
-  --src <dir>        源目录（默认 ${DEFAULT_SRC}）
-  --date <YYYY-MM-DD> 覆盖注册条目 date（默认文件 mtime）
-  --dry-run          只预览将要执行的动作，零写入
-  --registry <path>  注册表 TS 路径（默认 lib/portfolio-images.ts；测试隔离用）
-  --public-dir <p>   原图目录（默认 public/images/portfolio；测试隔离用）
-  --thumbs-dir <p>   缩略图目录（默认 public/images/portfolio-thumbs；测试隔离用）`);
+  --src <dir>           源目录（默认 ${DEFAULT_SRC}）
+  --date <YYYY-MM-DD>   覆盖注册条目 date（默认文件 mtime）
+  --dry-run             只预览将要执行的动作，零写入
+  --registry <path>     注册表 TS 路径（默认 lib/portfolio-images.ts；测试隔离用）
+  --originals-dir <p>   原图归档目录（默认 assets-src/images/portfolio，不进部署包）
+  --web-dir <p>         展示用 WebP 目录（默认 public/images/portfolio/web）
+  --thumbs-dir <p>      缩略图目录（默认 public/images/portfolio-thumbs；测试隔离用）`);
 }
 
 // ── ffmpeg 定位（与 generate-portfolio-thumbs.mjs 同策略：PATH 优先，回退 WinGet Links） ──
@@ -230,18 +241,21 @@ function main() {
     }
     batchSlugs.add(slug);
 
-    const copyDest = path.join(opts.publicDir, file);
+    const copyDest = path.join(opts.originalsDir, file);
     const thumbName = `${slug}.webp`;
     const thumbDest = path.join(opts.thumbsDir, thumbName);
+    const webName = `${slug}.webp`;
+    const webDest = path.join(opts.webDir, webName);
     // 同名不同码点视为冲突：目标已存在即中止该项（已注册的不会走到这里）
     if (fs.existsSync(copyDest)) { errors.push(red(`  ✗ ${file}: 目标已存在 ${copyDest}（同名/码点冲突），中止该项`)); continue; }
     if (fs.existsSync(thumbDest)) { errors.push(red(`  ✗ ${file}: 缩略图已存在 ${thumbDest}（slug 冲突?），中止该项`)); continue; }
+    if (fs.existsSync(webDest)) { errors.push(red(`  ✗ ${file}: 展示图已存在 ${webDest}（slug 冲突?），中止该项`)); continue; }
 
     plans.push({
-      file, srcPath, copyDest, thumbDest, thumbName, slug,
+      file, srcPath, copyDest, thumbDest, thumbName, webDest, webName, slug,
       title: makeTitle(stem),
       date, needsManualId,
-      insertLine: `  { id: ${tsStr(slug)}, title: ${tsStr(makeTitle(stem))}, image: ${tsStr(`/images/portfolio/${file}`)}, thumb: ${tsStr(`/images/portfolio-thumbs/${thumbName}`)}, date: ${tsStr(date)} },`,
+      insertLine: `  { id: ${tsStr(slug)}, title: ${tsStr(makeTitle(stem))}, image: ${tsStr(`/images/portfolio/${file}`)}, imageWeb: ${tsStr(`/images/portfolio/web/${webName}`)}, thumb: ${tsStr(`/images/portfolio-thumbs/${thumbName}`)}, date: ${tsStr(date)} },`,
     });
   }
   for (const e of errors) console.log(e);
@@ -251,6 +265,7 @@ function main() {
   console.log(bold('\n将执行的动作:'));
   for (const p of plans) {
     console.log(`  ${cyan('copy')}  ${p.srcPath}\n        -> ${p.copyDest}`);
+    console.log(`  ${cyan('web')}   ffmpeg 宽 ${WEB_W} webp q${WEB_Q} -> ${p.webDest}`);
     console.log(`  ${cyan('thumb')} ffmpeg ${THUMB_W}x${THUMB_H} webp q${THUMB_Q} -> ${p.thumbDest}`);
     console.log(`  ${cyan('insert')} 置顶到 portfolioWorks 数组开头:`);
     console.log(gray(`        ${p.insertLine}`));
@@ -264,10 +279,11 @@ function main() {
     return;
   }
 
-  // 6. 实跑：copy → thumb → insert
+  // 6. 实跑：copy → web → thumb → insert
   const done = [];
   const failed = [];
-  fs.mkdirSync(opts.publicDir, { recursive: true });
+  fs.mkdirSync(opts.originalsDir, { recursive: true });
+  fs.mkdirSync(opts.webDir, { recursive: true });
   fs.mkdirSync(opts.thumbsDir, { recursive: true });
 
   let registryText = reg.text;
@@ -280,8 +296,21 @@ function main() {
         console.log(yellow(`  skipped（运行中已注册）: ${p.file}`));
         continue;
       }
-      // copy 原图
+      // copy 原图到归档目录（不进 public）
       fs.copyFileSync(p.srcPath, p.copyDest);
+      // ffmpeg 展示图：宽 WEB_W、等比、q82（与 portfolio-perf_20261019_v1 生成口径一致）
+      const webArgs = [
+        '-y', '-hide_banner', '-loglevel', 'error',
+        '-i', p.srcPath,
+        '-vf', `scale=${WEB_W}:-2`,
+        '-frames:v', '1',
+        '-c:v', 'libwebp', '-q:v', String(WEB_Q),
+        p.webDest,
+      ];
+      const rw = spawnSync(ffmpeg, webArgs, { encoding: 'utf8', shell: false });
+      if (rw.status !== 0 || !fs.existsSync(p.webDest)) {
+        throw new Error(`ffmpeg(web) exit ${rw.status}: ${String(rw.stderr || '').trim().slice(0, 200)}`);
+      }
       // ffmpeg 缩略图（#42 参数）
       const args = [
         '-y', '-hide_banner', '-loglevel', 'error',
@@ -303,13 +332,15 @@ function main() {
       registryText = registryText.slice(0, at) + reg.eol + p.insertLine + registryText.slice(at);
       registryDirty = true;
       const kb = (fs.statSync(p.thumbDest).size / 1024).toFixed(1);
-      console.log(green(`  ✓ ${p.file} → id=${p.slug}（thumb ${kb} KB）`));
+      const webKb = (fs.statSync(p.webDest).size / 1024).toFixed(1);
+      console.log(green(`  ✓ ${p.file} → id=${p.slug}（web ${webKb} KB / thumb ${kb} KB）`));
       done.push(p);
     } catch (err) {
       failed.push(`${p.file}（${err.message}）`);
       console.error(red(`  ✗ ${p.file}: ${err.message}`));
       // 回滚该项已产生的部分产物，保持一致性
       try { if (fs.existsSync(p.copyDest)) fs.unlinkSync(p.copyDest); } catch {}
+      try { if (fs.existsSync(p.webDest)) fs.unlinkSync(p.webDest); } catch {}
       try { if (fs.existsSync(p.thumbDest)) fs.unlinkSync(p.thumbDest); } catch {}
     }
   }

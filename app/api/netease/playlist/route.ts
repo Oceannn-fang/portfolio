@@ -55,16 +55,25 @@ export async function GET(request: Request) {
     const missingIds = allIds.filter((id) => !detailed.has(id));
 
     if (missingIds.length > 0) {
-      // song/detail 单次实测最多返回约 200 首，按 200 分批请求
+      // song/detail 单次实测最多返回约 200 首，按 200 分批。
+      // 原实现串行 await：批数 × 单批耗时直接累加，线上冷路径实测 4.63s TTFB。
+      // 改为并发拉取后按原顺序合并（结果按 id 查表，合并顺序不影响输出）。
       const BATCH_SIZE = 200;
+      const batches: number[][] = [];
       for (let i = 0; i < missingIds.length; i += BATCH_SIZE) {
-        const batch = missingIds.slice(i, i + BATCH_SIZE);
-        const detailResponse = await fetch(
-          `https://music.163.com/api/song/detail?ids=[${batch.join(',')}]`,
-          { headers: UPSTREAM_HEADERS }
-        ).catch(() => null);
-        if (!detailResponse?.ok) continue;
-        const detailData = await detailResponse.json().catch(() => null);
+        batches.push(missingIds.slice(i, i + BATCH_SIZE));
+      }
+      const batchResults = await Promise.all(
+        batches.map((batch) =>
+          fetch(
+            `https://music.163.com/api/song/detail?ids=[${batch.join(',')}]`,
+            { headers: UPSTREAM_HEADERS }
+          )
+            .then((detailResponse) => (detailResponse.ok ? detailResponse.json() : null))
+            .catch(() => null)
+        )
+      );
+      for (const detailData of batchResults) {
         for (const song of detailData?.songs || []) {
           if (song.id && song.name) detailed.set(song.id, song);
         }

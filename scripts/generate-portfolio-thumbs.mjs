@@ -9,7 +9,8 @@ import path from 'node:path';
 
 const ROOT = path.resolve(import.meta.dirname, '..');
 const TS_SOURCE = path.join(ROOT, 'lib', 'portfolio-images.ts');
-const SRC_DIR = path.join(ROOT, 'public', 'images', 'portfolio');
+// 2026-11-05：原图已从 public 移到 assets-src（部署包不再携带 175MB PNG）
+const SRC_DIR = path.join(ROOT, 'assets-src', 'images', 'portfolio');
 const OUT_DIR = path.join(ROOT, 'public', 'images', 'portfolio-thumbs');
 const W = 240, H = 428, QUALITY = 80;
 
@@ -30,7 +31,9 @@ function findFfmpeg() {
 // 从 lib/portfolio-images.ts 提取 { id, image 文件名 }
 function parseWorks() {
   const src = fs.readFileSync(TS_SOURCE, 'utf8');
-  const re = /\{\s*id:\s*'([^']+)'\s*,\s*title:\s*'[^']*'\s*,\s*image:\s*'\/images\/portfolio\/([^']+)'\s*,\s*date:\s*'[^']+'\s*,?\s*\}/g;
+  // 条目内字段顺序会变（image 与 date 之间已插入 imageWeb / thumb），
+  // 故用非贪婪跨字段匹配，不再要求 image 紧邻 date
+  const re = /\{\s*id:\s*'([^']+)'[^\n]*?image:\s*'\/images\/portfolio\/([^']+)'[^\n]*?date:\s*'[^']+'/g;
   const works = [];
   let m;
   while ((m = re.exec(src)) !== null) works.push({ id: m[1], file: m[2] });
